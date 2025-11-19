@@ -1,0 +1,123 @@
+
+@token = Bearer  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU1Zjc0NGQxNzc3ZmRkNzcwY2M3OGQiLCJ1c2VyVHlwZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzU5OTE2NDk3LCJleHAiOjE3OTE0NTI0OTd9.jOmTaY2diJF6lkFnjZE53CxM-FKzn8LNhhiSjqOYUfk
+
+@url = http://192.168.1.43:4567
+
+//Register for client
+###
+POST {{url}}/api/v1/user/register HTTP/1.1
+Content-type: application/json
+
+{
+      "firstName": "Khan123",
+      "lastName": "Khan",
+      "email": "khan112345@gmail.com",
+      "phone": "234561789866",
+      "password": "12345678"
+}
+
+
+//registerVerify
+###
+POST {{url}}/api/v1/user/registerVerify HTTP/1.1
+Content-type: application/json
+
+{
+    "token": "bUst8TblncX9MtwdAbnNNPaADtWrmepFQfxlHbqu",
+    "otp": "123456"
+}
+
+//login
+###
+POST {{url}}/api/v1/user/login HTTP/1.1
+Content-type: application/json
+
+{
+    "loginType": "a@gmail.com",
+    "password": "12345678"
+}
+
+//verifyUser
+###
+POST {{url}}/api/v1/user/verifyUser HTTP/1.1
+Content-type: application/json
+
+{
+    "token": "c5mREktpsWTOLpUjFIHERqa006DEEbV6EE9zHXd3",
+    "otp": "123456"
+}
+
+//forgotPassword
+###
+POST {{url}}/api/v1/user/forgotPassword HTTP/1.1
+Content-type: application/json
+
+{
+    "loginType": "a@gmail.com"
+}
+
+//forgotPasswordVerify
+###
+POST {{url}}/api/v1/user/forgotPasswordVerify HTTP/1.1
+Content-type: application/json
+
+{
+    "token": "bm06J5vT7S7D5WP2t9hccZTfDompLncglRPAR4pc",
+    "otp": "123456",
+    "newPassword": "12345678",
+    "confirmPassword": "12345678"
+}
+
+//profileGet
+###
+GET  {{url}}/api/v1/user/getProfile HTTP/1.1
+Content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU1Zjc0NGQxNzc3ZmRkNzcwY2M3OGQiLCJ1c2VyVHlwZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzU5OTE2NDk3LCJleHAiOjE3OTE0NTI0OTd9.jOmTaY2diJF6lkFnjZE53CxM-FKzn8LNhhiSjqOYUfk
+
+//getDistance
+###
+POST {{url}}/api/v1/user/getDistance HTTP/1.1
+Content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU1Zjc0NGQxNzc3ZmRkNzcwY2M3OGQiLCJ1c2VyVHlwZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzU5OTE2NDk3LCJleHAiOjE3OTE0NTI0OTd9.jOmTaY2diJF6lkFnjZE53CxM-FKzn8LNhhiSjqOYUfk
+
+{
+    "name": "Location A",
+    "mobNo": "9876543210",
+    "origName": "jaipur",
+    "destName": "delhi",
+    "picUpType": "home",
+    "origLat": 28.6139,
+    "origLon": 77.209,
+    "destLat": 28.7041,
+    "destLon": 77.1025
+}
+
+//bookInstantDelivery
+###
+POST {{url}}/api/v1/user/bookInstantDelivery HTTP/1.1
+Content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU1Zjc0NGQxNzc3ZmRkNzcwY2M3OGQiLCJ1c2VyVHlwZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzU5OTE2NDk3LCJleHAiOjE3OTE0NTI0OTd9.jOmTaY2diJF6lkFnjZE53CxM-FKzn8LNhhiSjqOYUfk
+
+{
+    "vehicleTypeId": "68ce8594e9401176157710fb",
+    "price": 500,
+    "isCopanCode": "",
+    "copanId": "",
+    "copanAmount": 0,
+    "coinAmount": 25,
+    "taxAmount": 101.71,
+    "userPayAmount": 500,
+    "distance": 14.44,
+    "mobNo": "delhi",
+    "name": "home",
+    "origName": "jaipur",
+    "origLat": 28.6139,
+    "origLon": 77.209,
+    "destName": "delhi",
+    "destLat": 28.7041,
+    "destLon": 77.1025,
+    "picUpType": "home",
+    "packageDetails": "Documents",
+    "paymentMethod": "wallet"
+}
+
