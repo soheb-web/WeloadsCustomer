@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -32,13 +31,14 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   final List<double> dropLons;
   final List<String> dropNames;
   const SelectTripScreen(
-      this.socket,
-      this.pickupLat,
-      this.pickupLon,
-      this.dropLats,
-      this.dropLons,
-      this.dropNames,
-      {super.key,});
+    this.socket,
+    this.pickupLat,
+    this.pickupLon,
+    this.dropLats,
+    this.dropLons,
+    this.dropNames, {
+    super.key,
+  });
 
   @override
   ConsumerState<SelectTripScreen> createState() => _SelectTripScreenState();
@@ -74,12 +74,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   late BitmapDescriptor _number1Icon;
   late BitmapDescriptor _number2Icon;
 
-
-
   @override
   void initState() {
     super.initState();
-
 
     socket = widget.socket;
     pickupLat = widget.pickupLat;
@@ -91,44 +88,55 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     userId = box.get("id")?.toString();
     log('User ID: $userId');
 
-
     _getCurrentLocation();
     startLocationStream();
     _setupEventListeners();
     _loadCustomIcons();
 
     _createNumberIcons();
-
   }
-
 
   Future<void> _createNumberIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
     _number2Icon = await _createNumberIcon("2", Colors.orange);
-
   }
+
   Future<BitmapDescriptor> _createNumberIcon(String number, Color color) async {
     final size = 80.0;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, Paint()..color = color);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 8, Paint()..color = Colors.white);
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2,
+      Paint()..color = color,
+    );
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2 - 8,
+      Paint()..color = Colors.white,
+    );
 
     final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
     textPainter.text = TextSpan(
       text: number,
-      style: const TextStyle(color: Colors.black, fontSize: 40, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        color: Colors.black,
+        fontSize: 40,
+        fontWeight: FontWeight.bold,
+      ),
     );
     textPainter.layout();
-    textPainter.paint(canvas, Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2));
+    textPainter.paint(
+      canvas,
+      Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2),
+    );
 
     final picture = recorder.endRecording();
     final img = await picture.toImage(size.toInt(), size.toInt());
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
-
 
   Future<void> _loadCustomIcons() async {
     try {
@@ -160,6 +168,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       log("Icon load error: $e");
     }
   }
+
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -178,7 +187,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       return;
     }
 
-    final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
     safeSetState(() {
       _currentPosition = position;
       _currentLatlng = LatLng(position.latitude, position.longitude);
@@ -190,25 +201,38 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       _fitAllMarkersAndDrivers();
     }
   }
+
   void safeSetState(VoidCallback fn) {
     if (mounted) setState(fn);
   }
+
   void startLocationStream() {
-    _locationSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 10),
-    ).listen((position) {
-      updateUserLocation(position.latitude, position.longitude);
-      _currentPosition = position;
-    });
+    _locationSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10,
+          ),
+        ).listen((position) {
+          updateUserLocation(position.latitude, position.longitude);
+          _currentPosition = position;
+        });
   }
+
   void updateUserLocation(double lat, double lon) {
     if (socket?.connected == true && userId != null) {
-      socket!.emitWithAck('user:location_update', {'userId': userId, 'lat': lat, 'lon': lon});
+      socket!.emitWithAck('user:location_update', {
+        'userId': userId,
+        'lat': lat,
+        'lon': lon,
+      });
     }
   }
+
   void _setupEventListeners() {
     socket?.on('receive_message', (data) => log('Message: $data'));
   }
+
   @override
   void dispose() {
     _locationSubscription?.cancel();
@@ -220,33 +244,44 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 
   void _addMarkers() {
     _markers.clear();
-    _markers.add(Marker(
-      markerId: const MarkerId('pickup'),
-      position: LatLng(pickupLat, pickupLon),
-      infoWindow: const InfoWindow(title: 'Pickup'),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-    ));
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('pickup'),
+        position: LatLng(pickupLat, pickupLon),
+        infoWindow: const InfoWindow(title: 'Pickup'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      ),
+    );
     for (int i = 0; i < dropLats.length; i++) {
       final lat = dropLats[i];
       final lon = dropLons[i];
       final name = dropNames[i];
       BitmapDescriptor icon;
-      if (i == 0) icon = _number1Icon;
-      else if (i == 1) icon = _number2Icon;
-      else icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
-            // _dotIcon;
-      _markers.add(Marker(
-        markerId: MarkerId('drop_$i'),
-        position: LatLng(lat, lon),
-        infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
-        icon: icon,
-        anchor: const Offset(0.5, 0.5),
-      ));
+      if (i == 0)
+        icon = _number1Icon;
+      else if (i == 1)
+        icon = _number2Icon;
+      else
+        icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
+      // _dotIcon;
+      _markers.add(
+        Marker(
+          markerId: MarkerId('drop_$i'),
+          position: LatLng(lat, lon),
+          infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
+          icon: icon,
+          anchor: const Offset(0.5, 0.5),
+        ),
+      );
     }
     safeSetState(() {});
   }
+
   void _addNearbyDriverMarkers() {
-    if (nearbyDrivers.data == null || nearbyDrivers.data!.isEmpty || !_iconsLoaded) return;
+    if (nearbyDrivers.data == null ||
+        nearbyDrivers.data!.isEmpty ||
+        !_iconsLoaded)
+      return;
     _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
     for (int i = 0; i < nearbyDrivers.data!.length; i++) {
       final driver = nearbyDrivers.data![i];
@@ -258,7 +293,8 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       final double angle = (i * 137.508);
       final double radius = 0.00008;
       final double offsetLat = radius * cos(angle * pi / 180);
-      final double offsetLon = radius * cos(angle * pi / 180) / cos(baseLat * pi / 180);
+      final double offsetLon =
+          radius * cos(angle * pi / 180) / cos(baseLat * pi / 180);
       final double finalLat = baseLat + offsetLat;
       final double finalLon = baseLon + offsetLon;
       final String model = (driver.vehicleDetails?.isNotEmpty == true)
@@ -273,31 +309,38 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           : model.contains("auto")
           ? driverAutoIcon
           : driverCycleIcon;
-      _markers.add(Marker(
-        markerId: MarkerId(markerId),
-        position: LatLng(finalLat, finalLon),
-        icon: icon,
-        anchor: const Offset(0.5, 0.5),
-        zIndex: i.toDouble(),
-        infoWindow: InfoWindow(
-          title: "${driver.firstName} ${driver.lastName}",
-          snippet: "${driver.vehicleDetails?[0].model} • ${(driver.distance! / 1000).toStringAsFixed(1)} km",
+      _markers.add(
+        Marker(
+          markerId: MarkerId(markerId),
+          position: LatLng(finalLat, finalLon),
+          icon: icon,
+          anchor: const Offset(0.5, 0.5),
+          zIndex: i.toDouble(),
+          infoWindow: InfoWindow(
+            title: "${driver.firstName} ${driver.lastName}",
+            snippet:
+                "${driver.vehicleDetails?[0].model} • ${(driver.distance! / 1000).toStringAsFixed(1)} km",
+          ),
         ),
-      ));
+      );
     }
     safeSetState(() {});
     _fitAllMarkersAndDrivers();
   }
+
   void _fitAllMarkersAndDrivers() {
     if (_markers.isEmpty || _mapController == null) return;
     final positions = _markers.map((m) => m.position).toList();
     if (positions.length == 1) {
-      _mapController!.animateCamera(CameraUpdate.newLatLngZoom(positions[0], 14));
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(positions[0], 14),
+      );
       return;
     }
     final bounds = _calculateBounds(positions);
     _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
   }
+
   Future<void> _fetchMultiStopRoute() async {
     if (_currentLatlng == null) return;
     const apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
@@ -326,20 +369,24 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
         }
       }
-    } catch (e) { log("Route1 error: $e"); }
+    } catch (e) {
+      log("Route1 error: $e");
+    }
 
     dropDistances = List.filled(dropLats.length, '');
     dropDurations = List.filled(dropLats.length, '');
 
     for (int i = 0; i < dropLats.length; i++) {
-      final origin = i == 0 ? '$pickupLat,$pickupLon' : '${dropLats[i-1]},${dropLons[i-1]}';
+      final origin = i == 0
+          ? '$pickupLat,$pickupLon'
+          : '${dropLats[i - 1]},${dropLons[i - 1]}';
       final dest = '${dropLats[i]},${dropLons[i]}';
 
-      final url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-        'origin': origin,
-        'destination': dest,
-        'key': apiKey,
-      });
+      final url = Uri.https(
+        'maps.googleapis.com',
+        '/maps/api/directions/json',
+        {'origin': origin, 'destination': dest, 'key': apiKey},
+      );
 
       try {
         final res = await http.get(url);
@@ -356,18 +403,22 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
             totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
           }
         }
-      } catch (e) { log("Drop route $i error: $e"); }
+      } catch (e) {
+        log("Drop route $i error: $e");
+      }
     }
 
     safeSetState(() {
       _polylines.clear();
       if (allPoints.isNotEmpty) {
-        _polylines.add(Polyline(
-          polylineId: const PolylineId('full_route'),
-          points: allPoints,
-          color: Colors.blue,
-          width: 5,
-        ));
+        _polylines.add(
+          Polyline(
+            polylineId: const PolylineId('full_route'),
+            points: allPoints,
+            color: Colors.blue,
+            width: 5,
+          ),
+        );
       }
       totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
       totalDuration = '$totalTimeMin min';
@@ -378,6 +429,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       _fitAllMarkersAndDrivers();
     }
   }
+
   List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
     int index = 0, len = encoded.length;
@@ -405,6 +457,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     }
     return points;
   }
+
   LatLngBounds _calculateBounds(List<LatLng> points) {
     double minLat = points[0].latitude, maxLat = points[0].latitude;
     double minLng = points[0].longitude, maxLng = points[0].longitude;
@@ -414,12 +467,11 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       if (p.longitude < minLng) minLng = p.longitude;
       if (p.longitude > maxLng) maxLng = p.longitude;
     }
-    return LatLngBounds(southwest: LatLng(minLat, minLng), northeast: LatLng(maxLat, maxLng));
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -427,152 +479,552 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body:
-      // distanceProviderState.when(
-      //   data: (snp) {
-      //
-      //     // final name = snp.data[0].name;
-      //     // final phon = snp.data[0].mobNo;
-      //     // final pickupAddress = snp.data[0].origName;
-      //     final dropAddress = dropNames.join(" → ");
-      //
-      //     return _currentLatlng == null
-      //         ? const Center(child: CircularProgressIndicator())
-      //         :
+          // distanceProviderState.when(
+          //   data: (snp) {
+          //
+          //     // final name = snp.data[0].name;
+          //     // final phon = snp.data[0].mobNo;
+          //     // final pickupAddress = snp.data[0].origName;
+          //     final dropAddress = dropNames.join(" → ");
+          //
+          //     return _currentLatlng == null
+          //         ? const Center(child: CircularProgressIndicator())
+          //         :
+          distanceProviderState.when(
+            data: (response) {
+              if (response.data == null || response.data!.isEmpty) {
+                return Center(child: Text("No vehicles available"));
+              }
 
-      distanceProviderState.when(
-        data: (response) {
-          if (response.data == null || response.data!.isEmpty) {
-            return Center(child: Text("No vehicles available"));
-          }
+              final vehicle = response.data![selectIndex]; // Selected vehicle
 
-          final vehicle = response.data![selectIndex]; // Selected vehicle
-
-          return _currentLatlng == null
-              ? const Center(child: CircularProgressIndicator())
-              :
-          Stack(
-            children: [
-
-
-
-              GoogleMap(
-                padding: EdgeInsets.only(top: 40.h, right: 16.w),
-                initialCameraPosition: CameraPosition(target: _currentLatlng!, zoom: 15),
-                onMapCreated: (controller) {
-                  _mapController = controller;
-                  _addMarkers();
-                  _fetchMultiStopRoute();
-                },
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                markers: _markers,
-                polylines: _polylines,
-              ),
-
-              Positioned(
-                left: 10.w, top: 40.h,
-                child: FloatingActionButton(
-                  mini: true, backgroundColor: Colors.white,
-                  shape: const CircleBorder(),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
-                ),
-              ),
-
-              if (totalDistance != null)
-                Positioned(
-                  bottom: 70.h, left: 16.w, right: 16.w,
-                  child: Container(
-                    padding: EdgeInsets.all(12.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.r),
-                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+              return _currentLatlng == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : Stack(
                       children: [
-                        if (toPickupDistance != null)
-                          Text('To Pickup: $toPickupDistance | $toPickupDuration', style: GoogleFonts.inter(fontSize: 14.sp)),
-                        ...dropDistances.asMap().entries.map((e) => e.value.isNotEmpty
-                            ? Text('Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}', style: GoogleFonts.inter(fontSize: 13.sp))
-                            : const SizedBox()),
-                        Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                        GoogleMap(
+                          padding: EdgeInsets.only(top: 40.h, right: 16.w),
+                          initialCameraPosition: CameraPosition(
+                            target: _currentLatlng!,
+                            zoom: 15,
+                          ),
+                          onMapCreated: (controller) {
+                            _mapController = controller;
+                            _addMarkers();
+                            _fetchMultiStopRoute();
+                          },
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: true,
+                          markers: _markers,
+                          polylines: _polylines,
+                        ),
+
+                        Positioned(
+                          left: 10.w,
+                          top: 40.h,
+                          child: FloatingActionButton(
+                            mini: true,
+                            backgroundColor: Colors.white,
+                            shape: const CircleBorder(),
+                            onPressed: () => Navigator.pop(context),
+                            child: const Icon(
+                              Icons.arrow_back_ios,
+                              color: Color(0xFF1D3557),
+                            ),
+                          ),
+                        ),
+
+                        if (totalDistance != null)
+                          Positioned(
+                            bottom: 70.h,
+                            left: 16.w,
+                            right: 16.w,
+                            child: Container(
+                              padding: EdgeInsets.all(12.w),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (toPickupDistance != null)
+                                    Text(
+                                      'To Pickup: $toPickupDistance | $toPickupDuration',
+                                      style: GoogleFonts.inter(fontSize: 14.sp),
+                                    ),
+                                  ...dropDistances.asMap().entries.map(
+                                    (e) => e.value.isNotEmpty
+                                        ? Text(
+                                            'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 13.sp,
+                                            ),
+                                          )
+                                        : const SizedBox(),
+                                  ),
+                                  Text(
+                                    'Total: $totalDistance | $totalDuration',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        DraggableScrollableSheet(
+                          initialChildSize: 0.80,
+                          minChildSize: 0.30,
+                          maxChildSize: 0.80,
+                          builder: (context, scrollController) {
+                            return Container(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 16.h,
+                                horizontal: 16.w,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(30.r),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 10,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: ListView(
+                                controller: scrollController,
+                                padding: EdgeInsets.zero,
+                                children: [
+                                  // ---- Top drag handle ----
+                                  Center(
+                                    child: Container(
+                                      margin: EdgeInsets.only(bottom: 10.h),
+                                      width: 60.w,
+                                      height: 5.h,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.grey[300],
+                                      ),
+                                    ),
+                                  ),
+
+                                  // ---- LIST OF VEHICLES ----
+                                  ...List.generate(response.data!.length, (
+                                    dataIndex,
+                                  ) {
+                                    final isSelected = selectIndex == dataIndex;
+                                    return InkWell(
+                                      onTap: () async {
+                                        setState(() {
+                                          selectIndex = dataIndex;
+                                          isLoadingDrivers = true;
+                                          _markers.removeWhere(
+                                            (m) => m.markerId.value.startsWith(
+                                              'driver_',
+                                            ),
+                                          );
+                                        });
+
+                                        try {
+                                          final selectedVehicle =
+                                              response.data![dataIndex];
+                                          final body = NearByDriverModel(
+                                            lat: pickupLat,
+                                            long: pickupLon,
+                                            vehicleId: selectedVehicle
+                                                .vehicleTypeId
+                                                .toString(),
+                                          );
+
+                                          final drivers = await APIStateNetwork(
+                                            callPrettyDio(),
+                                          ).getNearByDriverList(body);
+                                          setState(() {
+                                            nearbyDrivers = drivers;
+                                            isLoadingDrivers = false;
+                                            if (drivers.data != null &&
+                                                drivers.data!.isNotEmpty) {
+                                              _addNearbyDriverMarkers();
+                                            }
+                                          });
+                                        } catch (e) {
+                                          setState(
+                                            () => isLoadingDrivers = false,
+                                          );
+                                        }
+                                      },
+                                      child: AnimatedContainer(
+                                        margin: EdgeInsets.only(bottom: 15.h),
+                                        duration: Duration(milliseconds: 250),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? Color(0xFFE5F0F1)
+                                              : Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            15.r,
+                                          ),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? Colors.black
+                                                : Colors.grey.shade300,
+                                            width: isSelected ? 1.5 : 1,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: isSelected
+                                                  ? Colors.black26
+                                                  : Colors.black12,
+                                              blurRadius: isSelected ? 8 : 4,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: 12.w,
+                                            right: 12.w,
+                                            top: isSelected ? 8 : 16.h,
+                                            bottom: isSelected ? 10 : 16.h,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              if (isSelected)
+                                                Center(
+                                                  child: Image.network(
+                                                    response
+                                                        .data![dataIndex]
+                                                        .image
+                                                        .toString(),
+                                                    width: isSelected
+                                                        ? 100.w
+                                                        : 70.w,
+                                                    height: isSelected
+                                                        ? 60.h
+                                                        : 50.h,
+                                                    fit: BoxFit.contain,
+                                                  ),
+                                                ),
+                                              Row(
+                                                children: [
+                                                  if (!isSelected)
+                                                    Image.network(
+                                                      response
+                                                          .data![dataIndex]
+                                                          .image
+                                                          .toString(),
+                                                      width: isSelected
+                                                          ? 100.w
+                                                          : 70.w,
+                                                      height: isSelected
+                                                          ? 70.h
+                                                          : 50.h,
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  SizedBox(width: 8.w),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        response
+                                                                .data![dataIndex]
+                                                                .vehicleType ??
+                                                            "",
+                                                        style:
+                                                            GoogleFonts.inter(
+                                                              fontSize:
+                                                                  isSelected
+                                                                  ? 20.sp
+                                                                  : 16.sp,
+                                                              fontWeight:
+                                                                  isSelected
+                                                                  ? FontWeight
+                                                                        .w600
+                                                                  : FontWeight
+                                                                        .w400,
+                                                            ),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            response
+                                                                .data![dataIndex]
+                                                                .name
+                                                                .toString(),
+                                                            style:
+                                                                GoogleFonts.inter(
+                                                                  fontSize:
+                                                                      isSelected
+                                                                      ? 15.sp
+                                                                      : 13.sp,
+                                                                ),
+                                                          ),
+                                                          SizedBox(width: 5.w),
+                                                          CircleAvatar(
+                                                            radius: 4.r,
+                                                            backgroundColor:
+                                                                Colors.grey,
+                                                          ),
+                                                          SizedBox(width: 5.w),
+                                                          Text(
+                                                            "${response.data![dataIndex].distance.toString()} away",
+                                                            style:
+                                                                GoogleFonts.inter(
+                                                                  fontSize:
+                                                                      isSelected
+                                                                      ? 15.sp
+                                                                      : 13.sp,
+                                                                ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Spacer(),
+                                                  Text(
+                                                    "₹${response.data![dataIndex].price}",
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: isSelected
+                                                          ? 18.sp
+                                                          : 15.sp,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10.h),
+                                    width: double.infinity,
+                                    height: 50.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      border: Border.all(
+                                        color: Colors.grey,
+                                        width: 1.w,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Image.asset(
+                                              "assets/cash.png",
+                                              height: 20.h,
+                                              width: 20.w,
+                                            ),
+                                            SizedBox(width: 10.w),
+                                            Text(
+                                              "Cash",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14.sp,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Image.asset(
+                                              "assets/promo.png",
+                                              height: 20.h,
+                                              width: 20.w,
+                                            ),
+                                            SizedBox(width: 10.w),
+                                            Text(
+                                              "Promo Code",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14.sp,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Image.asset(
+                                              "assets/note.png",
+                                              height: 20.h,
+                                              width: 20.w,
+                                            ),
+                                            SizedBox(width: 10.w),
+                                            Text(
+                                              "Add Note",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14.sp,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  _buildBookNowButton(
+                                    name: vehicle.name ?? "",
+                                    phon: vehicle.mobNo ?? "",
+                                    pickupAddress: vehicle.origName ?? "",
+                                    dropAddress: dropNames.join(" → "),
+                                    selectedVehicle: vehicle,
+                                  ),
+
+                                  // _buildBookNowButton(name, phon, pickupAddress, dropAddress),
+                                  // SizedBox(height: 20.h),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+
+                        //////////////////////////////// //////////////////////////////////////////////////////////////
+
+                        // DraggableScrollableSheet(
+                        //   initialChildSize: 0.47,
+                        //   minChildSize: 0.47,
+                        //   maxChildSize: 0.47,
+                        //   builder: (context, scrollController) {
+                        //     return Container(
+                        //       decoration: const BoxDecoration(
+                        //         color: Colors.white,
+                        //         borderRadius: BorderRadius.vertical(
+                        //           top: Radius.circular(20),
+                        //         ),
+                        //         boxShadow: [
+                        //           BoxShadow(
+                        //             color: Colors.black12,
+                        //             blurRadius: 10,
+                        //           ),
+                        //         ],
+                        //       ),
+                        //       child: SingleChildScrollView(
+                        //         controller: scrollController,
+                        //         padding: EdgeInsets.symmetric(
+                        //           horizontal: 15.w,
+                        //           vertical: 10.h,
+                        //         ),
+                        //         child: Column(
+                        //           children: [
+                        //             // SizedBox(height: 200.h, child: _buildVehicleList(snp)),
+                        // SizedBox(
+                        //   height: 200.h,
+                        //   child: _buildVehicleList(response),
+                        // ),
+                        //             // _buildPaymentRow(),
+                        //             Container(
+                        //               margin: EdgeInsets.only(top: 10.h),
+                        //               width: double.infinity,
+                        //               height: 50.h,
+                        //               decoration: BoxDecoration(
+                        //                 borderRadius: BorderRadius.circular(
+                        //                   10.r,
+                        //                 ),
+                        //                 border: Border.all(
+                        //                   color: Colors.grey,
+                        //                   width: 1.w,
+                        //                 ),
+                        //               ),
+                        //               child: Row(
+                        //                 mainAxisAlignment:
+                        //                     MainAxisAlignment.spaceAround,
+                        //                 children: [
+                        //                   Row(
+                        //                     children: [
+                        //                       Image.asset(
+                        //                         "assets/cash.png",
+                        //                         height: 20.h,
+                        //                         width: 20.w,
+                        //                       ),
+                        //                       SizedBox(width: 10.w),
+                        //                       Text(
+                        //                         "Cash",
+                        //                         style: GoogleFonts.inter(
+                        //                           fontSize: 14.sp,
+                        //                         ),
+                        //                       ),
+                        //                     ],
+                        //                   ),
+                        //                   Row(
+                        //                     children: [
+                        //                       Image.asset(
+                        //                         "assets/promo.png",
+                        //                         height: 20.h,
+                        //                         width: 20.w,
+                        //                       ),
+                        //                       SizedBox(width: 10.w),
+                        //                       Text(
+                        //                         "Promo Code",
+                        //                         style: GoogleFonts.inter(
+                        //                           fontSize: 14.sp,
+                        //                         ),
+                        //                       ),
+                        //                     ],
+                        //                   ),
+                        //                   Row(
+                        //                     children: [
+                        //                       Image.asset(
+                        //                         "assets/note.png",
+                        //                         height: 20.h,
+                        //                         width: 20.w,
+                        //                       ),
+                        //                       SizedBox(width: 10.w),
+                        //                       Text(
+                        //                         "Add Note",
+                        //                         style: GoogleFonts.inter(
+                        //                           fontSize: 14.sp,
+                        //                         ),
+                        //                       ),
+                        //                     ],
+                        //                   ),
+                        //                 ],
+                        //               ),
+                        //             ),
+                        //             SizedBox(height: 10.h),
+                        //             _buildBookNowButton(
+                        //               name: vehicle.name ?? "",
+                        //               phon: vehicle.mobNo ?? "",
+                        //               pickupAddress: vehicle.origName ?? "",
+                        //               dropAddress: dropNames.join(" → "),
+                        //               selectedVehicle: vehicle,
+                        //             ),
+                        //             // _buildBookNowButton(name, phon, pickupAddress, dropAddress),
+                        //             // SizedBox(height: 20.h),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        // ),
                       ],
-                    ),
-                  ),
-                ),
-
-              DraggableScrollableSheet(
-                initialChildSize: 0.47,
-                minChildSize: 0.47,
-                maxChildSize: 0.47,
-                builder: (context, scrollController) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
-                    ),
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-                      child: Column(
-                        children: [
-
-                          // SizedBox(height: 200.h, child: _buildVehicleList(snp)),
-
-                          SizedBox(height: 200.h, child: _buildVehicleList(response)),
-                          // _buildPaymentRow(),
-
-                          Container(
-                            margin: EdgeInsets.only(top: 10.h),
-                            width: double.infinity,
-                            height: 50.h,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.r),
-                              border: Border.all(color: Colors.grey, width: 1.w),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Row(children: [Image.asset("assets/cash.png", height: 20.h, width: 20.w), SizedBox(width: 10.w), Text("Cash", style: GoogleFonts.inter(fontSize: 14.sp))]),
-                                Row(children: [Image.asset("assets/promo.png", height: 20.h, width: 20.w), SizedBox(width: 10.w), Text("Promo Code", style: GoogleFonts.inter(fontSize: 14.sp))]),
-                                Row(children: [Image.asset("assets/note.png", height: 20.h, width: 20.w), SizedBox(width: 10.w), Text("Add Note", style: GoogleFonts.inter(fontSize: 14.sp))]),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildBookNowButton(
-                            name: vehicle.name ?? "",
-                            phon: vehicle.mobNo ?? "",
-                            pickupAddress: vehicle.origName ?? "",
-                            dropAddress: dropNames.join(" → "),
-                            selectedVehicle: vehicle,
-                          ),
-                          // _buildBookNowButton(name, phon, pickupAddress, dropAddress),
-                          // SizedBox(height: 20.h),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-
-            ],
-          );
-        },
-        error: (e, s) => Center(child: Text(e.toString())),
-        loading: () => const Center(child: CircularProgressIndicator()),
-      ),
+                    );
+            },
+            error: (e, s) => Center(child: Text(e.toString())),
+            loading: () => const Center(child: CircularProgressIndicator()),
+          ),
     );
   }
-
-
-
-
-
 
   Widget _buildVehicleList(dynamic snp) {
     return ListView.builder(
@@ -585,7 +1037,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
             setState(() {
               selectIndex = index;
               isLoadingDrivers = true;
-              _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
+              _markers.removeWhere(
+                (m) => m.markerId.value.startsWith('driver_'),
+              );
             });
 
             try {
@@ -596,7 +1050,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                 vehicleId: selectedVehicle.vehicleTypeId,
               );
 
-              final drivers = await APIStateNetwork(callPrettyDio()).getNearByDriverList(body);
+              final drivers = await APIStateNetwork(
+                callPrettyDio(),
+              ).getNearByDriverList(body);
               setState(() {
                 nearbyDrivers = drivers;
                 isLoadingDrivers = false;
@@ -610,23 +1066,67 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
-            margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: isSelected ? 0 : 10.h),
+            margin: EdgeInsets.symmetric(
+              horizontal: 10.w,
+              vertical: isSelected ? 0 : 10.h,
+            ),
             width: 130.w,
             height: isSelected ? 180.h : 170.h,
             decoration: BoxDecoration(
               color: isSelected ? const Color(0xFFE5F0F1) : Colors.white,
               borderRadius: BorderRadius.circular(15.r),
-              border: Border.all(color: isSelected ? Colors.black : Colors.grey.shade400, width: isSelected ? 1.5 : 1),
-              boxShadow: [BoxShadow(color: isSelected ? Colors.black26 : Colors.black12, blurRadius: isSelected ? 8 : 4, offset: const Offset(0, 4))],
+              border: Border.all(
+                color: isSelected ? Colors.black : Colors.grey.shade400,
+                width: isSelected ? 1.5 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isSelected ? Colors.black26 : Colors.black12,
+                  blurRadius: isSelected ? 8 : 4,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
                 const SizedBox(height: 10),
-                Text("In 2 min", style: GoogleFonts.inter(fontSize: isSelected ? 15.sp : 13.sp, fontWeight: FontWeight.w500)),
+                Text(
+                  "In 2 min",
+                  style: GoogleFonts.inter(
+                    fontSize: isSelected ? 15.sp : 13.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(height: 10),
-                AnimatedScale(scale: isSelected ? 1.15 : 1.0, duration: const Duration(milliseconds: 250), child: Image.network(snp.data[index].image, width: 116.w, height: 70.h, fit: BoxFit.contain)),
-                Padding(padding: const EdgeInsets.only(left: 10, top: 10), child: Text(snp.data[index].name, style: GoogleFonts.inter(fontSize: isSelected ? 17.sp : 15.sp, fontWeight: FontWeight.w600))),
-                Padding(padding: const EdgeInsets.only(left: 10), child: Text("₹${snp.data[index].price}", style: GoogleFonts.inter(fontSize: isSelected ? 16.sp : 14.sp))),
+                AnimatedScale(
+                  scale: isSelected ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Image.network(
+                    snp.data[index].image,
+                    width: 116.w,
+                    height: 70.h,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10, top: 10),
+                  child: Text(
+                    snp.data[index].vehicleType,
+                    style: GoogleFonts.inter(
+                      fontSize: isSelected ? 17.sp : 15.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Text(
+                    "₹${snp.data[index].price}",
+                    style: GoogleFonts.inter(
+                      fontSize: isSelected ? 16.sp : 14.sp,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -635,9 +1135,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     );
   }
 
-
-
-/*  Widget _buildBookNowButton({
+  /*  Widget _buildBookNowButton({
     required String name,
     required String phon,
     required String pickupAddress,
@@ -710,8 +1208,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     );
   }*/
 
-
-/*
+  /*
   Widget _buildBookNowButton({
     required String name,
     required String phon,
@@ -792,7 +1289,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   }
 }*/
 
-
   Widget _buildBookNowButton({
     required String name,
     required String phon,
@@ -804,74 +1300,91 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 50),
         backgroundColor: const Color(0xFF006970),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.r),
+        ),
       ),
-      onPressed: isBooking ? null : () async {
-        setState(() => isBooking = true);
-        try {
-          final body = BookInstantDeliveryBodyModel(
-            vehicleTypeId: selectedVehicle.vehicleTypeId ?? "",
-            origName: pickupAddress,
-            origLat: pickupLat,
-            origLon: pickupLon,
-            coinAmount: 0,
-            copanId: null,
-            dropoff: selectedVehicle.dropoff?.map((d) => BookDropoff(
-              name: d.nameString,
-              lat: d.lat ?? 0.0,
-              long: d.long ?? 0.0,
-            )).toList() ??
-                [],
-            distance: (selectedVehicle.distance ?? 0).toDouble(),
-            userPayAmount: double.parse(selectedVehicle.price ?? "0").toInt(),
-            taxAmount: 18.0,
-            mobNo: phon,
-            name: "nmbkj",
-          );
-          final service = APIStateNetwork(callPrettyDio());
-          final response = await service.bookInstantDelivery(body);
-          if (response.code == 0 ) {
-            final dataMap = response;
-            final txId = dataMap.data.txId.toString();
-            if (txId.isEmpty) {
-              Fluttertoast.showToast(msg: "Booking failed: No txId");
-              return;
-            }
-            box.put("current_booking_txId", txId);
-            Navigator.push(
-              context,
-              CupertinoPageRoute(
-                builder: (context) => WaitingForDriverScreen(
-                  socket: socket!,
-                  pickupLat: pickupLat,
-                  pickupLon: pickupLon,
-                  dropLats: dropLats,
-                  dropLons: dropLons,
-                  dropNames: dropNames,
-                  txId: txId,
-                ),
-              ),
-            );
-            Fluttertoast.showToast(msg: "Delivery booked!");
-          }
-          else {
-            // response.data is List or null
-            final errorMsg = response.message ?? "Invalid response from server";
-            log("Booking failed: $errorMsg | data type: ${response.data.runtimeType}");
-            Fluttertoast.showToast(msg: errorMsg);
-          }
-        } catch (e, s) {
-          log("Booking error: $e\n$s");
-          Fluttertoast.showToast(msg: "Booking error: ${e.toString()}");
-        } finally {
-          setState(() => isBooking = false);
-        }
-      },
+      onPressed: isBooking
+          ? null
+          : () async {
+              setState(() => isBooking = true);
+              try {
+                final body = BookInstantDeliveryBodyModel(
+                  vehicleTypeId: selectedVehicle.vehicleTypeId ?? "",
+                  origName: pickupAddress,
+                  origLat: pickupLat,
+                  origLon: pickupLon,
+                  coinAmount: 0,
+                  copanId: null,
+                  dropoff:
+                      selectedVehicle.dropoff
+                          ?.map(
+                            (d) => BookDropoff(
+                              name: d.nameString,
+                              lat: d.lat ?? 0.0,
+                              long: d.long ?? 0.0,
+                            ),
+                          )
+                          .toList() ??
+                      [],
+                  distance: (selectedVehicle.distance ?? 0).toDouble(),
+                  userPayAmount: double.parse(
+                    selectedVehicle.price ?? "0",
+                  ).toInt(),
+                  taxAmount: 18.0,
+                  mobNo: phon,
+                  name: "nmbkj",
+                );
+                final service = APIStateNetwork(callPrettyDio());
+                final response = await service.bookInstantDelivery(body);
+                if (response.code == 0) {
+                  final dataMap = response;
+                  final txId = dataMap.data.txId.toString();
+                  if (txId.isEmpty) {
+                    Fluttertoast.showToast(msg: "Booking failed: No txId");
+                    return;
+                  }
+                  box.put("current_booking_txId", txId);
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => WaitingForDriverScreen(
+                        socket: socket!,
+                        pickupLat: pickupLat,
+                        pickupLon: pickupLon,
+                        dropLats: dropLats,
+                        dropLons: dropLons,
+                        dropNames: dropNames,
+                        txId: txId,
+                      ),
+                    ),
+                  );
+                  Fluttertoast.showToast(msg: "Delivery booked!");
+                } else {
+                  // response.data is List or null
+                  final errorMsg =
+                      response.message ?? "Invalid response from server";
+                  log(
+                    "Booking failed: $errorMsg | data type: ${response.data.runtimeType}",
+                  );
+                  Fluttertoast.showToast(msg: errorMsg);
+                }
+              } catch (e, s) {
+                log("Booking error: $e\n$s");
+                Fluttertoast.showToast(msg: "Booking error: ${e.toString()}");
+              } finally {
+                setState(() => isBooking = false);
+              }
+            },
       child: isBooking
           ? const CircularProgressIndicator(color: Colors.white)
-          : Text("Book Now", style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.white)),
+          : Text(
+              "Book Now",
+              style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.white),
+            ),
     );
-  }}
+  }
+}
 
 class WaitingForDriverScreen extends StatefulWidget {
   final IO.Socket socket;
@@ -924,8 +1437,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
   late BitmapDescriptor _number2Icon;
   late BitmapDescriptor _dotIcon;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -939,15 +1450,15 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 40, end: 100).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
-    );
+    _pulseAnimation = Tween<double>(
+      begin: 40,
+      end: 100,
+    ).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeOut));
     _setupEventListeners();
     _startSearching();
     _startPulseMarkerUpdater();
     _loadIconsAndInitMap();
   }
-
 
   // MARK: - Icon Loading
   Future<void> _loadIconsAndInitMap() async {
@@ -956,47 +1467,68 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     _initMap();
   }
 
-
   Future<void> _createCustomIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
     _number2Icon = await _createNumberIcon("2", Colors.orange);
     _dotIcon = await _createDotIcon();
   }
+
   Future<BitmapDescriptor> _createNumberIcon(String number, Color color) async {
     final size = 80.0;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, Paint()..color = color);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 8, Paint()..color = Colors.white);
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2,
+      Paint()..color = color,
+    );
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2 - 8,
+      Paint()..color = Colors.white,
+    );
 
     final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
     textPainter.text = TextSpan(
       text: number,
-      style: const TextStyle(color: Colors.black, fontSize: 40, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        color: Colors.black,
+        fontSize: 40,
+        fontWeight: FontWeight.bold,
+      ),
     );
     textPainter.layout();
-    textPainter.paint(canvas, Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2));
+    textPainter.paint(
+      canvas,
+      Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2),
+    );
 
     final picture = recorder.endRecording();
     final img = await picture.toImage(size.toInt(), size.toInt());
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
+
   Future<BitmapDescriptor> _createDotIcon() async {
     final size = 40.0;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, Paint()..color = Colors.blue);
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2,
+      Paint()..color = Colors.blue,
+    );
     final picture = recorder.endRecording();
     final img = await picture.toImage(size.toInt(), size.toInt());
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
 
-
   void _startPulseMarkerUpdater() {
-    _pulseUpdateTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _pulseUpdateTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      timer,
+    ) {
       if (mounted && _mapController != null && _iconsLoaded) {
         _updatePulsatingPickupMarker();
       }
@@ -1008,13 +1540,15 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     if (mounted) {
       setState(() {
         _markers.removeWhere((m) => m.markerId.value == 'pickup_pulse');
-        _markers.add(Marker(
-          markerId: const MarkerId('pickup_pulse'),
-          position: LatLng(pickupLat, pickupLon),
-          icon: icon,
-          anchor: const Offset(0.5, 0.5),
-          zIndex: 100,
-        ));
+        _markers.add(
+          Marker(
+            markerId: const MarkerId('pickup_pulse'),
+            position: LatLng(pickupLat, pickupLon),
+            icon: icon,
+            anchor: const Offset(0.5, 0.5),
+            zIndex: 100,
+          ),
+        );
       });
     }
   }
@@ -1026,10 +1560,28 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     final center = Offset(size / 2, size / 2);
     final pulseRadius = _pulseAnimation.value / 2;
 
-    canvas.drawCircle(center, pulseRadius, Paint()..color = Colors.blueAccent.withOpacity(0.3));
-    canvas.drawCircle(center, pulseRadius, Paint()..color = Colors.blueAccent.withOpacity(0.6)..style = PaintingStyle.stroke..strokeWidth = 4);
+    canvas.drawCircle(
+      center,
+      pulseRadius,
+      Paint()..color = Colors.blueAccent.withOpacity(0.3),
+    );
+    canvas.drawCircle(
+      center,
+      pulseRadius,
+      Paint()
+        ..color = Colors.blueAccent.withOpacity(0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
+    );
     canvas.drawCircle(center, 24, Paint()..color = Colors.blueAccent);
-    canvas.drawCircle(center, 24, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 4);
+    canvas.drawCircle(
+      center,
+      24,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
+    );
 
     final path = Path();
     path.moveTo(center.dx, center.dy - 18);
@@ -1044,24 +1596,25 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
 
-
-
   // MARK: - Map Init
   void _initMap() {
     if (!_iconsLoaded) return;
     _addMarkers();
     _fetchMultiStopRoute();
   }
+
   void _addMarkers() {
     _markers.clear();
 
-    _markers.add(Marker(
-      markerId: const MarkerId('pickup_static'),
-      position: LatLng(pickupLat, pickupLon),
-      infoWindow: const InfoWindow(title: 'Pickup'),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      zIndex: 99,
-    ));
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('pickup_static'),
+        position: LatLng(pickupLat, pickupLon),
+        infoWindow: const InfoWindow(title: 'Pickup'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        zIndex: 99,
+      ),
+    );
 
     for (int i = 0; i < dropLats.length; i++) {
       final lat = dropLats[i];
@@ -1069,25 +1622,32 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       final name = dropNames[i];
 
       BitmapDescriptor icon;
-      if (i == 0) icon = _number1Icon;
-      else if (i == 1) icon = _number2Icon;
-      else icon = _dotIcon;
+      if (i == 0)
+        icon = _number1Icon;
+      else if (i == 1)
+        icon = _number2Icon;
+      else
+        icon = _dotIcon;
 
-      _markers.add(Marker(
-        markerId: MarkerId('drop_$i'),
-        position: LatLng(lat, lon),
-        infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
-        icon: icon,
-        anchor: const Offset(0.5, 0.5),
-      ));
+      _markers.add(
+        Marker(
+          markerId: MarkerId('drop_$i'),
+          position: LatLng(lat, lon),
+          infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
+          icon: icon,
+          anchor: const Offset(0.5, 0.5),
+        ),
+      );
     }
 
     _updatePulsatingPickupMarker();
   }
+
   // MARK: - Socket Listener
   void _setupEventListeners() {
     _socket.on('user:driver_assigned', _handleAssigned);
   }
+
   Future<void> _handleAssigned(dynamic payload) async {
     if (!mounted) return;
     print("payload socket accept data $payload");
@@ -1117,7 +1677,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         return;
       }
 
-      final driverName = '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
+      final driverName =
+          '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
       final otp = payload['otp']?.toString() ?? 'N/A';
 
       Fluttertoast.showToast(msg: "Driver Assigned: $driverName");
@@ -1159,8 +1720,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
               deliveryId: deliveryId,
               driver: driver,
               otp: otp,
-              pickup: pickup,           // Fixed
-              dropoff: dropoff,         // Already List<Map<String, dynamic>>
+              pickup: pickup, // Fixed
+              dropoff: dropoff, // Already List<Map<String, dynamic>>
               amount: amount,
               vehicleType: vehicleType, // Fixed
               status: status,
@@ -1185,19 +1746,20 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     dropDurations = List.filled(dropLats.length, '');
 
     for (int i = 0; i < dropLats.length; i++) {
-      final origin = i == 0 ? '$pickupLat,$pickupLon' : '${dropLats[i-1]},${dropLons[i-1]}';
+      final origin = i == 0
+          ? '$pickupLat,$pickupLon'
+          : '${dropLats[i - 1]},${dropLons[i - 1]}';
       final dest = '${dropLats[i]},${dropLons[i]}';
 
-      final url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-        'origin': origin,
-        'destination': dest,
-        'key': apiKey,
-      });
+      final url = Uri.https(
+        'maps.googleapis.com',
+        '/maps/api/directions/json',
+        {'origin': origin, 'destination': dest, 'key': apiKey},
+      );
 
       try {
         final response = await http.get(url);
         if (response.statusCode == 200) {
-
           final data = json.decode(response.body);
           if (data['status'] == 'OK') {
             final poly = data['routes'][0]['overview_polyline']['points'];
@@ -1209,7 +1771,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
             totalDistKm += (leg['distance']['value'] as num) / 1000;
             totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
           }
-
         }
       } catch (e) {
         log("Route error $i: $e");
@@ -1220,12 +1781,14 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       setState(() {
         _polylines.clear();
         if (allPoints.isNotEmpty) {
-          _polylines.add(Polyline(
-            polylineId: const PolylineId('full_route'),
-            points: allPoints,
-            color: Colors.blue,
-            width: 5,
-          ));
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('full_route'),
+              points: allPoints,
+              color: Colors.blue,
+              width: 5,
+            ),
+          );
         }
         totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
         totalDuration = '$totalTimeMin min';
@@ -1238,9 +1801,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
       }
     }
-
   }
-
 
   List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
@@ -1269,6 +1830,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     }
     return points;
   }
+
   LatLngBounds _calculateBounds(List<LatLng> points) {
     double minLat = points[0].latitude, maxLat = points[0].latitude;
     double minLng = points[0].longitude, maxLng = points[0].longitude;
@@ -1278,9 +1840,11 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       if (p.longitude < minLng) minLng = p.longitude;
       if (p.longitude > maxLng) maxLng = p.longitude;
     }
-    return LatLngBounds(southwest: LatLng(minLat, minLng), northeast: LatLng(maxLat, maxLng));
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
   }
-
 
   // MARK: - Timer & Search
   void _startDotTimer() {
@@ -1288,6 +1852,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       if (mounted) setState(() => _dotCount = (_dotCount % 3) + 1);
     });
   }
+
   void _startSearchTimer() {
     _searchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -1317,28 +1882,37 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     _pulseController.stop();
     setState(() => _isSearching = false);
   }
+
   String _formatTime(int seconds) {
     int min = seconds ~/ 60;
     int sec = seconds % 60;
     return '$min:${sec.toString().padLeft(2, '0')}';
   }
+
   void _retrySearch() async {
     _stopSearching();
     setState(() => _isSearching = true);
 
     try {
       final body = BookInstantDeliveryBodyModel(
-        vehicleTypeId: "68ce853be9401176157710f7", // Ya current selected vehicle se
+        vehicleTypeId:
+            "68ce853be9401176157710f7", // Ya current selected vehicle se
         origName: dropNames.first,
         origLat: pickupLat,
         origLon: pickupLon,
         coinAmount: 0,
         copanId: null,
-        dropoff: dropLats.asMap().entries.map((e) => BookDropoff(
-          name: dropNames[e.key],
-          lat: e.value,
-          long: dropLons[e.key],
-        )).toList(),
+        dropoff: dropLats
+            .asMap()
+            .entries
+            .map(
+              (e) => BookDropoff(
+                name: dropNames[e.key],
+                lat: e.value,
+                long: dropLons[e.key],
+              ),
+            )
+            .toList(),
         distance: 341.0,
         userPayAmount: 270112,
         taxAmount: 18.0,
@@ -1368,6 +1942,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       Fluttertoast.showToast(msg: "Retry failed: $e");
     }
   }
+
   @override
   void dispose() {
     _socket.off('user:driver_assigned');
@@ -1379,12 +1954,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     super.dispose();
   }
 
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     final dots = '.' * _dotCount;
@@ -1393,105 +1962,177 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       backgroundColor: Colors.white,
       body: _routeFetched && _iconsLoaded
           ? Stack(
-        children: [
-
-          GoogleMap(
-            padding: EdgeInsets.only(top: 40.h, right: 16.w),
-            initialCameraPosition: CameraPosition(target: LatLng(pickupLat, pickupLon), zoom: 15),
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _centerCameraOnPickup();
-            },
-            markers: _markers,
-            polylines: _polylines,
-            myLocationEnabled: true,
-            zoomControlsEnabled: true,
-            mapType: MapType.normal,
-          ),
-
-          // Back Button
-          Positioned(
-            left: 10.w, top: 40.h,
-            child: FloatingActionButton(
-              mini: true,
-              backgroundColor: Colors.white,
-              shape: const CircleBorder(),
-              onPressed: () => Navigator.pop(context),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
-              ),
-            ),
-          ),
-
-          // Route Info
-          Positioned(
-            bottom: 170.h, left: 16.w, right: 16.w,
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...dropDistances.asMap().entries.map((e) => e.value.isNotEmpty
-                      ? Text('Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}', style: GoogleFonts.inter(fontSize: 13.sp))
-                      : const SizedBox()),
-                  if (totalDistance != null)
-                    Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-          ),
-
-          // Search Status
-          Positioned(
-            bottom: 10.h, left: 16.w, right: 16.w,
-            child: Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _isSearching ? "Searching for nearby drivers$dots" : "No drivers found nearby",
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-                    textAlign: TextAlign.center,
+              children: [
+                GoogleMap(
+                  padding: EdgeInsets.only(top: 40.h, right: 16.w),
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(pickupLat, pickupLon),
+                    zoom: 15,
                   ),
-                  const SizedBox(height: 12),
-                  _isSearching
-                      ? Text("Please wait... (${_formatTime(_remainingSeconds)})", style: const TextStyle(fontSize: 15, color: Colors.grey), textAlign: TextAlign.center)
-                      : const Text("Try again or cancel request.", style: TextStyle(fontSize: 15, color: Colors.grey), textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  _isSearching
-                      ? const CircularProgressIndicator(strokeWidth: 3, color: Colors.blueAccent)
-                      : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _centerCameraOnPickup();
+                  },
+                  markers: _markers,
+                  polylines: _polylines,
+                  myLocationEnabled: true,
+                  zoomControlsEnabled: true,
+                  mapType: MapType.normal,
+                ),
+
+                // Back Button
+                Positioned(
+                  left: 10.w,
+                  top: 40.h,
+                  child: FloatingActionButton(
+                    mini: true,
+                    backgroundColor: Colors.white,
+                    shape: const CircleBorder(),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 8),
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: Color(0xFF1D3557),
+                      ),
                     ),
-                    onPressed: _retrySearch,
-                    child: const Text("Try Again", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white)),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      )
+                ),
+
+                // Route Info
+                Positioned(
+                  bottom: 170.h,
+                  left: 16.w,
+                  right: 16.w,
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ...dropDistances.asMap().entries.map(
+                          (e) => e.value.isNotEmpty
+                              ? Text(
+                                  'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
+                                  style: GoogleFonts.inter(fontSize: 13.sp),
+                                )
+                              : const SizedBox(),
+                        ),
+                        if (totalDistance != null)
+                          Text(
+                            'Total: $totalDistance | $totalDuration',
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Search Status
+                Positioned(
+                  bottom: 10.h,
+                  left: 16.w,
+                  right: 16.w,
+                  child: Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(12.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _isSearching
+                              ? "Searching for nearby drivers$dots"
+                              : "No drivers found nearby",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        _isSearching
+                            ? Text(
+                                "Please wait... (${_formatTime(_remainingSeconds)})",
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              )
+                            : const Text(
+                                "Try again or cancel request.",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                        const SizedBox(height: 16),
+                        _isSearching
+                            ? const CircularProgressIndicator(
+                                strokeWidth: 3,
+                                color: Colors.blueAccent,
+                              )
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blueAccent,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 40,
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                onPressed: _retrySearch,
+                                child: const Text(
+                                  "Try Again",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )
           : const Center(child: CircularProgressIndicator()),
     );
   }
 
   void _centerCameraOnPickup() {
-    _mapController?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(pickupLat, pickupLon), zoom: 15.5)));
+    _mapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: LatLng(pickupLat, pickupLon), zoom: 15.5),
+      ),
+    );
   }
 }

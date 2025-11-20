@@ -24,7 +24,7 @@ import 'Newscreen.dart';
 class HomeScreen extends ConsumerStatefulWidget {
   final bool
   forceSocketRefresh; // New flag to force socket refresh on navigation
-  const HomeScreen( {super.key, this.forceSocketRefresh = false});
+  const HomeScreen({super.key, this.forceSocketRefresh = false});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -32,6 +32,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 var box = Hive.box("folder");
 var id = box.get("id");
+
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int selectIndex = 0;
   List<Map<String, dynamic>> myList = [
@@ -84,7 +85,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isCheckingLocation = true;
   String? userId;
   late IO.Socket socket;
-
 
   @override
   void initState() {
@@ -187,9 +187,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-// didChangeDependencies pura hata do - zarurat nahi ab
-// @override
-// void didChangeDependencies() { ... } ← DELETE THIS
+  // didChangeDependencies pura hata do - zarurat nahi ab
+  // @override
+  // void didChangeDependencies() { ... } ← DELETE THIS
 
   Future<void> _checkLocationPermission() async {
     setState(() {
@@ -241,6 +241,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       setState(() => _isCheckingLocation = false);
     }
   }
+
   void _showLocationDialog(String message) {
     showDialog(
       context: context,
@@ -263,6 +264,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+
   Future<void> _updateAddress() async {
     if (_currentPosition == null) return;
     try {
@@ -277,8 +279,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
         });
       } else {
-        setState(() {currentAddress =
-        "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";});
+        setState(() {
+          currentAddress =
+              "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+        });
       }
     } catch (e) {
       log('Error updating address: $e');
@@ -288,6 +292,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       });
     }
   }
+
   void startLocationStream() {
     _locationSubscription =
         Geolocator.getPositionStream(
@@ -305,16 +310,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _updateAddress();
         });
   }
+
   @override
   void dispose() {
     _locationSubscription?.cancel();
     super.dispose();
   }
 
-  Color _getStatusColor(Status? status) {
+  Color _getStatusColor(String? status) {
     String statusStr = status?.toString().split('.').last ?? "not_assigned";
 
-    switch (statusStr.toLowerCase()) {
+    switch (status.toString().toLowerCase()) {
       case "assigned":
         return const Color(0xFFE3F2FD);
       case "ongoing":
@@ -333,13 +339,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-
-  Color _getStatusTextColor(Status? status) {
+  Color _getStatusTextColor(String? status) {
     String statusStr = status?.toString().split('.').last ?? "not_assigned";
 
-
-
-    switch (statusStr.toLowerCase()) {
+    switch (status.toString().toLowerCase()) {
       case "assigned":
         return const Color(0xFF0D47A1); // dark blue
       case "not_assigned":
@@ -353,10 +356,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     final historyProvier = ref.watch(getDeliveryHistoryController);
     // 🔄 Show loader while checking
     if (_isCheckingLocation) {
@@ -441,10 +442,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       body: selectIndex == 0
-          ?
-
-      SingleChildScrollView(
-        child: Column(
+          ? SingleChildScrollView(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
@@ -484,10 +483,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             backgroundColor: Colors.amber,
                           ),
                           onPressed: () {
-
-
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen(socket)));
-
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    InstantDeliveryScreen(socket),
+                              ),
+                            );
 
                             // Navigator.push(
                             //   context,
@@ -497,7 +499,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             //         InstantDeliveryScreen(),
                             //   ),
                             // );
-
                           },
                           child: Text(
                             "Book",
@@ -537,8 +538,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
 
-
-
                   SizedBox(height: 20.h),
 
                   historyProvier.when(
@@ -559,7 +558,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // Sirf ONGOING deliveries filter karo
                       final ongoingDeliveries = history.data!.deliveries!
-                          .where((d) => d.status.toString() == "Status.ONGOING")
+                          .where((d) => d.status.toString() == "ongoing")
                           .toList();
 
                       if (ongoingDeliveries.isEmpty) {
@@ -579,14 +578,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PickupScreenNotification(
-                                    deliveryId: delivery.id ?? "",
-                                  ),
+                                  builder: (context) =>
+                                      PickupScreenNotification(
+                                        deliveryId: delivery.id ?? "",
+                                      ),
                                 ),
                               );
                             },
                             child: Padding(
-                              padding: EdgeInsets.only(bottom: 15.h, left: 25.w, right: 25.w),
+                              padding: EdgeInsets.only(
+                                bottom: 15.h,
+                                left: 25.w,
+                                right: 25.w,
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -611,13 +615,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                       const Spacer(),
                                       Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 4.h,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF7DCF4A).withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(4.r),
+                                          color: const Color(
+                                            0xFF7DCF4A,
+                                          ).withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(
+                                            4.r,
+                                          ),
                                         ),
                                         child: Text(
-                                          "ONGOING",
+                                          "ongoing",
                                           style: GoogleFonts.inter(
                                             fontSize: 11.sp,
                                             fontWeight: FontWeight.w600,
@@ -631,58 +642,95 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                                   // Drop Locations with Numbered Circles
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Container(
                                         width: 35.w,
                                         height: 35.h,
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(5.r),
+                                          borderRadius: BorderRadius.circular(
+                                            5.r,
+                                          ),
                                           color: const Color(0xFFF7F7F7),
                                         ),
                                         child: Center(
-                                          child: SvgPicture.asset("assets/SvgImage/bikess.svg"),
+                                          child: SvgPicture.asset(
+                                            "assets/SvgImage/bikess.svg",
+                                          ),
                                         ),
                                       ),
                                       SizedBox(width: 10.w),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
-                                                Icon(Icons.location_on, size: 16.sp, color: const Color(0xFF27794D)),
+                                                Icon(
+                                                  Icons.location_on,
+                                                  size: 16.sp,
+                                                  color: const Color(
+                                                    0xFF27794D,
+                                                  ),
+                                                ),
                                                 SizedBox(width: 5.w),
                                                 Text(
                                                   "Drop off",
-                                                  style: GoogleFonts.inter(fontSize: 12.sp, color: const Color(0xFF545454)),
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12.sp,
+                                                    color: const Color(
+                                                      0xFF545454,
+                                                    ),
+                                                  ),
                                                 ),
                                               ],
                                             ),
 
                                             // Multiple Drop Locations (1-3)
-                                            if (delivery.dropoff != null && delivery.dropoff!.isNotEmpty)
-                                              ...delivery.dropoff!.asMap().entries.map((entry) {
+                                            if (delivery.dropoff != null &&
+                                                delivery.dropoff!.isNotEmpty)
+                                              ...delivery.dropoff!.asMap().entries.map((
+                                                entry,
+                                              ) {
                                                 int idx = entry.key;
                                                 final drop = entry.value;
-                                                bool isFinal = idx == delivery.dropoff!.length - 1;
+                                                bool isFinal =
+                                                    idx ==
+                                                    delivery.dropoff!.length -
+                                                        1;
 
                                                 return Padding(
-                                                  padding: EdgeInsets.only(left: 3.w, top: 6.h),
+                                                  padding: EdgeInsets.only(
+                                                    left: 3.w,
+                                                    top: 6.h,
+                                                  ),
                                                   child: Row(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Container(
                                                         width: 18.w,
                                                         height: 18.h,
-                                                        decoration: const BoxDecoration(
-                                                          color: Colors.red,
-                                                          shape: BoxShape.circle,
-                                                        ),
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                              color: Colors.red,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                            ),
                                                         child: Center(
                                                           child: Text(
                                                             "${idx + 1}",
-                                                            style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 10.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -692,16 +740,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                           text: TextSpan(
                                                             style: GoogleFonts.inter(
                                                               fontSize: 14.sp,
-                                                              color: const Color(0xFF0C341F),
+                                                              color:
+                                                                  const Color(
+                                                                    0xFF0C341F,
+                                                                  ),
                                                             ),
                                                             children: [
-                                                              TextSpan(text: drop.name ?? "Drop ${idx + 1}"),
+                                                              TextSpan(
+                                                                text:
+                                                                    drop.name ??
+                                                                    "Drop ${idx + 1}",
+                                                              ),
                                                               if (isFinal)
                                                                 TextSpan(
-                                                                  text: " (Final)",
+                                                                  text:
+                                                                      " (Final)",
                                                                   style: GoogleFonts.inter(
-                                                                    fontWeight: FontWeight.w600,
-                                                                    color: Colors.red[700],
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    color: Colors
+                                                                        .red[700],
                                                                   ),
                                                                 ),
                                                             ],
@@ -718,7 +777,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             // Date
                                             Text(
                                               DateFormat("dd MMMM yyyy, h:mma")
-                                                  .format(DateTime.fromMillisecondsSinceEpoch(delivery.createdAt!))
+                                                  .format(
+                                                    DateTime.fromMillisecondsSinceEpoch(
+                                                      delivery.createdAt!,
+                                                    ),
+                                                  )
                                                   .toLowerCase(),
                                               style: GoogleFonts.inter(
                                                 fontSize: 12.sp,
@@ -744,128 +807,120 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       log("History Error: $error");
                       return Center(child: Text("Error loading deliveries"));
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                   ),
                   SizedBox(height: 20.h),
 
-
-
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: 15.w,
-                        right: 15.w,
-                        bottom: 10.h,
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 15.w,
+                      right: 15.w,
+                      bottom: 10.h,
+                    ),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      itemCount: myList.length,
+                      padding: EdgeInsets.zero,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 20.w,
+                        mainAxisSpacing: 20.w,
+                        childAspectRatio: 0.75,
                       ),
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        itemCount: myList.length,
-                        padding: EdgeInsets.zero,
-                        physics: NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 20.w,
-                          mainAxisSpacing: 20.w,
-                          childAspectRatio: 0.75,
-                        ),
-                        itemBuilder: (context, index) {
-
-
-                          return InkWell(
-                            onTap: () {
-                              if (index == 4 || index == 5) {
-                                Fluttertoast.showToast(msg: "Comming Soon");
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => InstantDeliveryScreen(socket),
-                                  ),
-                                );
-                              }
-                            },
-                            child: Container(
-                              width: 160.w,
-                              height: 185.h,
-                              decoration: BoxDecoration(
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () {
+                            if (index == 4 || index == 5) {
+                              Fluttertoast.showToast(msg: "Comming Soon");
+                            } else {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) =>
+                                      InstantDeliveryScreen(socket),
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 160.w,
+                            height: 185.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Card(
+                              color: cardColors[index % cardColors.length],
+                              shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
-                              child: Card(
-                                color: cardColors[index % cardColors.length],
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-
-
-                                    SizedBox(height: 30.h),
-                                    Center(
-                                      child:
-                                          myList[index]['image']
-                                              .toString()
-                                              .endsWith(".svg")
-                                          ? SvgPicture.asset(
-                                              myList[index]['image'],
-                                              width: 80.w,
-                                              height: 80.h,
-                                            )
-                                          : Image.asset(
-                                              myList[index]['image'],
-                                              width: 80.w,
-                                              height: 80.h,
-                                            ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 30.h),
+                                  Center(
+                                    child:
+                                        myList[index]['image']
+                                            .toString()
+                                            .endsWith(".svg")
+                                        ? SvgPicture.asset(
+                                            myList[index]['image'],
+                                            width: 80.w,
+                                            height: 80.h,
+                                          )
+                                        : Image.asset(
+                                            myList[index]['image'],
+                                            width: 80.w,
+                                            height: 80.h,
+                                          ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 9.w,
+                                      top: 4.h,
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        left: 9.w,
-                                        top: 4.h,
-                                      ),
-                                      child: Text(
-                                        // "Trucks",
-                                        myList[index]['name'].toString(),
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF000000),
-                                          letterSpacing: -1,
-                                        ),
+                                    child: Text(
+                                      // "Trucks",
+                                      myList[index]['name'].toString(),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF000000),
+                                        letterSpacing: -1,
                                       ),
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 9.w),
-                                      child: Text(
-                                        //  "Choose from Our Fleet",
-                                        myList[index]['title'].toString(),
-                                        style: GoogleFonts.inter(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xFF000000),
-                                          letterSpacing: -1,
-                                        ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 9.w),
+                                    child: Text(
+                                      //  "Choose from Our Fleet",
+                                      myList[index]['title'].toString(),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF000000),
+                                        letterSpacing: -1,
                                       ),
                                     ),
-
-
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
+                  ),
 
-                  SizedBox(height: 20.h,),
-
+                  SizedBox(height: 20.h),
 
                   SizedBox(height: 40.h),
 
-                  SizedBox(height: 40.h,),
+                  SizedBox(height: 40.h),
                 ],
               ),
-      )
-
+            )
           : selectIndex == 1
           ? OrderListScreen()
           : selectIndex == 2
@@ -895,9 +950,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-
     );
-
   }
 
   Widget cardbuild(String image, String name) {
@@ -936,17 +989,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
-
 }
-
-
 
 class Shipment extends StatefulWidget {
   const Shipment({super.key});
   @override
   State<Shipment> createState() => _ShipmentState();
 }
+
 class _ShipmentState extends State<Shipment> {
   @override
   Widget build(BuildContext context) {

@@ -39,8 +39,7 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen> {
               data: (order) {
                 final completedDeliveries = order.data!.deliveries!
                     .where(
-                      (delivery) =>
-                          delivery.status.toString() == "Status.COMPLETED",
+                      (delivery) => delivery.status.toString() == "completed",
                     )
                     .toList();
 
@@ -109,7 +108,7 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen> {
                                       children: [
                                         Text(
                                           // "TATA Car",
-                                          item.name!.name??"",
+                                          item.name ?? "",
                                           style: GoogleFonts.inter(
                                             fontSize: 14.sp,
                                             fontWeight: FontWeight.w600,
@@ -272,18 +271,27 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen> {
                                           //   maxLines: 2,
                                           //   overflow: TextOverflow.ellipsis,
                                           // ),
-                                          ...order.data!.deliveries![index].dropoff!
-                                              .map((d) => Padding(
-                                            padding: EdgeInsets.only(left: 3.w, bottom: 4.h),
-                                            child: Text(
-                                              d.name ?? "",
-                                              style: GoogleFonts.inter(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xFF0C341F),
-                                              ),
-                                            ),
-                                          ))
+                                          ...order
+                                              .data!
+                                              .deliveries![index]
+                                              .dropoff!
+                                              .map(
+                                                (d) => Padding(
+                                                  padding: EdgeInsets.only(
+                                                    left: 3.w,
+                                                    bottom: 4.h,
+                                                  ),
+                                                  child: Text(
+                                                    d.name ?? "",
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 14.sp,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: Color(0xFF0C341F),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
                                               .toList(),
                                         ],
                                       ),

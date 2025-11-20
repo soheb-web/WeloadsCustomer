@@ -373,6 +373,8 @@ class UpdateUserProfilePage extends ConsumerStatefulWidget {
 class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
+  final emailConroller = TextEditingController();
+  final phoneController = TextEditingController();
   bool isLoading = false;
   File? _image;
   final picker = ImagePicker();
@@ -448,6 +450,15 @@ class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
               profileData.data?.doc?.lastName != null) {
             lastNameController.text = profileData.data!.doc!.lastName!;
           }
+          if (emailConroller.text.isEmpty &&
+              profileData.data?.doc?.email != null) {
+            emailConroller.text = profileData.data!.doc!.email!;
+          }
+
+          if (phoneController.text.isEmpty &&
+              profileData.data?.doc?.phone != null) {
+            phoneController.text = profileData.data!.doc!.phone!;
+          }
 
           final existingImage = profileData.data?.doc?.image ?? '';
 
@@ -457,7 +468,7 @@ class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 50.h),
+                  SizedBox(height: 40.h),
                   InkWell(
                     onTap: () {
                       Navigator.pop(context);
@@ -499,7 +510,7 @@ class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
                       letterSpacing: -1,
                     ),
                   ),
-                  SizedBox(height: 35.h),
+                  SizedBox(height: 25.h),
                   TextFormField(
                     controller: firstNameController,
                     style: GoogleFonts.inter(
@@ -535,6 +546,7 @@ class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
                         fontWeight: FontWeight.w400,
                         color: const Color(0xFF787B7B),
                       ),
+                      suffixIcon: Icon(Icons.edit, color: Color(0xFF006970)),
                     ),
                   ),
                   SizedBox(height: 20.h),
@@ -573,8 +585,97 @@ class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
                         fontWeight: FontWeight.w400,
                         color: const Color(0xFF787B7B),
                       ),
+                      suffixIcon: Icon(Icons.edit, color: Color(0xFF006970)),
                     ),
                   ),
+                  SizedBox(height: 20.h),
+                  TextFormField(
+                    onTap: () {
+                      Fluttertoast.showToast(
+                        msg: "You cannot change your registered email",
+                      );
+                    },
+                    readOnly: true,
+                    controller: emailConroller,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF293540),
+                    ),
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      labelStyle: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF006970),
+                      ),
+                      filled: true,
+                      fillColor: Color(0xFFF0F5F5),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.r),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF006970).withOpacity(0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.r),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF006970).withOpacity(0.3),
+                        ),
+                      ),
+                      hintText: "Enter Email",
+                      hintStyle: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF787B7B),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  TextFormField(
+                    onTap: () {
+                      Fluttertoast.showToast(
+                        msg: "You cannot change your registered Phone Number",
+                      );
+                    },
+                    controller: phoneController,
+                    readOnly: true,
+                    keyboardType: TextInputType.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF293540),
+                    ),
+                    decoration: InputDecoration(
+                      labelText: "Phone",
+                      labelStyle: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF006970),
+                      ),
+                      filled: true,
+                      fillColor: Color(0xFFF0F5F5),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.r),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF006970).withOpacity(0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.r),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF006970).withOpacity(0.3),
+                        ),
+                      ),
+                      hintText: "Enter Phone",
+                      hintStyle: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF787B7B),
+                      ),
+                    ),
+                  ),
+
                   SizedBox(height: 20.h),
 
                   // InkWell(

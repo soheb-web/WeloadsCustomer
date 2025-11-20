@@ -83,7 +83,7 @@ class _SupportPageState extends ConsumerState<SupportPage> {
                   borderSide: BorderSide(color: Color(0xFF006970), width: 1.w),
                 ),
                 hint: Text(
-                  "Please Enter Subject",
+                  "Enter Subject",
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -116,7 +116,7 @@ class _SupportPageState extends ConsumerState<SupportPage> {
                   borderSide: BorderSide(color: Color(0xFF006970), width: 1.w),
                 ),
                 hint: Text(
-                  "Please Enter Description",
+                  "Enter Description",
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
