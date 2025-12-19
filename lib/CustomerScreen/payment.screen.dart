@@ -230,14 +230,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Porter credits",
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
+                    // Text(
+                    //   "Porter credits",
+                    //   style: GoogleFonts.inter(
+                    //     fontSize: 14.sp,
+                    //     fontWeight: FontWeight.w600,
+                    //     color: Colors.black,
+                    //   ),
+                    // ),
                     Text(
                       "Balance: ₹0",
                       style: GoogleFonts.inter(

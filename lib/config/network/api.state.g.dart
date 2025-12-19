@@ -12,7 +12,7 @@ part of 'api.state.dart';
 
 class _APIStateNetwork implements APIStateNetwork {
   _APIStateNetwork(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://weloads.com/api';
+    baseUrl ??= 'https://backend.weloads.live/api';
   }
 
   final Dio _dio;

@@ -10,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../otpPage/otp.screen.dart';
+import '../OtpScreen.dart';
+
 mixin LoginController<T extends LoginScreen> on State<T> {
   final loginformKey = GlobalKey<FormState>();
   bool isShow = true;
@@ -56,6 +59,8 @@ mixin LoginController<T extends LoginScreen> on State<T> {
     return token ?? "unknown_device";
   }
   void loginUser() async {
+
+   // Navigator.push(context, MaterialPageRoute(builder: (context)=>OtpScreenNew()));
     final diviceID = await fcmGetToken();
     if (!loginformKey.currentState!.validate()) {
       setState(() {
@@ -69,7 +74,7 @@ mixin LoginController<T extends LoginScreen> on State<T> {
     });
     final body = LoginBodyModel(
       loginType: emailController.text,
-      password: passwordController.text,
+      // password: passwordController.text,
       deviceId:diviceID,
     );
     try {
@@ -84,7 +89,8 @@ mixin LoginController<T extends LoginScreen> on State<T> {
             builder: (context) => LoginVerifyScreen(
               token: response.data!.token,
               email: emailController.text,
-              pass: passwordController.text,
+
+              // passwordController.text,
             ),
           ),
           (route) => false,

@@ -122,7 +122,7 @@ class _OnbordingScreenState extends State<OnbordingScreen>
       body: Padding(
         padding: EdgeInsets.only(left: 15.w),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // SvgPicture.asset("assets/SvgImage/service.svg"),
@@ -137,31 +137,31 @@ class _OnbordingScreenState extends State<OnbordingScreen>
               // fit: BoxFit.contain,
             ),
             SizedBox(height: 30.h),
-            Padding(
-              padding: EdgeInsets.only(right: 60.w),
-              child: Text(
-                "Request for Delivery in few clicks",
-                style: GoogleFonts.abhayaLibre(
-                  fontSize: 30.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF086E86),
-                  height: 1,
-                ),
-              ),
-            ),
+           Text(
+             "Request for Delivery in few clicks",
+             style: GoogleFonts.abhayaLibre(
+               fontSize: 30.sp,
+               fontWeight: FontWeight.bold,
+               color: Color(0xFF086E86),
+               height: 1,
+             ),
+           ),
+
             SizedBox(height: 16.h),
-            Padding(
-              padding: EdgeInsets.only(right: 60.w),
-              child: Text(
-                "On-demand delivery whenever and wherever the need arises.",
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF086E86),
-                  //letterSpacing: -0.55,
+           Container(
+             margin: EdgeInsets.only(left: 10.w,),
+             child: Text(
+
+                  "On-demand delivery whenever and wherever the need arises.",
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF086E86),
+                    //letterSpacing: -0.55,
+                  ),
                 ),
-              ),
-            ),
+           ),
+
             SizedBox(height: 30.h),
             ElevatedButton(
               style: ElevatedButton.styleFrom(

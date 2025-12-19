@@ -42,6 +42,10 @@ class Data {
   List<Pickup>? dropoff;
   String? status;
   String? paymentMethod;
+  int? freeWaitingTime;
+  int? totalWaitingTime;
+  int? extraWaitingMinutes;
+  int? extraWaitingCharge;
   String? otp;
   String? txId;
   int? createdAt;
@@ -57,6 +61,10 @@ class Data {
     this.dropoff,
     this.status,
     this.paymentMethod,
+    this.freeWaitingTime,
+    this.totalWaitingTime,
+    this.extraWaitingMinutes,
+    this.extraWaitingCharge,
     this.otp,
     this.txId,
     this.createdAt,
@@ -83,6 +91,10 @@ class Data {
         : List<Pickup>.from(json["dropoff"]!.map((x) => Pickup.fromJson(x))),
     status: json["status"]?.toString(),
     paymentMethod: json["paymentMethod"]?.toString(),
+    freeWaitingTime: json["freeWaitingTime"],
+    totalWaitingTime: json["totalWaitingTime"],
+    extraWaitingMinutes: json["extraWaitingMinutes"],
+    extraWaitingCharge: json["extraWaitingCharge"],
     otp: json["otp"]?.toString(),
     txId: json["txId"]?.toString(),
     createdAt: json["createdAt"] is int
@@ -101,6 +113,10 @@ class Data {
     "dropoff": dropoff == null ? [] : List<dynamic>.from(dropoff!.map((x) => x.toJson())),
     "status": status,
     "paymentMethod": paymentMethod,
+    "freeWaitingTime": freeWaitingTime,
+    "totalWaitingTime": totalWaitingTime,
+    "extraWaitingMinutes": extraWaitingMinutes,
+    "extraWaitingCharge": extraWaitingCharge,
     "otp": otp,
     "txId": txId,
     "createdAt": createdAt,

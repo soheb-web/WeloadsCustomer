@@ -70,9 +70,9 @@ class Delivery {
   double? distance;
   String? mobNo;
   String? picUpType;
-  Name? name;
+  String? name;
   List<Pickup>? dropoff;
-  Status? status;
+  String? status;
   String? cancellationReason;
   PaymentMethod? paymentMethod;
   String? image;
@@ -120,50 +120,15 @@ class Delivery {
     this.updatedAt,
   });
 
-  // factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
-  //   pickup: json["pickup"] == null ? null : Pickup.fromJson(json["pickup"]),
-  //   packageDetails: json["packageDetails"] == null ? null : PackageDetails.fromJson(json["packageDetails"]),
-  //   id: json["_id"],
-  //   customer: customerValues.map[json["customer"]]!,
-  //   deliveryBoy: deliveryBoyValues.map[json["deliveryBoy"]]!,
-  //   pendingDriver: json["pendingDriver"],
-  //   vehicleTypeId: vehicleTypeIdValues.map[json["vehicleTypeId"]]!,
-  //   rejectedDeliveryBoy: json["rejectedDeliveryBoy"] == null ? [] : List<DeliveryBoy>.from(json["rejectedDeliveryBoy"]!.map((x) => deliveryBoyValues.map[x]!)),
-  //   isCopanCode: json["isCopanCode"],
-  //   copanAmount: json["copanAmount"],
-  //   coinAmount: json["coinAmount"],
-  //   taxAmount: json["taxAmount"],
-  //   userPayAmount: json["userPayAmount"],
-  //   distance: json["distance"]?.toDouble(),
-  //   mobNo: json["mobNo"],
-  //   picUpType: json["picUpType"],
-  //   name: nameValues.map[json["name"]]!,
-  //   dropoff: json["dropoff"] == null ? [] : List<Pickup>.from(json["dropoff"]!.map((x) => Pickup.fromJson(x))),
-  //   status: statusValues.map[json["status"]]!,
-  //   cancellationReason: json["cancellationReason"],
-  //   paymentMethod: paymentMethodValues.map[json["paymentMethod"]]!,
-  //   image: json["image"],
-  //   otp: json["otp"],
-  //   isDisable: json["isDisable"],
-  //   isDeleted: json["isDeleted"],
-  //   txId: json["txId"],
-  //   date: json["date"],
-  //   month: json["month"],
-  //   year: json["year"],
-  //   createdAt: json["createdAt"],
-  //   updatedAt: json["updatedAt"],
-  // );
 
   factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
     pickup: json["pickup"] == null ? null : Pickup.fromJson(json["pickup"]),
     packageDetails: json["packageDetails"] == null ? null : PackageDetails.fromJson(json["packageDetails"]),
     id: json["_id"],
-
     customer: customerValues.map[json["customer"]],
     deliveryBoy: deliveryBoyValues.map[json["deliveryBoy"]],
     pendingDriver: json["pendingDriver"],
     vehicleTypeId: vehicleTypeIdValues.map[json["vehicleTypeId"]],
-
     rejectedDeliveryBoy: json["rejectedDeliveryBoy"] == null
         ? []
         : json["rejectedDeliveryBoy"]
@@ -171,7 +136,6 @@ class Delivery {
         .where((e) => e != null)
         .cast<DeliveryBoy>()
         .toList(),
-
     isCopanCode: json["isCopanCode"],
     copanAmount: json["copanAmount"],
     coinAmount: json["coinAmount"],
@@ -180,10 +144,9 @@ class Delivery {
     distance: json["distance"]?.toDouble(),
     mobNo: json["mobNo"],
     picUpType: json["picUpType"],
-
-    name: nameValues.map[json["name"]],
+    name: json["name"],
     dropoff: json["dropoff"] == null ? [] : List<Pickup>.from(json["dropoff"]!.map((x) => Pickup.fromJson(x))),
-    status: statusValues.map[json["status"]],
+    status: json["status"],
     cancellationReason: json["cancellationReason"],
     paymentMethod: paymentMethodValues.map[json["paymentMethod"]],
     image: json["image"],
@@ -215,9 +178,9 @@ class Delivery {
     "distance": distance,
     "mobNo": mobNo,
     "picUpType": picUpType,
-    "name": nameValues.reverse[name],
+    "name": name,
     "dropoff": dropoff == null ? [] : List<dynamic>.from(dropoff!.map((x) => x.toJson())),
-    "status": statusValues.reverse[status],
+    "status": status,
     "cancellationReason": cancellationReason,
     "paymentMethod": paymentMethodValues.reverse[paymentMethod],
     "image": image,

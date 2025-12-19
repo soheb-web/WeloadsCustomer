@@ -1,3 +1,4 @@
+/*
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginVerifyController.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class LoginVerifyScreen extends StatefulWidget {
   final String token;
@@ -83,7 +85,7 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                   SizedBox(height: 26.h),
                   OtpPinField(
                     key: loginVerifyotpKey,
-                    maxLength: 6,
+                    maxLength: 4,
                     fieldHeight: 50.h,
                     fieldWidth: 44.w,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -108,7 +110,10 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                       });
                     },
                   ),
-                  SizedBox(height: 20.h),
+
+
+
+                SizedBox(height: 20.h),
                   Text.rich(
                     TextSpan(
                       text: "Didn’t get any code yet? ",
@@ -127,7 +132,7 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              resendOTP(widget.email, widget.pass);
+                              resendOTP(widget.email, '');
                             },
                         ),
                       ],
@@ -217,6 +222,242 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+*/
+
+
+
+import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginVerifyController.dart';
+import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:otp_pin_field/otp_pin_field.dart';
+
+class LoginVerifyScreen extends StatefulWidget {
+  final String token;
+  final String email;
+  // final String pass;
+
+  const LoginVerifyScreen({
+    super.key,
+    required this.token,
+    required this.email,
+    // required this.pass,
+  });
+
+  @override
+  State<LoginVerifyScreen> createState() => _LoginVerifyScreenState();
+}
+
+class _LoginVerifyScreenState extends State<LoginVerifyScreen>
+    with LoginVerifyController<LoginVerifyScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 60.h),
+
+              /// LOGO
+              Image.asset(
+                "assets/scooter.png",
+                width: 84.w,
+                height: 72.h,
+              ),
+
+              SizedBox(height: 40.h),
+
+              /// TITLE
+              Text(
+                "Verify Your Number",
+                style: GoogleFonts.inter(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF006970),
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              /// SUBTITLE
+              Text(
+                "Please enter a 4-digit code sent\nto your phone",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+
+              SizedBox(height: 32.h),
+
+              /// OTP FIELD (IMAGE STYLE)
+              OtpPinField(
+                key: loginVerifyotpKey,
+                maxLength: 4,
+                fieldHeight: 45.h,
+                fieldWidth: 45.w,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                keyboardType: TextInputType.number,
+
+                otpPinFieldStyle: OtpPinFieldStyle(
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF006970),
+                  ),
+                  activeFieldBackgroundColor: Colors.white,
+                  defaultFieldBackgroundColor: Colors.white,
+                  activeFieldBorderColor: Color(0xFF006970),
+                  defaultFieldBorderColor: Color(0xFF006970),
+                ),
+
+                otpPinFieldDecoration:
+                OtpPinFieldDecoration.custom,
+
+                onChange: (value) {
+                  otp = value;
+                },
+
+                onSubmit: (value) {
+                  otp = value;
+                },
+              ),
+
+              SizedBox(height: 16.h),
+
+              /// TIMER + RESEND
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    "0:59 ",
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF006970),
+                    ),
+                  ),
+                  Text(
+                    "Resend OTP",
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 40.h),
+
+              /// VERIFY BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF006970),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                  ),
+                  onPressed: loading
+                      ? null
+                      : () {
+                    verifyLogin(widget.token);
+                  },
+                  child: loading
+                      ? SizedBox(
+                    width: 26.w,
+                    height: 26.h,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : Text(
+                    "VERIFY",
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+
+              // SizedBox(height: 28.h),
+
+              Expanded(child: SizedBox()),
+              /// BOTTOM TEXT
+              // Text.rich(
+              //   TextSpan(
+              //     text: "Didn't receive the code? ",
+              //     style: GoogleFonts.inter(
+              //       fontSize: 13.sp,
+              //       fontWeight: FontWeight.w400,
+              //       color: Colors.grey.shade600,
+              //     ),
+              //     children: [
+              //       TextSpan(
+              //         text: "Try again",
+              //         style: GoogleFonts.inter(
+              //           fontSize: 13.sp,
+              //           fontWeight: FontWeight.w600,
+              //           color: Color(0xFF006970),
+              //         ),
+              //         recognizer: TapGestureRecognizer()
+              //           ..onTap = () {
+              //             resendOTP(widget.email, '');
+              //           },
+              //       ),
+              //     ],
+              //   ),
+              // ),
+
+
+
+
+              Text(
+                "Don’t have an account?",
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF4F4F4F),
+                ),
+              ),
+              GestureDetector(
+                onTap: (){
+                  resendOTP(widget.email, );
+                },
+                child: Text(
+                  "Try again",
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF006970),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20.h),
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +12,17 @@ import '../../data/Model/SubmitRatingModel.dart';
 
 class GiveRatingScreen extends StatefulWidget {
   final String driverId;
-  const GiveRatingScreen({super.key, required this.driverId});
+  final String driverName;
+  final String driverLastName;
+  final String driverImage;
+  const GiveRatingScreen({
+    super.key,
+    required this.driverId,
+    required this.driverName,
+    required this.driverLastName,
+    required this.driverImage
+
+  });
 
   @override
   State<GiveRatingScreen> createState() => _GiveRatingScreenState();
@@ -36,52 +47,7 @@ class _GiveRatingScreenState extends State<GiveRatingScreen> {
     commentController.dispose();
     super.dispose();
   }
-/*
 
-  void submitRating() async {
-    if (selectedRating == 0) {
-      Fluttertoast.showToast(msg: "Please select a rating");
-      return;
-    }
-
-    setState(() => isLoading = true);
-
-    // ← YEH WAHI DATA HAI JO TUMNE DIYA
-    final request = SubmitRatingRequest(
-      driverId: widget.driverId, // "68f87c3b40938d4d2f2eb341"
-      rating: selectedRating,    // 4
-      comment: commentController.text.trim().isEmpty
-          ? "No comment"         // ← Agar khali hai to "No comment" bhejo
-          : commentController.text.trim(),
-    );
-
-    print("Sending: ${request.toJson()}"); // Debug ke liye
-
-    try {
-      final service = APIStateNetwork(callPrettyDio());
-      final response = await service.reviewRating(request);
-
-      Fluttertoast.showToast(
-        msg: response.message,
-        backgroundColor: response.error ? Colors.red : Colors.green,
-        textColor: Colors.white,
-      );
-
-      if (!response.error) {
-        await Future.delayed(Duration(milliseconds: 500));
-        if (mounted) {
-          // Navigator.of(context).popUntil((route) => route.isFirst
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen(forceSocketRefresh: true,)));
-        }
-          // );
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Failed! Check internet.", backgroundColor: Colors.red);
-    } finally {
-      if (mounted) setState(() => isLoading = false);
-    }
-  }
-*/
 
 
 
@@ -148,10 +114,7 @@ class _GiveRatingScreenState extends State<GiveRatingScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.grey.shade700),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           "Rate Your Ride",
           style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16.sp),
@@ -170,15 +133,29 @@ class _GiveRatingScreenState extends State<GiveRatingScreen> {
                 padding: EdgeInsets.all(20.w),
                 child: Column(
                   children: [
+                    // CircleAvatar(
+                    //   radius: 40.r,
+                    //   backgroundColor: Colors.orange.shade100,
+                    //   child: Icon(Icons.person, size: 50, color: Color(0xFF006970)),
+                    // ),
                     CircleAvatar(
-                      radius: 40.r,
-                      backgroundColor: Colors.orange.shade100,
-                      child: Icon(Icons.person, size: 50, color: Color(0xFF006970)),
+                      radius: 30.r,
+                      backgroundColor: Colors.grey.shade200,
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: widget.driverImage,
+                          fit: BoxFit.cover,
+                          width: 60.r,
+                          height: 60.r,
+                          placeholder: (context, url) => CircularProgressIndicator(strokeWidth: 2),
+                          errorWidget: (context, url, error) => Icon(Icons.person, size: 30.r, color: Colors.grey),
+                        ),
+                      ),
                     ),
                     SizedBox(height: 12.h),
                     Text("How was your ride?", style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600)),
                     SizedBox(height: 8.h),
-                    Text("Driver ID: ${widget.driverId}", style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
+                    Text("Driver Name: ${widget.driverName} ${widget.driverLastName}", style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
                   ],
                 ),
               ),

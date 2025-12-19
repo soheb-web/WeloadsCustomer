@@ -31,7 +31,9 @@ class InstantDeliveryScreen extends ConsumerStatefulWidget {
   ConsumerState<InstantDeliveryScreen> createState() => _InstantDeliveryScreenState();
 }
 
+
 class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
+
   TextEditingController pickupController = TextEditingController();
   List<TextEditingController> dropControllers = [TextEditingController()];
   TextEditingController nameContr = TextEditingController();
@@ -150,11 +152,11 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     final notifier = ref.watch(getDistanceProvider);
     var box = Hive.box("folder");
-
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
       floatingActionButton: FloatingActionButton(
@@ -167,9 +169,12 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
           child: const Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
         ),
       ),
-      body: _currentLatLng == null
+      body:
+
+      _currentLatLng == null
           ? const Center(child: CircularProgressIndicator())
           : Stack(
+
         children: [
 
 
@@ -181,11 +186,10 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
             myLocationButtonEnabled: true,
           ),
 
-
           DraggableScrollableSheet(
             initialChildSize: 0.45,
             minChildSize: 0.25,
-            maxChildSize: 0.45,
+            maxChildSize: 0.65,
             builder: (context, scrollController) {
               return Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -224,13 +228,19 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                         letterSpacing: -1,
                       ),
                     ),
+
+
                     RideCardMyCode(
                       pickupController: pickupController,
                       dropControllers: dropControllers,
                       onAddDrop: _addDropLocation,
                       onRemoveDrop: _removeDropLocation,
                     ),
+
+
                     SizedBox(height: 15.h),
+
+
                     Container(
                       margin: EdgeInsets.only(left: 15.w, right: 15.w),
                       child: ElevatedButton(
@@ -505,12 +515,16 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10.h),
+
+
+                    SizedBox(height: 40.h),
                   ],
                 ),
               );
             },
           ),
+
+
         ],
       ),
     );
@@ -529,17 +543,13 @@ Future<double> getTotalDistance({
 
   final String origin = '$pickupLat,$pickupLon';
   final String destination = '${dropLats.last},${dropLons.last}';
-
-  // Waypoints: केवल intermediate drops (last drop को छोड़कर)
   final List<String> waypoints = [];
   for (int i = 0; i < dropLats.length - 1; i++) {
     waypoints.add('${dropLats[i]},${dropLons[i]}');
   }
-
   final String waypointsParam = waypoints.isNotEmpty
       ? '&waypoints=${waypoints.join('|')}'
       : '';
-
   final url = Uri.parse(
     'https://maps.googleapis.com/maps/api/directions/json?'
         'origin=$origin'
@@ -569,49 +579,6 @@ Future<double> getTotalDistance({
   return totalMeters / 1000; // km
 }
 
-
-
-/*
-Future<double> getTotalDistance({
-  required double pickupLat,
-  required double pickupLon,
-  required List<double> dropLats,
-  required List<double> dropLons,
-  required String apiKey,
-}) async {
-  // Last drop as destination
-  double lastDropLat = dropLats.last;
-  double lastDropLon = dropLons.last;
-
-  // Waypoints: All drops except last (pipe-separated)
-  String waypoints = '';
-  for (int i = 0; i < dropLats.length - 1; i++) {
-    waypoints += '${dropLats[i]},${dropLons[i]}|';
-  }
-  waypoints = waypoints.substring(0, waypoints.length - 1); // Remove last '|'
-
-  final url = Uri.parse(
-    'https://maps.googleapis.com/maps/api/directions/json?'
-        'origin=$pickupLat,$pickupLon&'
-        'destination=$lastDropLat,$lastDropLon&'
-        'waypoints=$waypoints&'
-        'key=$apiKey&'
-        'mode=driving',
-  );
-
-  final response = await http.get(url);
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    if (data['status'] == 'OK') {
-      double totalMeters = 0;
-      for (var leg in data['routes'][0]['legs']) {
-        totalMeters += leg['distance']['value'].toDouble();
-      }
-      return totalMeters / 1000; // km में
-    }
-  }
-  throw Exception('Failed to calculate distance');
-}*/
 
 class RideCardMyCode extends StatefulWidget {
   final TextEditingController pickupController;
@@ -689,11 +656,75 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
         SizedBox(height: 15.h),
 
         // Drop Locations
+        // ...widget.dropControllers.asMap().entries.map((entry) {
+        //   int index = entry.key;
+        //   var controller = entry.value;
+        //
+        //   return Container(
+        //     margin: EdgeInsets.only(bottom: 10.h),
+        //     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        //     decoration: BoxDecoration(
+        //       color: Colors.white,
+        //       borderRadius: BorderRadius.circular(12.r),
+        //       border: Border.all(color: Colors.grey.shade300),
+        //     ),
+        //     child: Row(
+        //       children: [
+        //         Icon(Icons.location_on, size: 14.sp, color: Colors.red),
+        //         SizedBox(width: 10.w),
+        //         Expanded(
+        //           child: TextField(
+        //             controller: controller,
+        //             readOnly: true,
+        //             onTap: () {
+        //               Navigator.push(
+        //                 context,
+        //                 MaterialPageRoute(builder: (_) => DropPage(dropController: controller)),
+        //               ).then((_) => setState(() {}));
+        //             },
+        //             style: GoogleFonts.poppins(fontSize: 14.sp, fontWeight: FontWeight.w500),
+        //             decoration: InputDecoration(
+        //               isDense: true,
+        //               hintText: "Drop ${index + 1} location",
+        //               hintStyle: GoogleFonts.poppins(fontSize: 13.sp, color: Colors.grey),
+        //               contentPadding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
+        //               border: InputBorder.none,
+        //             ),
+        //           ),
+        //         ),
+        //
+        //         if (widget.dropControllers.length > 1)
+        //           IconButton(
+        //             onPressed: () => widget.onRemoveDrop(index),
+        //             icon: Icon(Icons.close, size: 18.sp, color: Colors.red),
+        //           ),
+        //
+        //         if (widget.dropControllers.length < 3)
+        //           Center(
+        //             child: TextButton.icon(
+        //               onPressed: widget.onAddDrop,
+        //               icon: Icon(Icons.add, size: 16.sp, color: const Color(0xFF006970)),
+        //               label: Text(
+        //                 "",
+        //                 style: GoogleFonts.poppins(fontSize: 13.sp, color: const Color(0xFF006970)),
+        //               ),
+        //             ),
+        //           ),
+        //       ],
+        //     ),
+        //   );
+        // }).toList(),
+
+
+
         ...widget.dropControllers.asMap().entries.map((entry) {
           int index = entry.key;
           var controller = entry.value;
+          final isLast = index == widget.dropControllers.length - 1;
+          final showAddButton = widget.dropControllers.length < 3 && isLast;
 
           return Container(
+            key: ValueKey(index), // Important for proper rebuilding
             margin: EdgeInsets.only(bottom: 10.h),
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             decoration: BoxDecoration(
@@ -712,55 +743,104 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => DropPage(dropController: controller)),
+                        MaterialPageRoute(
+                          builder: (_) => DropPage(dropController: controller),
+                        ),
                       ).then((_) => setState(() {}));
                     },
-                    style: GoogleFonts.poppins(fontSize: 14.sp, fontWeight: FontWeight.w500),
+                    style: GoogleFonts.poppins(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       isDense: true,
                       hintText: "Drop ${index + 1} location",
-                      hintStyle: GoogleFonts.poppins(fontSize: 13.sp, color: Colors.grey),
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
+                      hintStyle: GoogleFonts.poppins(
+                        fontSize: 13.sp,
+                        color: Colors.grey,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 10.h,
+                        horizontal: 8.w,
+                      ),
                       border: InputBorder.none,
                     ),
                   ),
                 ),
+
+                // Remove button (except for the first one if you want minimum 1)
                 if (widget.dropControllers.length > 1)
-                  IconButton(
-                    onPressed: () => widget.onRemoveDrop(index),
-                    icon: Icon(Icons.close, size: 18.sp, color: Colors.red),
-                  ),
+
+
+                    InkWell(
+                      onTap: (){
+                        widget.onRemoveDrop(index);
+                      },
+                      child: Container(
+                          decoration: BoxDecoration(
+
+                            borderRadius: BorderRadius.circular(30),
+                            color: Colors.red
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Icon(Icons.close, size: 20.sp, color: Colors.white),
+                          )),
+                    )
+                  // )
+
+
+                else
+                  SizedBox(width: 8.w), // Space balance when no remove button
+
+
+                // Add button - only on the last field
+                if (showAddButton)
+
+          Padding(
+            padding:  EdgeInsets.only(left:10.w),
+            child: InkWell(
+
+            onTap:(){
+            widget.onAddDrop();
+            },
+            child: Icon(Icons.add_circle, size: 34.sp, color: const Color(0xFF006970))),
+          )
+
+
+
+                  // TextButton.icon(
+                  //   onPressed:
+                  //   icon:
+                  //   label: Text(
+                  //     "",
+                  //     style: GoogleFonts.poppins(
+                  //       fontSize: 13.sp,
+                  //       color: const Color(0xFF006970),
+                  //       fontWeight: FontWeight.w500,
+                  //     ),
+                  //   ),
+                  // )
+                else if (widget.dropControllers.length < 3)
+                  SizedBox(width: 10.w), // Optional: balance spacing
               ],
             ),
           );
         }).toList(),
-
         // Add More Drop
-        if (widget.dropControllers.length < 3)
-          Center(
-            child: TextButton.icon(
-              onPressed: widget.onAddDrop,
-              icon: Icon(Icons.add, size: 16.sp, color: const Color(0xFF006970)),
-              label: Text(
-                "Add another drop (Max 3)",
-                style: GoogleFonts.poppins(fontSize: 13.sp, color: const Color(0xFF006970)),
-              ),
-            ),
-          ),
+
 
         SizedBox(height: 20.h),
       ],
     );
   }
 }
-
 class PickupPage extends ConsumerStatefulWidget {
   final TextEditingController pickController;
   const PickupPage({super.key, required this.pickController});
   @override
   ConsumerState<PickupPage> createState() => _PickupPageState();
 }
-
 class _PickupPageState extends ConsumerState<PickupPage> {
   late final TextEditingController _pickupController;
   late final FocusNode _focusNode;
@@ -947,14 +1027,12 @@ class _PickupPageState extends ConsumerState<PickupPage> {
     );
   }
 }
-
 class DropPage extends ConsumerStatefulWidget {
   final TextEditingController dropController;
   const DropPage({super.key, required this.dropController});
   @override
   ConsumerState<DropPage> createState() => _DropPageState();
 }
-
 class _DropPageState extends ConsumerState<DropPage> {
   late final TextEditingController _dropController;
   late final FocusNode _focusNode;

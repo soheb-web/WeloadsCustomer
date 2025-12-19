@@ -1,12 +1,10 @@
-import 'package:delivery_mvp_app/CustomerScreen/forgotPage/forgotSendOTP.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginController.dart';
-import 'package:delivery_mvp_app/CustomerScreen/registerPage/register.screen.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../registerPage/register.screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,239 +21,209 @@ class _LoginScreenState extends State<LoginScreen>
       backgroundColor: Color(0xFFFFFFFF),
       body: Form(
         key: loginformKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 66.h),
-              Center(
-                child: Image.asset(
-                  "assets/scooter.png",
-                  width: 84.w,
-                  height: 72.h,
+        child: Padding(
+          padding:  EdgeInsets.only(left: 30.w,right: 30.w),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 66.h),
+                Center(
+                  child: Image.asset(
+                    "assets/scooter.png",
+                    width: 84.w,
+                    height: 72.h,
+                  ),
+                ),
+
+            Expanded(child: SizedBox()),
+
+                      Text(
+                        "Welcome Back!",
+                        style: GoogleFonts.inter(
+                          fontSize: 30.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF006970),
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                Text(
+                  "Login to Continue your\nDeliveries",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color:  Colors.grey
+                  ),
+                ),
+
+
+                Expanded(child: SizedBox()),
+                SizedBox(),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30.r),
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.grey.shade300,
+                      width: 1,
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: TextFormField(
+                  controller: emailController, // rename if possible -> phoneController
+                  keyboardType: TextInputType.phone,
+                  maxLength: 10,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // ✅ only numbers
+                  ],
+                  decoration: InputDecoration(
+                    counterText: "", // hide maxLength counter
+                    prefixIcon: Icon(
+                      Icons.call,
+                      color: Colors.grey.shade500,
+                      size: 20.sp,
+                    ),
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    hintText: "Enter your phone number",
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey.shade400,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 14.h,
+                      horizontal: 20.w,
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please enter phone number";
+                    }
+                    if (value.length != 10) {
+                      return "Enter valid 10 digit phone number";
+                    }
+                    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
+                      return "Invalid phone number";
+                    }
+                    return null;
+                  },
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(left: 24.w, right: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 28.h),
-                    Text(
-                      "Welcome",
-                      style: GoogleFonts.inter(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF111111),
-                      ),
+
+
+                      SizedBox(height: 30.h),
+
+
+
+
+
+              Container(
+                width: double.infinity,
+                height: 50.h,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08), // ✅ same as TextField
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 4),
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      "Please input your details",
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF4F4F4F),
-                      ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF006970),
+                    elevation: 0, // ❗ shadow Container handle karega
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.r),
                     ),
-                    SizedBox(height: 35.h),
-                    TextFormField(
-                      controller: emailController,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Color(0xFFF0F5F5),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide(
-                            color: Color(0xFF006970),
-                            width: 1.w,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide(color: Colors.red, width: 1.w),
-                        ),
-                        hintText: "email or phone number",
-                        hintStyle: GoogleFonts.inter(
+                  ),
+                  onPressed: loadind ? null : loginUser,
+                  child: loadind
+                      ? SizedBox(
+                    width: 30.w,
+                    height: 30.h,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : Text(
+                    "GET OTP",
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 7.h),
+
+
+
+
+
+
+
+            Expanded(child: SizedBox()),
+
+                      Text(
+                        "Don’t have an account?",
+                        style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF293540),
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF4F4F4F),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: (){
+
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>RegisterScreen()));
+                        },
+                        child: Text(
+                          "Sign up",
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF006970),
+                          ),
                         ),
                       ),
 
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Please enter email or phone number";
-                        }
-                        String input = value.trim();
-                        final emailRegex = RegExp(
-                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                        );
-                        final phoneRegex = RegExp(r'^[6-9]\d{9}$');
-                        if (emailRegex.hasMatch(input) ||
-                            phoneRegex.hasMatch(input)) {
-                          return null;
-                        } else {
-                          return "Enter a valid email or 10-digit phone number";
-                        }
-                      },
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    SizedBox(height: 30.h),
-                    TextFormField(
-                      controller: passwordController,
-                      obscureText: isShow ? true : false,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Color(0xFFF0F5F5),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide(
-                            color: Color(0xFF006970),
-                            width: 1.w,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide(color: Colors.red, width: 1.w),
-                        ),
-                        hintText: "Password",
-                        hintStyle: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF293540),
-                        ),
-                        suffixIcon: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              isShow = !isShow;
-                            });
-                          },
-                          child: Text(
-                            isShow ? "Show" : "Hide",
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF1D3557),
-                            ),
-                          ),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Password is required";
-                        }
-                        return null;
-                      },
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) => ForgotSendOTPPage(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          "Forgot Password?",
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF111111),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 30.h),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(327.w, 50.h),
-                        backgroundColor: Color(0xFF006970),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                          side: BorderSide.none,
-                        ),
-                      ),
-                      onPressed: loadind ? null : loginUser,
-                      child: loadind
-                          ? Center(
-                              child: SizedBox(
-                                width: 30.w,
-                                height: 30.h,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            )
-                          : Text(
-                              "Login",
-                              style: GoogleFonts.inter(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFFFFFFFF),
-                              ),
-                            ),
-                    ),
-                    SizedBox(height: 7.h),
-                    Center(
-                      child: Text.rich(
-                        TextSpan(
-                          text: "Need an account? ",
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFF4F4F4F),
-                          ),
-                          children: [
-                            TextSpan(
-                              text: "Sign up",
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF006970),
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                      builder: (_) => RegisterScreen(),
-                                    ),
-                                  );
-                                },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10.h),
-                  ],
-                ),
-              ),
-            ],
+
+
+                      SizedBox(height: 30.h),
+                    ],
+                  ),
           ),
         ),
-      ),
+            ),
+
+
     );
   }
 }

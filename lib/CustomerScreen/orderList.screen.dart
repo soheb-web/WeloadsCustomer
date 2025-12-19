@@ -40,7 +40,7 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen> {
                 final completedDeliveries = order.data!.deliveries!
                     .where(
                       (delivery) =>
-                          delivery.status.toString() == "Status.COMPLETED",
+                          delivery.status.toString() == "completed",
                     )
                     .toList();
 
@@ -109,7 +109,7 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen> {
                                       children: [
                                         Text(
                                           // "TATA Car",
-                                          item.name!.name??"",
+                                          item.name??"",
                                           style: GoogleFonts.inter(
                                             fontSize: 14.sp,
                                             fontWeight: FontWeight.w600,

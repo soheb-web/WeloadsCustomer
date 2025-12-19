@@ -25,16 +25,73 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
     }
   }
 
+  // void verifyLogin(String token) async {
+  //   final body = LoginverifyBodyModel(token: token, otp: otp);
+  //   setState(() {
+  //     loading = true;
+  //   });
+  //   try {
+  //     final service = APIStateNetwork(callPrettyDio());
+  //     final response = await service.verifyLogin(body);
+  //
+  //     if (response.error == false) {
+  //       var box = Hive.box("folder");
+  //       await box.put("token", response.data!.token);
+  //       await box.put("email", response.data!.email);
+  //       await box.put("firstName", response.data!.firstName);
+  //       await box.put("lastName", response.data!.lastName);
+  //       await box.put("phone", response.data!.phone);
+  //       await box.put("id", response.data!.id);
+  //
+  //       Fluttertoast.showToast(msg: response.message);
+  //       Navigator.pushAndRemoveUntil(
+  //         context,
+  //         CupertinoPageRoute(builder: (context) => HomeScreen()),
+  //         (route) => false,
+  //       );
+  //       setState(() {
+  //         loading = false;
+  //       });
+  //     } else {
+  //       Fluttertoast.showToast(msg: response.message);
+  //       setState(() {
+  //         loading = false;
+  //         otp = "";
+  //       });
+  //       loginVerifyotpKey.currentState!.clearOtp();
+  //     }
+  //   } catch (e, st) {
+  //     log("${e.toString()} / ${st.toString()}");
+  //     setState(() {
+  //       loading = false;
+  //     });
+  //     Fluttertoast.showToast(msg: "Error");
+  //   }
+  // }
+
+
   void verifyLogin(String token) async {
-    final body = LoginverifyBodyModel(token: token, otp: otp);
+    if (otp.length != 4) {
+      Fluttertoast.showToast(msg: "Please enter 4 digit OTP");
+      return;
+    }
+
+    final body = LoginverifyBodyModel(
+      token: token,
+      otp: otp, // ✅ backend expects 4 digit
+    );
+
     setState(() {
       loading = true;
     });
+
     try {
       final service = APIStateNetwork(callPrettyDio());
+
       final response = await service.verifyLogin(body);
 
       if (response.error == false) {
+
         var box = Hive.box("folder");
         await box.put("token", response.data!.token);
         await box.put("email", response.data!.email);
@@ -44,36 +101,32 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
         await box.put("id", response.data!.id);
 
         Fluttertoast.showToast(msg: response.message);
+
         Navigator.pushAndRemoveUntil(
           context,
-          CupertinoPageRoute(builder: (context) => HomeScreen()),
-          (route) => false,
+          CupertinoPageRoute(builder: (_) => HomeScreen()),
+              (route) => false,
         );
-        setState(() {
-          loading = false;
-        });
       } else {
         Fluttertoast.showToast(msg: response.message);
-        setState(() {
-          loading = false;
-          otp = "";
-        });
-        loginVerifyotpKey.currentState!.clearOtp();
+        otp = "";
+        loginVerifyotpKey.currentState!.clearOtp(); // ✅ clear 4 digit pin
       }
     } catch (e, st) {
       log("${e.toString()} / ${st.toString()}");
+      Fluttertoast.showToast(msg: "Error");
+    } finally {
       setState(() {
         loading = false;
       });
-      Fluttertoast.showToast(msg: "Error");
     }
   }
 
-  void resendOTP(email, pass) async {
+  void resendOTP(email, ) async {
     final deviceId = await _getDeviceToken();
     final body = LoginBodyModel(
       loginType: email,
-      password: pass,
+      // password: pass,
       deviceId: deviceId,
     );
     try {
@@ -88,4 +141,5 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
       log("${e.toString()} / ${st.toString()}");
     }
   }
+
 }

@@ -11,13 +11,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-import '../config/network/api.state.dart';
-import '../data/Model/getDeliveryHistoryResModel..dart';
 import 'DetailPage.dart';
 
 class DeliveryHistoryScreen extends ConsumerStatefulWidget {
   final IO.Socket? socket;
-  const DeliveryHistoryScreen(this.socket,{super.key});
+  const DeliveryHistoryScreen(this.socket, {super.key});
 
   @override
   ConsumerState<DeliveryHistoryScreen> createState() =>
@@ -26,7 +24,7 @@ class DeliveryHistoryScreen extends ConsumerStatefulWidget {
 
 class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
 
-  Color _getStatusColor(Status? status) {
+  Color _getStatusColor(String? status) {
     String statusStr = status?.toString().split('.').last ?? "not_assigned";
 
     switch (statusStr.toLowerCase()) {
@@ -47,13 +45,8 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
         return const Color(0xFFE0E0E0);
     }
   }
-
-
-  Color _getStatusTextColor(Status? status) {
+  Color _getStatusTextColor(String? status) {
     String statusStr = status?.toString().split('.').last ?? "not_assigned";
-
-
-
     switch (statusStr.toLowerCase()) {
       case "assigned":
         return const Color(0xFF0D47A1); // dark blue
@@ -69,14 +62,12 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
     final historyProvier = ref.watch(getDeliveryHistoryController);
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       body:
-
       RefreshIndicator(
         backgroundColor: Color(0xFF006970),
         color: Colors.white,
@@ -141,31 +132,37 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                     itemCount: history.data!.deliveries!.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                        onTap: (){
-
-
-                          history.data!.deliveries![index].status.toString()=="Status.ASSIGNED" ||    history.data!.deliveries![index].status.toString()=="Status.ONGOING"?
-
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>
-                              PickupScreenNotification(
-                                  socket: widget.socket,
-                                deliveryId: history.data!.deliveries![index].id??"",
-                              ))):
-
-//                           history.data!.deliveries![index].status=="assigned" ||    history.data!.deliveries![index].status=="ongoing"?
-//
-//                           Navigator.push(context, MaterialPageRoute(builder: (context)=>
-//                               PickupScreenNotification(
-// socket: widget.socket,
-//                                   deliveryId: history.data!.deliveries![index].id??"",
-//                               )))
-//
-//                               :
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>
-                              RequestDetailsPage(
-                                  deliveryId: history.data!.deliveries![index].id??""
-                              )));
-
+                        onTap: () {
+                          history.data!.deliveries![index].status.toString() ==
+                                      "assigned" ||
+                                  history.data!.deliveries![index].status
+                                          .toString() ==
+                                      "ongoing"
+                              ? Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PickupScreenNotification(
+                                          socket: widget.socket,
+                                          deliveryId:
+                                              history
+                                                  .data!
+                                                  .deliveries![index]
+                                                  .id ??
+                                              "",
+                                        ),
+                                  ),
+                                )
+                              : Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RequestDetailsPage(
+                                      deliveryId:
+                                          history.data!.deliveries![index].id ??
+                                          "",
+                                    ),
+                                  ),
+                                );
                         },
                         child: Padding(
                           padding: EdgeInsets.only(
@@ -179,16 +176,9 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    // "ORDB1234",
-                                    history.data!.deliveries![index].id??"",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF0C341F),
-                                    ),
-                                  ),
                                   Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         "Receipient: ${history.data!.deliveries![index].name ?? "Unknow"}",
@@ -198,67 +188,48 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                           color: Color(0xFF545454),
                                         ),
                                       ),
-                                      SizedBox(width: 20.w,),
-                                      // Spacer(),
-                                      // if (index == 0)
-                                      Expanded(
-                                        child: Container(
-                                          padding: EdgeInsets.only(
-                                            left: 6.w,
-                                            right: 6.w,
-                                            top: 2.h,
-                                            bottom: 2.h,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              3.r,
-                                            ),
-                                            // color: Color(0xFFFFF4C7),
-                                            color: _getStatusColor(
-                                              history.data!.deliveries![index].status,
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child:
-                                            // Text(
-                                            //     // ASSIGNED,
-                                            //     // CANCELLED_BY_DRIVER,
-                                            //     // CANCELLED_BY_USER,
-                                            //     // COMPLETED,
-                                            //     // NOT_ASSIGNED,
-                                            //     // NO_DRIVER_FOUND,
-                                            //     // ONGOING,
-                                            //     // PICKED
-                                            //   // "In progress",
-                                            //   history.data!.deliveries![index].status.toString()=="CANCELLED_BY_DRIVER"?"Cancel":"",
-                                            //   style: GoogleFonts.inter(
-                                            //     fontSize: 12.sp,
-                                            //     fontWeight: FontWeight.w500,
-                                            //     // color: Color(0xFF7E6604),
-                                            //     // color: _getStatusTextColor(
-                                            //     //   history
-                                            //     //       .data!
-                                            //     //       .deliveries![index]
-                                            //     //       .status,
-                                            //     // ),
-                                            //   ),
-                                            // ),
 
-                                            // child:
-                                              Text(
-                                          getReadableStatus(
-                                          history.data!.deliveries![index].status.toString(),
+                                      SizedBox(width: 20.w),
+
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                          left: 2.w,
+                                          right: 2.w,
+                                          top: 2.h,
+                                          bottom: 2.h,
                                         ),
-                                        style: GoogleFonts.inter(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w500,
-                                          color: _getStatusTextColor(
-                                            history.data!.deliveries![index].status,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            3.r,
+                                          ),
+                                          // color: Color(0xFFFFF4C7),
+                                          color: _getStatusColor(
+                                            history
+                                                .data!
+                                                .deliveries![index]
+                                                .status,
                                           ),
                                         ),
-                                      ),
-
-                        ),
+                                        child: Center(
+                                          child: Text(
+                                            getReadableStatus(
+                                              history
+                                                  .data!
+                                                  .deliveries![index]
+                                                  .status
+                                                  .toString(),
+                                            ),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: _getStatusTextColor(
+                                                history
+                                                    .data!
+                                                    .deliveries![index]
+                                                    .status,
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -285,7 +256,8 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                   SizedBox(width: 10.w),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -306,19 +278,26 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                           ],
                                         ),
 
-
-                                        ...history.data!.deliveries![index].dropoff!
-                                            .map((d) => Padding(
-                                          padding: EdgeInsets.only(left: 3.w, bottom: 4.h),
-                                          child: Text(
-                                            d.name ?? "",
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xFF0C341F),
-                                            ),
-                                          ),
-                                        ))
+                                        ...history
+                                            .data!
+                                            .deliveries![index]
+                                            .dropoff!
+                                            .map(
+                                              (d) => Padding(
+                                                padding: EdgeInsets.only(
+                                                  left: 3.w,
+                                                  bottom: 4.h,
+                                                ),
+                                                child: Text(
+                                                  d.name ?? "",
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xFF0C341F),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
                                             .toList(),
                                         SizedBox(height: 2.h),
                                         Text(
@@ -366,23 +345,24 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
     );
   }
 }
+
 String getReadableStatus(String status) {
   switch (status) {
-    case "CANCELLED_BY_DRIVER":
+    case "cancelled_by_driver":
       return "Cancelled By Driver";
-    case "CANCELLED_BY_USER":
+    case "cancelled_by_user":
       return "Cancelled By User";
-    case "ASSIGNED":
+    case "assigned":
       return "Assigned";
-    case "NOT_ASSIGNED":
+    case "not_assigned":
       return "Not Assigned";
-    case "NO_DRIVER_FOUND":
+    case "no_driver_found":
       return "No Driver Found";
-    case "ONGOING":
+    case "ongoing":
       return "Ongoing";
-    case "PICKED":
+    case "picked":
       return "Picked";
-    case "COMPLETED":
+    case "completed":
       return "Completed";
     default:
       return status;

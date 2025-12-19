@@ -1,10 +1,10 @@
 
 
+import 'dart:async';
 import 'dart:developer';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:delivery_mvp_app/data/Model/CancelOrderModel.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,6 +19,7 @@ import '../config/network/api.state.dart';
 import '../config/utils/pretty.dio.dart';
 import '../data/Model/GetDeliveryByIdResModel2.dart';
 import 'Chat/chating.page.dart';
+import 'CompleteScreen.dart';
 import 'Rating/ratingPage.dart';
 import 'home.screen.dart';
 
@@ -33,9 +34,12 @@ class PickupScreenNotification extends StatefulWidget {
   @override
   State<PickupScreenNotification> createState() => _PickupScreenNotificationState();
 }
+
+
 class _PickupScreenNotificationState extends State<PickupScreenNotification> {
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
+  LatLng? _driverLatLng;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = <Polyline>{};
   final TextEditingController _controller = TextEditingController();
@@ -47,15 +51,17 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
   String? error;
   late IO.Socket socket;
   String? driverToPickupETA = "Calculating...";
-
   late BitmapDescriptor _number1Icon;
   late BitmapDescriptor _number2Icon;
+  late BitmapDescriptor driverIcon;
+
 
   Future<void> _createNumberIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
     _number2Icon = await _createNumberIcon("2", Colors.orange);
 
   }
+
   Future<BitmapDescriptor> _createNumberIcon(String number, Color color) async {
     final size = 80.0;
     final recorder = ui.PictureRecorder();
@@ -77,24 +83,42 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
+  bool _isArrived = false;
+  int _waitingSeconds = 0;
+  String _waitingTimeText = "00:00";
+  Timer? _waitingTimer;
+// ये फंक्शन timer update करता रहेगा
+  void _updateWaitingTimeText() {
+    int mins = _waitingSeconds ~/ 60;
+    int secs = _waitingSeconds % 60;
+    _waitingTimeText = "${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}";
+  }
 
+  int _maxFreeWaitingSeconds = 300; // डिफ़ॉल्ट 5 मिनट (fallback)
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
     socket = widget.socket ??
-        IO.io('https://weloads.com', <String, dynamic>{
+        // IO.io('http://192.168.1.43:4567', <String, dynamic>{
+        IO.io('https://backend.weloads.live', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
     if (widget.socket == null) {
       socket.connect();
     }
-    _emitDriverArrivedAtPickup();
+
     _setupSocketListeners();
     _fetchDeliveryData();
+    _emitDriverArrivedAtPickup();
     _createNumberIcons();
+
+    loadSimpleDriverIcon().then((_) {
+      if (mounted) setState(() {});
+    });
+
   }
 
 
@@ -185,15 +209,34 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     }
   }
 
-  void _emitDriverArrivedAtPickup() {
+  void _emitDriverArrivedAtPickup() async{
+   await _fetchDeliveryData();
     final payload = {"deliveryId": widget.deliveryId};
-    final payloadLocation = { widget.deliveryId};
+    final payloadLocation = {"driverId": deliveryData!.data!.deliveryBoy!.id ?? ""};
     if (socket.connected) {
       socket.emit("delivery:status_update", payload);
-      socket.emit("driver:get_location", payloadLocation);
+      // socket.emit("driver:get_location", payloadLocation);
+
+      socket.emitWithAck(
+        "driver:get_location",
+        { "driverId": deliveryData!.data!.deliveryBoy!.id },
+        ack: (data) {
+          print("Driver Location Response: $data");
+
+          // data mostly Map ya List mein aata hai, safe check karo
+          if (data is Map<String, dynamic>) {
+            _handleDriverLocationResponse(data);
+          } else if (data is List && data.isNotEmpty) {
+            // Agar list mein aaya ho (kabhi kabhi aisa hota hai)
+            _handleDriverLocationResponse(data[0]);
+          }
+        },
+      );
+
       log("Emitted → $payload");
       log("Emitted newww → $payloadLocation");
-      socket.on("delivery:status_update", (data) {
+
+    /*  socket.on("delivery:status_update", (data) {
         log("Status updated response: $data");
         if (data['status'] == 'completed') {
           _navigateToGiveRatingScreen();
@@ -204,6 +247,94 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
 
       socket.on("driver:get_location", (data) {
 
+      });*/
+
+      socket.on("delivery:status_update", (data) {
+        log("Received delivery:status_update → $data");
+
+        // ← SABSE BADA FIX: Null & Type Check
+        if (data == null) {
+          log("Warning: Received null data from delivery:status_update");
+          return;
+        }
+
+        if (data is! Map<String, dynamic>) {
+          log("Warning: Invalid data format: $data");
+          return;
+        }
+
+        final status = data['status']?.toString().toLowerCase();
+        final success = data['success'] == true;
+
+        if (status == null) {
+          log("Warning: Status field missing in response");
+          return;
+        }
+
+        log("Delivery status changed to: $status");
+
+        if (status == 'completed' && success) {
+          // _navigateToGiveRatingScreen();
+
+
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CompleteScreen(
+                socket:socket,
+                freeWaitingTime: data['freeWaitingTime'],
+                previousAmount: data['previousAmount'],
+                extraWaitingMinutes: data['extraWaitingMinutes'],
+                extraWaitingCharge: data['extraWaitingCharge'],
+                deliveryId: widget.deliveryId,
+                driverId: deliveryData!.data!.deliveryBoy!.id ?? "",
+                driverName: deliveryData!.data!.deliveryBoy!.firstName ?? "",
+                driverLastName: deliveryData!.data!.deliveryBoy!.lastName ?? "",
+                driverImage: deliveryData!.data!.deliveryBoy!.image ?? "",
+
+              ),
+            ),
+          );
+
+
+        } else if (status == 'cancelled_by_driver') {
+          _navigateToHomeScreen();
+        }
+
+
+
+        ////////////////////////////////////////////////////////////
+        ///////////////////////Arrived Driver /////////////////////
+        if (status == "arrived") {
+          final waitingTime = data["waitingTime"]; // ← Ye minutes mein aata hai (2, 4, 7, 10 etc)
+          final arrivedAt = data["arrivedAt"];
+          int freeMinutes = 5; // fallback
+          if (waitingTime != null) {
+            freeMinutes = int.tryParse(waitingTime.toString()) ?? 5;
+          }
+          int elapsedSeconds = 0;
+
+          if (arrivedAt != null) {
+            final serverTimestamp = arrivedAt is num
+                ? arrivedAt.toInt()
+                : int.tryParse(arrivedAt.toString()) ?? 0;
+            if (serverTimestamp > 0) {
+              elapsedSeconds = ((DateTime.now().millisecondsSinceEpoch - serverTimestamp) / 1000).floor();
+            }
+          }
+          // Step 3: Timer ko perfect sync kar do
+          _startOrSyncWaitingTimer(
+            fromSeconds: elapsedSeconds,
+            freeMinutes: freeMinutes,
+          );
+          log("Perfect Sync → Free: $freeMinutes min | Elapsed: $elapsedSeconds sec");
+        }else if(status == "ongoing"){
+          _isArrived=false;
+        }
+
+
+        // Add more statuses if needed
       });
 
 
@@ -213,6 +344,53 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     }
   }
 
+
+
+
+  void _startOrSyncWaitingTimer({required int fromSeconds, required int freeMinutes}) {
+    _maxFreeWaitingSeconds = freeMinutes * 60;
+
+    setState(() {
+      _isArrived = true;
+      _waitingSeconds = fromSeconds;
+      _updateWaitingTimeText();
+    });
+
+    _waitingTimer?.cancel();
+    _waitingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _waitingSeconds++;
+        _updateWaitingTimeText();
+      });
+    });
+  }
+
+
+
+// Socket se jo response aaya usko yahan use karo
+  void _handleDriverLocationResponse(Map<String, dynamic> response) {
+    if (response["success"] == true) {
+      double lat = double.parse(response["lat"].toString());
+      double lon = double.parse(response["lon"].toString());
+
+      _driverLatLng = LatLng(lat, lon);
+      _addMarkers();
+      print("Driver Location Updated: $_driverLatLng");
+
+      // // Agar map pe marker move karna hai to yahan call karo
+      // _moveDriverMarker(_driverLatLng!);
+
+      // UI update ke liye (if needed)
+      setState(() {});
+    } else {
+      print("Driver location failed or not available");
+      _driverLatLng = null;
+    }
+  }
   void _navigateToHomeScreen() {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => HomeScreen(forceSocketRefresh: true)),
@@ -224,7 +402,14 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GiveRatingScreen(driverId: deliveryData!.data!.deliveryBoy!.id ?? ""),
+        builder: (context) => GiveRatingScreen(
+
+            driverId: deliveryData!.data!.deliveryBoy!.id ?? "",
+          driverName: deliveryData!.data!.deliveryBoy!.firstName ?? "",
+          driverLastName: deliveryData!.data!.deliveryBoy!.lastName ?? "",
+          driverImage: deliveryData!.data!.deliveryBoy!.image ?? "",
+
+        ),
       ),
     );
   }
@@ -310,17 +495,43 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     return points;
   }
 
+  Future<void> loadSimpleDriverIcon() async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    const size = 100.0;
+
+
+    canvas.drawCircle(
+      const Offset(size / 2, size / 2),
+      size / 2 - 18,
+      Paint()..color = const Color(0xFF00C853), // Bright Green
+    );
+
+    canvas.drawCircle(
+      const Offset(size / 2, size / 2),
+      12,
+      Paint()..color = Colors.white,
+    );
+
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(size.toInt(), size.toInt());
+    final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+
+    driverIcon = BitmapDescriptor.fromBytes(pngBytes!.buffer.asUint8List());
+  }
+
   void _addMarkers() {
     final markers = <Marker>{};
-
     // Current Location
-    if (_currentLatLng != null) {
+    if (_driverLatLng != null) {
       markers.add(
         Marker(
-          markerId: const MarkerId('current_location'),
-          position: _currentLatLng!,
-          infoWindow: const InfoWindow(title: 'Your Location'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          markerId: const MarkerId('_driverLatLng'),
+          position: _driverLatLng!,
+          infoWindow: const InfoWindow(title: 'driver LatLng'),
+          icon:driverIcon,
+          // BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         ),
       );
     }
@@ -334,7 +545,7 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
             markerId: const MarkerId('pickup'),
             position: LatLng(pickup.lat!, pickup.long!),
             infoWindow: InfoWindow(title: 'Pickup', snippet: pickup.name),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
           ),
         );
       }
@@ -393,7 +604,8 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => CancelBottomSheetContent(
         txId: deliveryData?.data?.txId ?? '',
         onCancel: () => Navigator.pop(context),
@@ -537,13 +749,13 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
                               ],
                             ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(driverPhone, style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                              Text("Phone Number", style: GoogleFonts.inter(fontSize: 12.sp, color: Colors.grey[700])),
-                            ],
-                          ),
+
+
+                          actionButton("assets/SvgImage/calld.svg", () {
+                            launchUrl(Uri.parse("tel:$driverPhone"));
+                          }, ""),
+
+
                         ],
                       ),
 
@@ -640,14 +852,76 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
                         ),
                       ),
 
+
+
+
                       SizedBox(height: 20.h),
                       const Divider(),
+
+                      if (!_isArrived)
+                      // अभी तक arrived नहीं हुआ → Orange बटन
+                        SizedBox()
+                      else
+                      // Arrived हो चुका है → Timer दिखेगा + Color Change Logic
+                        Container(
+                          height: 56.h,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: _waitingSeconds >= _maxFreeWaitingSeconds
+                                ? Colors.red.shade600
+                                : Colors.blue.shade600,
+                            borderRadius: BorderRadius.circular(12.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (_waitingSeconds >= _maxFreeWaitingSeconds ? Colors.red : Colors.blue).withOpacity(0.4),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _waitingSeconds >= _maxFreeWaitingSeconds ? Icons.warning_amber_rounded : Icons.access_time_filled,
+                                color: Colors.white,
+                                size: 28.sp,
+                              ),
+                              SizedBox(width: 12.w),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Waiting Time",
+                                    style: TextStyle(color: Colors.white70, fontSize: 13.sp),
+                                  ),
+                                  Text(
+                                    _waitingTimeText,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24.sp,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      Text(_waitingSeconds >= _maxFreeWaitingSeconds ?"Waiting charges are applied now":""),
+                      // SizedBox(height: 15.h),
+                      const Divider(),
+
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text("Total Amount", style: TextStyle(fontSize: 14)),
-                          Text("₹$amount", style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text("₹ $amount", style: const TextStyle(
+
+                              fontWeight: FontWeight.w600)),
                         ],
                       ),
 
@@ -694,9 +968,7 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
                             ),
                           ),
                           SizedBox(width: 10.w),
-                          actionButton("assets/SvgImage/calld.svg", () {
-                            launchUrl(Uri.parse("tel:$driverPhone"));
-                          }, "Call"),
+
                         ],
                       ),
 
@@ -721,6 +993,7 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
                           ),
                         ],
                       ),
+                      SizedBox(height: 40,),
                     ],
                   ),
                 );
@@ -770,7 +1043,11 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     }
   }
 }
+
+
 // Cancel Bottom Sheet remains same (you already have it)
+
+
 class CancelBottomSheetContent extends StatefulWidget {
   final String txId;
   final VoidCallback onCancel;
@@ -854,6 +1131,7 @@ class _CancelBottomSheetContentState extends State<CancelBottomSheetContent> {
                       child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : Text('Submit', style: GoogleFonts.inter(color: Colors.white)),
                     ),
                   ),
+                  SizedBox(height: 100.h,)
                 ],
               ),
             ],
