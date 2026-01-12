@@ -23,6 +23,7 @@ import '../data/Model/DeleteAddressModel.dart';
 import '../data/Model/GetAddressResponseModel.dart';
 import '../data/controller/getAllAddress.dart';
 import 'AddAddressPage.dart';
+import 'SelectProductScreen.dart';
 
 class InstantDeliveryScreen extends ConsumerStatefulWidget {
   final IO.Socket? socket;
@@ -439,6 +440,8 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                               dropNames.add(controller.text);
                             }
 
+                            final pickAddress = pickupController.text;
+
                             // 3. Total Distance (1, 2 या 3 drops → सब काम करेगा)
                             final totalDistKm = await getTotalDistance(
                               pickupLat: pickupLat,
@@ -476,13 +479,15 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                               await Navigator.push(
                                 context,
                                 CupertinoPageRoute(
-                                  builder: (context) => SelectTripScreen(
+                                  builder: (context) => ProductTypeSelectScreen(
                                     widget.socket,
                                     pickupLat,
                                     pickupLon,
                                     dropLats,
                                     dropLons,
                                     dropNames,
+                                      pickAddress
+
                                     // totalDistance: totalDistKm.round(),
                                   ),
                                 ),

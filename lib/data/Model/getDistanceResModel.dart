@@ -112,47 +112,47 @@ class VehicleOption {
 // lib/data/Model/getDistanceResModel.dart
 
 class DistanceDropoff {  // ← नया नाम
-    final Name? name;
+    final String? name;
     final double? lat;
     final double? long;
 
     DistanceDropoff({this.name, this.lat, this.long});
 
     factory DistanceDropoff.fromJson(Map<String, dynamic> json) => DistanceDropoff(
-        name: nameValues.map[json["name"]],
+        name: json["name"],
         lat: json["lat"]?.toDouble(),
         long: json["long"]?.toDouble(),
     );
 
     Map<String, dynamic> toJson() => {
-        "name": nameValues.reverse[name],
+        "name": name,
         "lat": lat,
         "long": long,
     };
 
-    String get nameString => nameValues.reverse[name] ?? "Unknown";
+    // String get nameString => nameValues.reverse[name] ?? "Unknown";
 }
+//
+// enum Name {
+//     DHLI_INDIA,
+//     KANTA_CHAURAHA_SINDHI_COLONY_JHOTWARA_JAIPUR_RAJASTHAN,
+//     MANSAROVAR_JAIPUR_RAJASTHAN_INDIA
+// }
+//
+// final nameValues = EnumValues({
+//     "Déhli، India": Name.DHLI_INDIA,
+//     "Kanta Chauraha, Sindhi Colony, Jhotwara, Jaipur, Rajasthan": Name.KANTA_CHAURAHA_SINDHI_COLONY_JHOTWARA_JAIPUR_RAJASTHAN,
+//     "Mansarovar, Jaipur, Rajasthan, India": Name.MANSAROVAR_JAIPUR_RAJASTHAN_INDIA
+// });
 
-enum Name {
-    DHLI_INDIA,
-    KANTA_CHAURAHA_SINDHI_COLONY_JHOTWARA_JAIPUR_RAJASTHAN,
-    MANSAROVAR_JAIPUR_RAJASTHAN_INDIA
-}
-
-final nameValues = EnumValues({
-    "Déhli، India": Name.DHLI_INDIA,
-    "Kanta Chauraha, Sindhi Colony, Jhotwara, Jaipur, Rajasthan": Name.KANTA_CHAURAHA_SINDHI_COLONY_JHOTWARA_JAIPUR_RAJASTHAN,
-    "Mansarovar, Jaipur, Rajasthan, India": Name.MANSAROVAR_JAIPUR_RAJASTHAN_INDIA
-});
-
-class EnumValues<T> {
-    Map<String, T> map;
-    late Map<T, String> reverseMap;
-
-    EnumValues(this.map);
-
-    Map<T, String> get reverse {
-        reverseMap = map.map((k, v) => MapEntry(v, k));
-        return reverseMap;
-    }
-}
+// class EnumValues<T> {
+//     Map<String, T> map;
+//     late Map<T, String> reverseMap;
+//
+//     EnumValues(this.map);
+//
+//     Map<T, String> get reverse {
+//         reverseMap = map.map((k, v) => MapEntry(v, k));
+//         return reverseMap;
+//     }
+// }

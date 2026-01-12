@@ -15,7 +15,7 @@ class RegisterBodyModel {
   String lastName;
   String email;
   String phone;
-  String password;
+  // String password;
   String deviceId;
 
   RegisterBodyModel({
@@ -23,7 +23,7 @@ class RegisterBodyModel {
     required this.lastName,
     required this.email,
     required this.phone,
-    required this.password,
+    // required this.password,
     required this.deviceId,
   });
 
@@ -33,7 +33,7 @@ class RegisterBodyModel {
         lastName: json["lastName"],
         email: json["email"],
         phone: json["phone"],
-        password: json["password"],
+        // password: json["password"],
         deviceId: json["deviceId"],
       );
 
@@ -42,7 +42,7 @@ class RegisterBodyModel {
     "lastName": lastName,
     "email": email,
     "phone": phone,
-    "password": password,
+    // "password": password,
     "deviceId": deviceId,
   };
 }

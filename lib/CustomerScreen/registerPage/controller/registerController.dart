@@ -66,7 +66,7 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
       lastName: lastNameController.text,
       email: emailController.text,
       phone: phoneNumberController.text,
-      password: passwordController.text,
+      // password: passwordController.text,
       deviceId: deviceId,
     );
     try {

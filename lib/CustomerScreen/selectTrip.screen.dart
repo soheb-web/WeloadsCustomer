@@ -1,8 +1,4 @@
 
-
-
-
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -35,13 +31,17 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   final List<double> dropLats;
   final List<double> dropLons;
   final List<String> dropNames;
+  final String productType; // 👈 NEW
+
   const SelectTripScreen(
       this.socket,
       this.pickupLat,
       this.pickupLon,
       this.dropLats,
       this.dropLons,
-      this.dropNames, {
+      this.dropNames,
+      this.productType,
+      {
         super.key,
       });
 
@@ -90,9 +90,66 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     log('User ID: $userId');
     _getCurrentLocation();
     startLocationStream();
+    _setupDriverAssignedListener(); // ← यह add करो
     _setupEventListeners();
     _loadCustomIcons();
     _createNumberIcons();
+  }
+
+  void _setupDriverAssignedListener() {
+    // Duplicate listener न लगे, इसलिए पहले off करो
+    socket?.off('user:driver_assigned');
+    socket?.on('user:driver_assigned', (payload) {
+      print("🚀 Driver assigned received in SelectTripScreen: $payload");
+
+      if (!mounted) return;
+
+      _navigateToPickupScreen(payload);
+    });
+  }
+
+
+  void _navigateToPickupScreen(dynamic payload) async {
+    try {
+      final deliveryId = payload['deliveryId'] as String?;
+      if (deliveryId == null) return;
+
+      final driver = Map<String, dynamic>.from(payload['driver'] ?? {});
+      final otp = payload['otp']?.toString() ?? 'N/A';
+      final pickup = Map<String, dynamic>.from(payload['pickup'] ?? {});
+      final dropoffList = (payload['dropoff'] as List?)
+          ?.map((e) => Map<String, dynamic>.from(e))
+          .toList() ?? [];
+      final amount = payload['amount'] ?? 0;
+      final vehicleType = Map<String, dynamic>.from(payload['vehicleType'] ?? {});
+      final status = payload['status']?.toString() ?? 'assigned';
+
+      // txId Hive से लो (booking के बाद save किया था)
+      final txId = box.get("current_booking_txId") ?? "";
+
+      Fluttertoast.showToast(msg: "Driver Assigned!");
+
+      Navigator.pushReplacement(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => PickupScreen(
+            socket: socket!,
+            deliveryId: deliveryId,
+            driver: driver,
+            otp: otp,
+            pickup: pickup,
+            dropoff: dropoffList,
+            amount: amount,
+            vehicleType: vehicleType,
+            vehicleDetail: payload['vehicleDetails'],
+            status: status,
+            txId: txId,
+          ),
+        ),
+      );
+    } catch (e, s) {
+      log("Navigation error from SelectTripScreen: $e\n$s");
+    }
   }
   Future<void> _createNumberIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
@@ -140,22 +197,18 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         const ImageConfiguration(size: Size(72, 72)),
         'assets/icons/car.png',
       );
-
       driverBikeIcon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(72, 72)),
         'assets/icons/b.png',
       );
-
       driverAutoIcon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(72, 72)),
         'assets/icons/t.png',
       );
-
       driverTruckIcon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(72, 72)),
         'assets/icons/truck.png',
       );
-
       driverCycleIcon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(72, 72)),
         'assets/icons/cycle.png',
@@ -164,11 +217,8 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       _iconsLoaded = true;
       if (mounted) safeSetState(() {});
       log("Custom driver icons loaded");
-
     } catch (e) {
-
       log("Icon load error: $e");
-
     }
   }
   Future<void> _getCurrentLocation() async {
@@ -230,9 +280,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   void _setupEventListeners() {
     socket?.on('receive_message', (data) => log('Message: $data'));
   }
-
   @override
   void dispose() {
+    socket?.off('user:driver_assigned'); // important: memory leak avoid
     _locationSubscription?.cancel();
     _mapController?.dispose();
     socket?.clearListeners();
@@ -273,49 +323,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     }
     safeSetState(() {});
   }
-
-
-  // void _addMarkers() {
-  //   _markers.clear();
-  //
-  //   /// ✅ Pickup marker (always)
-  //   _markers.add(
-  //     Marker(
-  //       markerId: const MarkerId('pickup'),
-  //       position: LatLng(pickupLat, pickupLon),
-  //       infoWindow: const InfoWindow(title: 'Pickup'),
-  //       icon: BitmapDescriptor.defaultMarkerWithHue(
-  //         BitmapDescriptor.hueGreen,
-  //       ),
-  //     ),
-  //   );
-  //
-  //   /// ✅ Show ONLY last drop marker
-  //   if (dropLats.isNotEmpty && dropLons.isNotEmpty) {
-  //     final lastIndex = dropLats.length - 1;
-  //
-  //     _markers.add(
-  //       Marker(
-  //         markerId: const MarkerId('drop_last'),
-  //         position: LatLng(
-  //           dropLats[lastIndex],
-  //           dropLons[lastIndex],
-  //         ),
-  //         infoWindow: InfoWindow(
-  //           title: 'Drop',
-  //           snippet: dropNames[lastIndex],
-  //         ),
-  //         icon: BitmapDescriptor.defaultMarkerWithHue(
-  //           BitmapDescriptor.hueRed,
-  //         ),
-  //       ),
-  //     );
-  //   }
-  //
-  //   safeSetState(() {});
-  // }
-
-
   void _addNearbyDriverMarkers() {
     if (nearbyDrivers.data == null ||
         nearbyDrivers.data!.isEmpty ||
@@ -378,95 +385,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     final bounds = _calculateBounds(positions);
     _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
   }
-
-  // Future<void> _fetchMultiStopRoute() async {
-  //   if (_currentLatlng == null) return;
-  //   const apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
-  //   double totalDistKm = 0.0;
-  //   int totalTimeMin = 0;
-  //   List<LatLng> allPoints = [];
-  //
-  //   final url1 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-  //     'origin': '${_currentLatlng!.latitude},${_currentLatlng!.longitude}',
-  //     'destination': '$pickupLat,$pickupLon',
-  //     'key': apiKey,
-  //   });
-  //
-  //   try {
-  //     final res = await http.get(url1);
-  //     if (res.statusCode == 200) {
-  //       final data = json.decode(res.body);
-  //       if (data['status'] == 'OK') {
-  //         final poly = data['routes'][0]['overview_polyline']['points'];
-  //         final points = _decodePolyline(poly);
-  //         allPoints.addAll(points);
-  //         final leg = data['routes'][0]['legs'][0];
-  //         toPickupDistance = leg['distance']['text'];
-  //         toPickupDuration = leg['duration']['text'];
-  //         totalDistKm += (leg['distance']['value'] as num) / 1000;
-  //         totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
-  //       }
-  //     }
-  //   } catch (e) {
-  //     log("Route1 error: $e");
-  //   }
-  //
-  //   dropDistances = List.filled(dropLats.length, '');
-  //   dropDurations = List.filled(dropLats.length, '');
-  //
-  //   for (int i = 0; i < dropLats.length; i++) {
-  //     final origin = i == 0
-  //         ? '$pickupLat,$pickupLon'
-  //         : '${dropLats[i - 1]},${dropLons[i - 1]}';
-  //     final dest = '${dropLats[i]},${dropLons[i]}';
-  //
-  //     final url = Uri.https(
-  //       'maps.googleapis.com',
-  //       '/maps/api/directions/json',
-  //       {'origin': origin, 'destination': dest, 'key': apiKey},
-  //     );
-  //
-  //     try {
-  //       final res = await http.get(url);
-  //       if (res.statusCode == 200) {
-  //         final data = json.decode(res.body);
-  //         if (data['status'] == 'OK') {
-  //           final poly = data['routes'][0]['overview_polyline']['points'];
-  //           final points = _decodePolyline(poly);
-  //           allPoints.addAll(points);
-  //           final leg = data['routes'][0]['legs'][0];
-  //           dropDistances[i] = leg['distance']['text'];
-  //           dropDurations[i] = leg['duration']['text'];
-  //           totalDistKm += (leg['distance']['value'] as num) / 1000;
-  //           totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
-  //         }
-  //       }
-  //     } catch (e) {
-  //       log("Drop route $i error: $e");
-  //     }
-  //   }
-  //
-  //   safeSetState(() {
-  //     _polylines.clear();
-  //     if (allPoints.isNotEmpty) {
-  //       _polylines.add(
-  //         Polyline(
-  //           polylineId: const PolylineId('full_route'),
-  //           points: allPoints,
-  //           color: Colors.blue,
-  //           width: 5,
-  //         ),
-  //       );
-  //     }
-  //     totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
-  //     totalDuration = '$totalTimeMin min';
-  //     _routePoints = allPoints;
-  //   });
-  //
-  //   if (_mapController != null && _routePoints.isNotEmpty) {
-  //     _fitAllMarkersAndDrivers();
-  //   }
-  // }
   Future<void> _fetchMultiStopRoute() async {
     const apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
     double totalDistKm = 0.0;
@@ -476,9 +394,10 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     dropDistances = List.filled(dropLats.length, '');
     dropDurations = List.filled(dropLats.length, '');
 
-    // Loop only for pickup → drop1 → drop2 → ...
     for (int i = 0; i < dropLats.length; i++) {
-      final origin = i == 0 ? '$pickupLat,$pickupLon' : '${dropLats[i - 1]},${dropLons[i - 1]}';
+      final origin = i == 0
+          ? '$pickupLat,$pickupLon'
+          : '${dropLats[i - 1]},${dropLons[i - 1]}';
       final dest = '${dropLats[i]},${dropLons[i]}';
 
       final url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
@@ -528,7 +447,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       _fitAllMarkersAndDrivers();
     }
   }
-
   List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
     int index = 0, len = encoded.length;
@@ -589,46 +507,23 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
               ? const Center(child: CircularProgressIndicator())
               : Stack(
             children: [
-              // GoogleMap(
-              //   padding: EdgeInsets.only(top: 40.h, right: 16.w),
-              //   // initialCameraPosition: CameraPosition(
-              //   //   target: _currentLatlng!,
-              //   //   zoom: 15,
-              //   // ),
-              //   initialCameraPosition: CameraPosition(
-              //     target: _currentLatlng ?? LatLng(pickupLat, pickupLon), // fallback
-              //     zoom: 15,
-              //   ),
-              //   onMapCreated: (controller) {
-              //     _mapController = controller;
-              //     _addMarkers();
-              //     _fetchMultiStopRoute();
-              //   },
-              //   // myLocationEnabled: true,
-              //   // myLocationButtonEnabled: true,
-              //   markers: _markers,
-              //   polylines: _polylines,
-              // ),
-
-
               GoogleMap(
                 padding: EdgeInsets.only(top: 40.h, right: 16.w),
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(pickupLat, pickupLon), // Start from pickup
-                  zoom: 14,
+                  target: _currentLatlng!,
+                  zoom: 15,
                 ),
                 onMapCreated: (controller) {
                   _mapController = controller;
                   _addMarkers();
-                  _fetchMultiStopRoute(); // This will draw only pickup to drops
+                  _fetchMultiStopRoute();
                 },
+                myLocationEnabled: false,
+                myLocationButtonEnabled: false,
                 markers: _markers,
                 polylines: _polylines,
-                myLocationEnabled: false,         // No blue dot
-                myLocationButtonEnabled: false,   // No location button
-                zoomControlsEnabled: true,
-                mapType: MapType.normal,
               ),
+
               Positioned(
                 left: 10.w,
                 top: 40.h,
@@ -644,71 +539,67 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                 ),
               ),
 
+              // if (totalDistance != null)
+              //   Positioned(
+              //     bottom: 70.h,
+              //     left: 16.w,
+              //     right: 16.w,
+              //     child: Container(
+              //       padding: EdgeInsets.all(12.w),
+              //       decoration: BoxDecoration(
+              //         color: Colors.white,
+              //         borderRadius: BorderRadius.circular(8.r),
+              //         boxShadow: [
+              //           BoxShadow(
+              //             color: Colors.black12,
+              //             blurRadius: 8,
+              //           ),
+              //         ],
+              //       ),
+              //       child: Column(
+              //         mainAxisSize: MainAxisSize.min,
+              //         children: [
+              //           if (toPickupDistance != null)
+              //             Text(
+              //               'To Pickup: $toPickupDistance | $toPickupDuration',
+              //               style: GoogleFonts.inter(fontSize: 14.sp),
+              //             ),
+              //           ...dropDistances.asMap().entries.map(
+              //                 (e) => e.value.isNotEmpty
+              //                 ? Text(
+              //               'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
+              //               style: GoogleFonts.inter(
+              //                 fontSize: 13.sp,
+              //               ),
+              //             )
+              //                 : const SizedBox(),
+              //           ),
+              //           Text(
+              //             'Total: $totalDistance | $totalDuration',
+              //             style: GoogleFonts.inter(
+              //               fontSize: 14.sp,
+              //               fontWeight: FontWeight.bold,
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+
               if (totalDistance != null)
-                // Positioned(
-                //   bottom: 70.h,
-                //   left: 16.w,
-                //   right: 16.w,
-                //   child: Container(
-                //     padding: EdgeInsets.all(12.w),
-                //     decoration: BoxDecoration(
-                //       color: Colors.white,
-                //       borderRadius: BorderRadius.circular(8.r),
-                //       boxShadow: [
-                //         BoxShadow(
-                //           color: Colors.black12,
-                //           blurRadius: 8,
-                //         ),
-                //       ],
-                //     ),
-                //     child: Column(
-                //       mainAxisSize: MainAxisSize.min,
-                //       children: [
-                //         if (toPickupDistance != null)
-                //           Text(
-                //             'To Pickup: $toPickupDistance | $toPickupDuration',
-                //             style: GoogleFonts.inter(fontSize: 14.sp),
-                //           ),
-                //         ...dropDistances.asMap().entries.map(
-                //               (e) => e.value.isNotEmpty
-                //               ? Text(
-                //             'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
-                //             style: GoogleFonts.inter(
-                //               fontSize: 13.sp,
-                //             ),
-                //           )
-                //               : const SizedBox(),
-                //         ),
-                //         Text(
-                //           'Total: $totalDistance | $totalDuration',
-                //           style: GoogleFonts.inter(
-                //             fontSize: 14.sp,
-                //             fontWeight: FontWeight.bold,
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
                 Positioned(
                   bottom: 70.h,
                   left: 16.w,
                   right: 16.w,
                   child: Container(
-                    padding: EdgeInsets.all(12.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.r),
-                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-                    ),
+                    // ... decoration same
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Remove this block:
+                        // Remove this block completely:
                         // if (toPickupDistance != null)
-                        //   Text('To Pickup: $toPickupDistance | $toPickupDuration', style: ...),
+                        //   Text('To Pickup: $toPickupDistance | $toPickupDuration', ...),
 
-                        // Only show drop distances
                         ...dropDistances.asMap().entries.map(
                               (e) => e.value.isNotEmpty
                               ? Text(
@@ -719,13 +610,15 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                         ),
                         Text(
                           'Total: $totalDistance | $totalDuration',
-                          style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-
               DraggableScrollableSheet(
                 initialChildSize: 0.50,
                 minChildSize: 0.30,
@@ -1066,7 +959,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       ),
     );
   }
-
   String _getEstimatedTime({required String vehicleType, required double distance}) {
     // distance is assumed in KM (your API returns 7 → 7 km)
     final double distanceKm = distance;
@@ -1120,11 +1012,12 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
             origLon: pickupLon,
             coinAmount: 0,
             copanId: null,
+            productType: widget.productType,
             dropoff:
             selectedVehicle.dropoff
                 ?.map(
                   (d) => BookDropoff(
-                name: d.nameString,
+                name: d.name.toString(),
                 lat: d.lat ?? 0.0,
                 long: d.long ?? 0.0,
               ),
@@ -1154,7 +1047,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
               CupertinoPageRoute(
                 builder: (context) => WaitingForDriverScreen(
 
-
+                  productType: widget.productType,
                   mobile :phon,
                   name:name,
                   userPayAmount:double.parse(
@@ -1203,6 +1096,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class WaitingForDriverScreen extends StatefulWidget {
+  String productType;
   String mobile;
   String name;
   int userPayAmount;
@@ -1217,6 +1111,7 @@ class WaitingForDriverScreen extends StatefulWidget {
   final String txId;
    WaitingForDriverScreen({
     super.key,
+    required this.productType,
     required this.mobile,
     required this.name,
     required this.userPayAmount,
@@ -1234,7 +1129,6 @@ class WaitingForDriverScreen extends StatefulWidget {
   @override
   State<WaitingForDriverScreen> createState() => _WaitingForDriverScreenState();
 }
-
 class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     with TickerProviderStateMixin {
   final box = Hive.box("folder");
@@ -1281,7 +1175,9 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     _pulseAnimation = Tween<double>(begin: 40, end: 100).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
     );
-    _setupEventListeners();
+    // _setupEventListeners1();
+    _socket.off('user:driver_assigned'); // duplicate avoid
+    _socket.on('user:driver_assigned', _handleAssigned);
     _startSearching();
     _startPulseMarkerUpdater();
     _loadIconsAndInitMap();
@@ -1382,113 +1278,59 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     _addMarkers();
     _fetchMultiStopRoute();
   }
-  // void _addMarkers() {
-  //   _markers.clear();
-  //
-  //   _markers.add(Marker(
-  //     markerId: const MarkerId('pickup_static'),
-  //     position: LatLng(pickupLat, pickupLon),
-  //     infoWindow: const InfoWindow(title: 'Pickup'),
-  //     icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-  //     zIndex: 99,
-  //   ));
-  //
-  //   for (int i = 0; i < dropLats.length; i++) {
-  //     final lat = dropLats[i];
-  //     final lon = dropLons[i];
-  //     final name = dropNames[i];
-  //
-  //     BitmapDescriptor icon;
-  //     if (i == 0) icon = _number1Icon;
-  //     else if (i == 1) icon = _number2Icon;
-  //     else icon = _dotIcon;
-  //
-  //     _markers.add(Marker(
-  //       markerId: MarkerId('drop_$i'),
-  //       position: LatLng(lat, lon),
-  //       infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
-  //       icon: icon,
-  //       anchor: const Offset(0.5, 0.5),
-  //     ));
-  //   }
-  //
-  //   _updatePulsatingPickupMarker();
-  // }
-
   void _addMarkers() {
     _markers.clear();
+    _markers.add(Marker(
+      markerId: const MarkerId('pickup_static'),
+      position: LatLng(pickupLat, pickupLon),
+      infoWindow: const InfoWindow(title: 'Pickup'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      zIndex: 99,
+    ));
 
-    /// ✅ Pickup (always)
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('pickup_static'),
-        position: LatLng(pickupLat, pickupLon),
-        infoWindow: const InfoWindow(title: 'Pickup'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueGreen,
-        ),
-        zIndex: 99,
-      ),
-    );
+    for (int i = 0; i < dropLats.length; i++) {
+      final lat = dropLats[i];
+      final lon = dropLons[i];
+      final name = dropNames[i];
 
-    /// ✅ ONLY last drop marker
-    if (dropLats.isNotEmpty && dropLons.isNotEmpty) {
-      final lastIndex = dropLats.length - 1;
+      BitmapDescriptor icon;
+      if (i == 0) icon = _number1Icon;
+      else if (i == 1) icon = _number2Icon;
+      else icon = _dotIcon;
 
-      _markers.add(
-        Marker(
-          markerId: const MarkerId('drop_last'),
-          position: LatLng(
-            dropLats[lastIndex],
-            dropLons[lastIndex],
-          ),
-          infoWindow: InfoWindow(
-            title: 'Drop',
-            snippet: dropNames[lastIndex],
-          ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueRed,
-        ),
-          // _dotIcon, // ya koi bhi custom icon
-          anchor: const Offset(0.5, 0.5),
-        ),
-      );
+      _markers.add(Marker(
+        markerId: MarkerId('drop_$i'),
+        position: LatLng(lat, lon),
+        infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
+        icon: icon,
+        anchor: const Offset(0.5, 0.5),
+      ));
     }
-
-    /// 🔄 Pulsating pickup marker (as it is)
     _updatePulsatingPickupMarker();
   }
 
-  // MARK: - Socket Listener
-  void _setupEventListeners() {
-    _socket.on('user:driver_assigned', _handleAssigned);
-  }
+
+  // void _setupEventListeners1() {
+  //   _socket.on('user:driver_assigned', _handleAssigned);
+  // }
 
 
   Future<void> _handleAssigned(dynamic payload) async {
-
     if (!mounted) return;
-
     print("payload socket accept data $payload");
-
     try {
-
       if (payload is! Map<String, dynamic>) {
         log("Invalid payload: not a Map");
         return;
       }
-
       final deliveryId = payload['deliveryId'] as String?;
-
       if (deliveryId == null) {
         log("Missing deliveryId");
         return;
       }
-
       // Driver
       final driverData = payload['driver'];
       Map<String, dynamic> driver = {};
-
       if (driverData is Map<String, dynamic>) {
         driver = driverData;
       } else if (driverData is List && driverData.isNotEmpty) {
@@ -1498,22 +1340,17 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         Fluttertoast.showToast(msg: "Driver info missing");
         return;
       }
-
       final driverName = '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
       final otp = payload['otp']?.toString() ?? 'N/A';
-
       Fluttertoast.showToast(msg: "Driver Assigned: $driverName");
       // Pickup - Fix Type
-
       final pickupRaw = payload['pickup'];
       final Map<String, dynamic> pickup = (pickupRaw is Map)
           ? Map<String, dynamic>.from(pickupRaw)
           : {};
-
       // Dropoff: List of Maps
       final dropoffRaw = payload['dropoff'];
       final List<Map<String, dynamic>> dropoff = [];
-
       if (dropoffRaw is List) {
         for (var item in dropoffRaw) {
           if (item is Map) {
@@ -1521,7 +1358,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
           }
         }
       }
-
       // Vehicle Type - Fix Type
       final vehicleTypeRaw = payload['vehicleType'];
       final vehicleDetailRaw = payload['vehicleDetails'];
@@ -1557,6 +1393,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       Fluttertoast.showToast(msg: "Error: $e");
     }
   }
+
   Future<void> _fetchMultiStopRoute() async {
     const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
     double totalDistKm = 0.0;
@@ -1667,6 +1504,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       if (mounted) setState(() => _dotCount = (_dotCount % 3) + 1);
     });
   }
+
   void _startSearchTimer() {
     _searchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -1678,6 +1516,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       }
     });
   }
+
   void _startSearching() {
     setState(() {
       _isSearching = true;
@@ -1688,31 +1527,33 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     _startDotTimer();
     _startSearchTimer();
   }
+
   void _stopSearching() {
     _dotTimer.cancel();
     _searchTimer?.cancel();
     _pulseController.stop();
     setState(() => _isSearching = false);
   }
+
   String _formatTime(int seconds) {
     int min = seconds ~/ 60;
     int sec = seconds % 60;
     return '$min:${sec.toString().padLeft(2, '0')}';
   }
-  void _retrySearch() async {
 
+  void _retrySearch() async {
     _stopSearching();
     setState(() => _isSearching = true);
-
     try {
       final body = BookInstantDeliveryBodyModel(
+
         vehicleTypeId: widget.id,
-        // "68ce853be9401176157710f7", // Ya current selected vehicle se
         origName: dropNames.first,
         origLat: pickupLat,
         origLon: pickupLon,
         coinAmount: 0,
         copanId: null,
+        productType: widget.productType,
         dropoff: dropLats.asMap().entries.map((e) => BookDropoff(
           name: dropNames[e.key],
           lat: e.value,
@@ -1725,10 +1566,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         mobNo:widget.mobile,
         name:widget.name
       );
-
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.bookInstantDelivery(body);
-
       if (response.code == 0) {
         box.put("current_booking_txId", response.data!.txId);
         setState(() {
@@ -1744,13 +1583,10 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         Fluttertoast.showToast(msg: response.message ?? "Retry failed");
       }
     }
-
     catch (e) {
       setState(() => _isSearching = false);
       Fluttertoast.showToast(msg: "Retry failed: $e");
     }
-
-
   }
 
   @override
@@ -1783,7 +1619,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     //   Fluttertoast.showToast(msg: "Cancel failed: $e");
     // }
   }
-
   @override
   Widget build(BuildContext context) {
     final dots = '.' * _dotCount;
@@ -1803,12 +1638,11 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
             },
             markers: _markers,
             polylines: _polylines,
-            myLocationEnabled: true,
-            zoomControlsEnabled: true,
+            myLocationEnabled: false,
+            zoomControlsEnabled: false,
             mapType: MapType.normal,
           ),
 
-          // Back Button
 
           Positioned(
             left: 10.w, top: 40.h,
@@ -1838,12 +1672,17 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // ...dropDistances.asMap().entries.map((e) => e.value.isNotEmpty
+                  //     ? Text('Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}', style: GoogleFonts.inter(fontSize: 13.sp))
+                  //     : const SizedBox()),
+                  // if (totalDistance != null)
+                  //   Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+
                   ...dropDistances.asMap().entries.map((e) => e.value.isNotEmpty
                       ? Text('Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}', style: GoogleFonts.inter(fontSize: 13.sp))
                       : const SizedBox()),
                   if (totalDistance != null)
                     Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
-
 
                 ],
               ),
@@ -1946,7 +1785,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
               ),
             ),
           ),
-
         ],
       )
           : const Center(child: CircularProgressIndicator()),

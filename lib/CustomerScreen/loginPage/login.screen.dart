@@ -27,7 +27,9 @@ class _LoginScreenState extends State<LoginScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+
                 SizedBox(height: 66.h),
+
                 Center(
                   child: Image.asset(
                     "assets/scooter.png",
@@ -37,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
 
             Expanded(child: SizedBox()),
-
                       Text(
                         "Welcome Back!",
                         style: GoogleFonts.inter(
@@ -56,8 +57,6 @@ class _LoginScreenState extends State<LoginScreen>
                     color:  Colors.grey
                   ),
                 ),
-
-
                 Expanded(child: SizedBox()),
                 SizedBox(),
               Container(
@@ -129,15 +128,9 @@ class _LoginScreenState extends State<LoginScreen>
                     return null;
                   },
                 ),
+
               ),
-
-
                       SizedBox(height: 30.h),
-
-
-
-
-
               Container(
                 width: double.infinity,
                 height: 50.h,
@@ -182,13 +175,6 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
               ),
               SizedBox(height: 7.h),
-
-
-
-
-
-
-
             Expanded(child: SizedBox()),
 
                       Text(
@@ -199,6 +185,7 @@ class _LoginScreenState extends State<LoginScreen>
                           color: Color(0xFF4F4F4F),
                         ),
                       ),
+
                       InkWell(
                         onTap: (){
 

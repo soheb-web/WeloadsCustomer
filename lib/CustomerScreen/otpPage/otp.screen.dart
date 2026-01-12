@@ -1,3 +1,4 @@
+/*
 import 'package:delivery_mvp_app/CustomerScreen/otpPage/controller/otpController.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:flutter/cupertino.dart';
@@ -193,6 +194,226 @@ class _OtpScreenState extends State<OtpScreen> with OtpController<OtpScreen> {
                               color: Color(0xFF111111),
                               decoration: TextDecoration.underline,
                             ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+*/
+
+
+import 'package:delivery_mvp_app/CustomerScreen/otpPage/controller/otpController.dart';
+import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:otp_pin_field/otp_pin_field.dart';
+
+class OtpScreen extends StatefulWidget {
+  final String token;
+  const OtpScreen({super.key, required this.token});
+
+  @override
+  State<OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> with OtpController<OtpScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFFFF),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 70.h),
+            Center(
+              child: Image.asset(
+                "assets/scooter.png",
+                width: 84.w,
+                height: 72.h,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 24.w, right: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 28.h),
+                  Text(
+                    "Enter the 4-digit code",
+                    style: GoogleFonts.inter(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF111111),
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    "Please input the verification code sent to your phone number 23480*******90",
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF4F4F4F),
+                    ),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      minimumSize: Size(0, 30.h),
+                      padding: const EdgeInsets.only(left: 0, top: 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () {
+                      // TODO: Change number logic
+                    },
+                    child: Text(
+                      "Change Number?",
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF006970),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 26.h),
+
+                  // Updated OTP Field - Now 4 digits
+                  OtpPinField(
+                    key: registerVerifyotpKey,
+                    maxLength: 4, // Changed from 6 to 4
+                    fieldHeight: 56.h,
+                    fieldWidth: 70.w, // Increased width for better look with 4 boxes
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Better spacing for 4 fields
+                    keyboardType: TextInputType.number,
+                    otpPinFieldStyle: OtpPinFieldStyle(
+                      textStyle: GoogleFonts.inter(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF2D2D2D),
+                      ),
+                      activeFieldBackgroundColor: const Color(0xFFF0F5F5),
+                      defaultFieldBackgroundColor: const Color(0xFFF0F5F5),
+                      activeFieldBorderColor: Colors.transparent,
+                      defaultFieldBorderColor: Colors.transparent,
+                    ),
+                    otpPinFieldDecoration: OtpPinFieldDecoration.defaultPinBoxDecoration,
+                    onSubmit: (text) {
+                      if (text.length == 4) {
+                        // Auto trigger verification when 4 digits are entered
+                        sendOTP(widget.token);
+                      }
+                    },
+                    onChange: (value) {
+                      setState(() {
+                        otp = value;
+                      });
+                    },
+                  ),
+
+                  SizedBox(height: 20.h),
+                  Text.rich(
+                    TextSpan(
+                      text: "Didn’t get any code yet? ",
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF4F4F4F),
+                      ),
+                      children: [
+                        TextSpan(
+                          text: "Resend code",
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF006970),
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              // TODO: Resend OTP logic
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 30.h),
+
+                  // Verify Button - Disabled until 4 digits entered
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(327.w, 50.h),
+                      backgroundColor: const Color(0xFF006970),
+                      disabledBackgroundColor: const Color(0xFFAAD6D9), // Optional: dim color when disabled
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                    onPressed: otp.length == 4
+                        ? () async {
+                       sendOTP(widget.token);
+                    }
+                        : null, // Disabled if OTP is not 4 digits
+                    child: loading
+                        ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                    )
+                        : Text(
+                      "Verify",
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFFFFFFFF),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 25.h),
+                  Center(
+                    child: Text(
+                      "By signing up, you agree to snap",
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF111111),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Text.rich(
+                      TextSpan(
+                        text: "Terms of Service ",
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF111111),
+                          decoration: TextDecoration.underline,
+                        ),
+                        children: [
+                          const TextSpan(
+                            text: "and",
+                            style: TextStyle(decoration: TextDecoration.none),
+                          ),
+                          const TextSpan(
+                            text: " Privacy Policy.",
+                            style: TextStyle(decoration: TextDecoration.underline),
                           ),
                         ],
                       ),

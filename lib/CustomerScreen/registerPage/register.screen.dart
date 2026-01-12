@@ -278,50 +278,50 @@ class _RegisterScreenState extends State<RegisterScreen>
                       },
                     ),
                     SizedBox(height: 30.h),
-                    TextFormField(
-                      keyboardType: TextInputType.visiblePassword,
-                      controller: passwordController,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF293540),
-                      ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Color(0xFFF0F5F5),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide(
-                            color: Color(0xFF006970),
-                            width: 1.w,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide(color: Colors.red, width: 1.w),
-                        ),
-                        hintText: "Your Password",
-                        hintStyle: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF787B7B),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Password is required";
-                        }
-                        return null;
-                      },
-                    ),
+                    // TextFormField(
+                    //   keyboardType: TextInputType.visiblePassword,
+                    //   controller: passwordController,
+                    //   style: GoogleFonts.inter(
+                    //     fontSize: 16.sp,
+                    //     fontWeight: FontWeight.w500,
+                    //     color: Color(0xFF293540),
+                    //   ),
+                    //   decoration: InputDecoration(
+                    //     filled: true,
+                    //     fillColor: Color(0xFFF0F5F5),
+                    //     enabledBorder: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(5.r),
+                    //       borderSide: BorderSide.none,
+                    //     ),
+                    //     focusedBorder: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(5.r),
+                    //       borderSide: BorderSide(
+                    //         color: Color(0xFF006970),
+                    //         width: 1.w,
+                    //       ),
+                    //     ),
+                    //     errorBorder: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(5.r),
+                    //       borderSide: BorderSide.none,
+                    //     ),
+                    //     focusedErrorBorder: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(5.r),
+                    //       borderSide: BorderSide(color: Colors.red, width: 1.w),
+                    //     ),
+                    //     hintText: "Your Password",
+                    //     hintStyle: GoogleFonts.inter(
+                    //       fontSize: 14.sp,
+                    //       fontWeight: FontWeight.w400,
+                    //       color: Color(0xFF787B7B),
+                    //     ),
+                    //   ),
+                    //   validator: (value) {
+                    //     if (value == null || value.isEmpty) {
+                    //       return "Password is required";
+                    //     }
+                    //     return null;
+                    //   },
+                    // ),
 
                     SizedBox(height: 30.h),
                     ElevatedButton(

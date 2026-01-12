@@ -40,10 +40,9 @@ android {
 //    }
 
 
-
     signingConfigs {
         create("release") {
-            storeFile = file("c:\\Users\\a2z\\Downloads\\INSTANT\\instant-delivery-app\\instantDelivery.jks")
+            storeFile = file("c:\\Users\\a2z\\Downloads\\soheb-Globally\\INSTANT\\instant-delivery-app\\instantDelivery.jks")
             storePassword = "123456"
             keyAlias = "instantDelivery"
             keyPassword = "123456"

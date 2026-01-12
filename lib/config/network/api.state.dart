@@ -43,11 +43,10 @@ import '../../data/Model/RatingResponseModel.dart';
 import '../../data/Model/SubmitRatingModel.dart';
 part 'api.state.g.dart';
 
-// @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 // @RestApi(baseUrl: "http://192.168.1.26:4567/api") // local url
 
- @RestApi(baseUrl: "https://backend.weloads.live/api")
- 
+// @RestApi(baseUrl: "https://backend.weloads.live/api")
 // @RestApi(baseUrl: "https://backend.weloads.live/api")
 
 // https://backend.weloads.live/api/
@@ -55,12 +54,11 @@ part 'api.state.g.dart';
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
+
   @GET("/v1/user/getDeliveryById")
   Future<GetDeliveryByIdResModel2> getDeliveryById2(
       @Query("deliveryId") String deliveryId,
       );
-
-
 
   @POST("/v1/user/bookInstantDelivery")
   Future<BookInstantDeliveryResModel> bookInstantDelivery(

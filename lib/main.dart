@@ -164,7 +164,8 @@ class _MyAppState extends State<MyApp> {
     log("=====================================");
     log(token ?? "No token found");
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+    return
+      AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Color(0xFF092325),
         statusBarIconBrightness: Brightness.light,

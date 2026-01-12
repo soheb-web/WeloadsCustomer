@@ -125,7 +125,7 @@ class _PickupScreenState extends State<PickupScreen> {
     canvas.drawCircle(
       const Offset(size / 2, size / 2),
       size / 2 - 18,
-      Paint()..color = const Color(0xFF00C853), // Bright Green
+      Paint()..color = const Color(0xFFD57430), // Bright Green
     );
 
     canvas.drawCircle(
@@ -344,49 +344,202 @@ class _PickupScreenState extends State<PickupScreen> {
     socket.onDisconnect((_) => setState(() => isSocketConnected = false));
   }
   // MARK: - Fetch Route for Multiple Drops
-  Future<void> _fetchRoute() async {
-    if (_currentLatLng == null || widget.pickup.isEmpty) return;
+  // Future<void> _fetchRoute() async {
+  //   if (_currentLatLng == null || widget.pickup.isEmpty) return;
+  //
+  //   const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
+  //   double totalDistKm = 0.0;
+  //   int totalTimeMin = 0;
+  //   List<LatLng> allPoints = [];
+  //
+  //   // 1. Driver → Pickup
+  //   final pickupLat = widget.pickup['lat'] as double;
+  //   final pickupLng = widget.pickup['long'] as double;
+  //   final url1 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+  //     'origin': '${_currentLatLng!.latitude},${_currentLatLng!.longitude}',
+  //     'destination': '$pickupLat,$pickupLng',
+  //     'key': apiKey,
+  //   });
+  //
+  //   try {
+  //     final res = await http.get(url1);
+  //     if (res.statusCode == 200) {
+  //       final data = json.decode(res.body);
+  //       if (data['status'] == 'OK') {
+  //         final poly = data['routes'][0]['overview_polyline']['points'];
+  //         final points = _decodePolyline(poly);
+  //         allPoints.addAll(points);
+  //         final leg = data['routes'][0]['legs'][0];
+  //         toPickupDistance = leg['distance']['text'];
+  //         toPickupDuration = leg['duration']['text'];
+  //         driverToPickupETA = leg['duration']['text'];
+  //         totalDistKm += (leg['distance']['value'] as num) / 1000;
+  //         totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
+  //       }
+  //     }
+  //   } catch (e) {
+  //     log("Route1 error: $e");
+  //   }
+  //
+  //   // 2. Pickup → Drop1 → Drop2 → Drop3
+  //   dropDistances = List.filled(widget.dropoff.length, '');
+  //   dropDurations = List.filled(widget.dropoff.length, '');
+  //
+  //   for (int i = 0; i < widget.dropoff.length; i++) {
+  //     final origin = i == 0 ? '$pickupLat,$pickupLng' : '${widget.dropoff[i - 1]['lat']},${widget.dropoff[i - 1]['long']}';
+  //     final dest = '${widget.dropoff[i]['lat']},${widget.dropoff[i]['long']}';
+  //
+  //     final url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+  //       'origin': origin,
+  //       'destination': dest,
+  //       'key': apiKey,
+  //     });
+  //
+  //     try {
+  //       final res = await http.get(url);
+  //       if (res.statusCode == 200) {
+  //         final data = json.decode(res.body);
+  //         if (data['status'] == 'OK') {
+  //           final poly = data['routes'][0]['overview_polyline']['points'];
+  //           final points = _decodePolyline(poly);
+  //           allPoints.addAll(points);
+  //           final leg = data['routes'][0]['legs'][0];
+  //           dropDistances[i] = leg['distance']['text'];
+  //           dropDurations[i] = leg['duration']['text'];
+  //           totalDistKm += (leg['distance']['value'] as num) / 1000;
+  //           totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
+  //         }
+  //       }
+  //     } catch (e) {
+  //       log("Drop $i route error: $e");
+  //     }
+  //   }
+  //
+  //   if (mounted) {
+  //     setState(() {
+  //       _polylines.clear();
+  //       if (allPoints.isNotEmpty) {
+  //         _polylines.add(Polyline(
+  //           polylineId: const PolylineId('full_route'),
+  //           points: allPoints,
+  //           color: Colors.blue,
+  //           width: 5,
+  //         ));
+  //       }
+  //       totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
+  //       totalDuration = '$totalTimeMin min';
+  //       _routePoints = allPoints;
+  //       _routeFetched = true;
+  //     });
+  //
+  //     if (_mapController != null && _routePoints.isNotEmpty) {
+  //       final bounds = _calculateBounds(_routePoints);
+  //       _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
+  //     }
+  //   }
+  // }
 
+
+  // Future<void> _fetchRoute() async {
+  //   // अगर driver location नहीं है तो सिर्फ pickup → drops का route दिखाओ
+  //   // user current location कभी use मत करो
+  //
+  //   const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
+  //   double totalDistKm = 0.0;
+  //   int totalTimeMin = 0;
+  //   List<LatLng> allPoints = [];
+  //
+  //   final pickupLat = widget.pickup['lat'] as double;
+  //   final pickupLng = widget.pickup['long'] as double;
+  //
+  //   // ✅ Driver location है तो driver → pickup की line + ETA दिखाओ
+  //   if (_driverLatLng != null) {
+  //     final url1 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+  //       'origin': '${_driverLatLng!.latitude},${_driverLatLng!.longitude}',
+  //       'destination': '$pickupLat,$pickupLng',
+  //       'key': apiKey,
+  //     });
+  //
+  //     try {
+  //       final res = await http.get(url1);
+  //       if (res.statusCode == 200) {
+  //         final data = json.decode(res.body);
+  //         if (data['status'] == 'OK') {
+  //           final poly = data['routes'][0]['overview_polyline']['points'];
+  //           final points = _decodePolyline(poly);
+  //           allPoints.addAll(points);
+  //           final leg = data['routes'][0]['legs'][0];
+  //           toPickupDistance = leg['distance']['text'];
+  //           toPickupDuration = leg['duration']['text'];
+  //           driverToPickupETA = leg['duration']['text'];
+  //           totalDistKm += (leg['distance']['value'] as num) / 1000;
+  //           totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
+  //         }
+  //       }
+  //     } catch (e) {
+  //       log("Driver to Pickup route error: $e");
+  //     }
+  //   } else {
+  //     // Driver location नहीं → ETA "On the way" दिखाओ
+  //     driverToPickupETA = "On the way";
+  //   }
+  //
+  //   // बाकी का code वैसा ही रहे (pickup → drops)
+  //   // ... existing drop loop code ...
+  //
+  // }
+
+
+  Future<void> _fetchRoute() async {
     const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
     double totalDistKm = 0.0;
     int totalTimeMin = 0;
     List<LatLng> allPoints = [];
 
-    // 1. Driver → Pickup
     final pickupLat = widget.pickup['lat'] as double;
     final pickupLng = widget.pickup['long'] as double;
-    final url1 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-      'origin': '${_currentLatLng!.latitude},${_currentLatLng!.longitude}',
-      'destination': '$pickupLat,$pickupLng',
-      'key': apiKey,
-    });
 
-    try {
-      final res = await http.get(url1);
-      if (res.statusCode == 200) {
-        final data = json.decode(res.body);
-        if (data['status'] == 'OK') {
-          final poly = data['routes'][0]['overview_polyline']['points'];
-          final points = _decodePolyline(poly);
-          allPoints.addAll(points);
-          final leg = data['routes'][0]['legs'][0];
-          toPickupDistance = leg['distance']['text'];
-          toPickupDuration = leg['duration']['text'];
-          driverToPickupETA = leg['duration']['text'];
-          totalDistKm += (leg['distance']['value'] as num) / 1000;
-          totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
+    // 1. Driver → Pickup (only if driver location available)
+    if (_driverLatLng != null) {
+      final url1 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+        'origin': '${_driverLatLng!.latitude},${_driverLatLng!.longitude}',
+        'destination': '$pickupLat,$pickupLng',
+        'key': apiKey,
+      });
+
+      try {
+        final res = await http.get(url1);
+        if (res.statusCode == 200) {
+          final data = json.decode(res.body);
+          if (data['status'] == 'OK') {
+            final poly = data['routes'][0]['overview_polyline']['points'];
+            final points = _decodePolyline(poly);
+            allPoints.addAll(points);
+
+            final leg = data['routes'][0]['legs'][0];
+            toPickupDistance = leg['distance']['text'];
+            toPickupDuration = leg['duration']['text'];
+            driverToPickupETA = leg['duration']['text'];
+
+            totalDistKm += (leg['distance']['value'] as num) / 1000;
+            totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
+          }
         }
+      } catch (e) {
+        log("Driver to Pickup route error: $e");
       }
-    } catch (e) {
-      log("Route1 error: $e");
+    } else {
+      driverToPickupETA = "On the way";
     }
 
-    // 2. Pickup → Drop1 → Drop2 → Drop3
+    // 2. Pickup → Drop1 → Drop2 → ...
     dropDistances = List.filled(widget.dropoff.length, '');
     dropDurations = List.filled(widget.dropoff.length, '');
 
     for (int i = 0; i < widget.dropoff.length; i++) {
-      final origin = i == 0 ? '$pickupLat,$pickupLng' : '${widget.dropoff[i - 1]['lat']},${widget.dropoff[i - 1]['long']}';
+      final origin = i == 0
+          ? '$pickupLat,$pickupLng'
+          : '${widget.dropoff[i - 1]['lat']},${widget.dropoff[i - 1]['long']}';
       final dest = '${widget.dropoff[i]['lat']},${widget.dropoff[i]['long']}';
 
       final url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
@@ -403,9 +556,11 @@ class _PickupScreenState extends State<PickupScreen> {
             final poly = data['routes'][0]['overview_polyline']['points'];
             final points = _decodePolyline(poly);
             allPoints.addAll(points);
+
             final leg = data['routes'][0]['legs'][0];
             dropDistances[i] = leg['distance']['text'];
             dropDurations[i] = leg['duration']['text'];
+
             totalDistKm += (leg['distance']['value'] as num) / 1000;
             totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
           }
@@ -415,29 +570,33 @@ class _PickupScreenState extends State<PickupScreen> {
       }
     }
 
+    // Update polyline and UI
     if (mounted) {
       setState(() {
         _polylines.clear();
         if (allPoints.isNotEmpty) {
-          _polylines.add(Polyline(
-            polylineId: const PolylineId('full_route'),
-            points: allPoints,
-            color: Colors.blue,
-            width: 5,
-          ));
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('full_route'),
+              points: allPoints,
+              color: Colors.blue,
+              width: 5,
+            ),
+          );
         }
         totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
         totalDuration = '$totalTimeMin min';
         _routePoints = allPoints;
-        _routeFetched = true;
       });
 
+      // Camera fit on full route
       if (_mapController != null && _routePoints.isNotEmpty) {
         final bounds = _calculateBounds(_routePoints);
-        _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
+        _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
       }
     }
   }
+
   LatLngBounds _calculateBounds(List<LatLng> points) {
     double minLat = points[0].latitude, maxLat = points[0].latitude;
     double minLng = points[0].longitude, maxLng = points[0].longitude;
@@ -504,7 +663,7 @@ class _PickupScreenState extends State<PickupScreen> {
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
-  /*void _addMarkers() {
+  void _addMarkers() {
     final markers = <Marker>{};
 
     // Current Location
@@ -527,7 +686,7 @@ class _PickupScreenState extends State<PickupScreen> {
       position: LatLng(pickupLat, pickupLng),
       infoWindow: InfoWindow(title: widget.pickup['name'] ?? 'Pickup'),
       icon:
-      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
     ));
 
     // Dropoffs
@@ -554,68 +713,11 @@ class _PickupScreenState extends State<PickupScreen> {
     }
 
     setState(() => _markers = markers);
-  }*/
-
-
-
-  void _addMarkers() {
-    final markers = <Marker>{};
-
-    /// ✅ Driver current location
-    if (_driverLatLng != null) {
-      markers.add(
-        Marker(
-          markerId: const MarkerId('current'),
-          position: _driverLatLng!,
-          infoWindow: const InfoWindow(title: 'Driver Location'),
-          icon: driverIcon,
-        ),
-      );
-    }
-
-    /// ✅ Pickup
-    final pickupLat = widget.pickup['lat'] as double;
-    final pickupLng = widget.pickup['long'] as double;
-
-    markers.add(
-      Marker(
-        markerId: const MarkerId('pickup'),
-        position: LatLng(pickupLat, pickupLng),
-        infoWindow: InfoWindow(
-          title: widget.pickup['name'] ?? 'Pickup',
-        ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueOrange,
-        ),
-      ),
-    );
-
-    /// ✅ ONLY last drop marker
-    if (widget.dropoff.isNotEmpty) {
-      final lastIndex = widget.dropoff.length - 1;
-      final lastDrop = widget.dropoff[lastIndex];
-
-      final lat = lastDrop['lat'] as double;
-      final lng = lastDrop['long'] as double;
-      final name = lastDrop['name'] ?? 'Drop';
-
-      markers.add(
-        Marker(
-          markerId: const MarkerId('drop_last'),
-          position: LatLng(lat, lng),
-          infoWindow: InfoWindow(
-            title: 'Drop',
-            snippet: name,
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueRed,
-          ),
-        ),
-      );
-    }
-
-    setState(() => _markers = markers);
   }
+
+
+
+
 
 
 
@@ -686,8 +788,8 @@ class _PickupScreenState extends State<PickupScreen> {
               },
               markers: _markers,
               polylines: _polylines,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+              myLocationEnabled: false,
+              myLocationButtonEnabled: false,
             ),
 
             // Route Info
