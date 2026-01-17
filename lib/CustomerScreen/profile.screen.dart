@@ -1,11 +1,9 @@
 import 'dart:developer';
+import 'package:delivery_mvp_app/CustomerScreen/PaymenetPage.dart';
 import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/support.page.dart';
-
 import 'package:delivery_mvp_app/CustomerScreen/updateUserProfile.page.dart';
-import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
-
 import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +14,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import 'AllIndiaDeliveryHistory.dart';
+import 'PackerMoverDeliveryHistory.dart';
+import 'TransactionScreen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final IO.Socket socket;
@@ -79,6 +81,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       },
     );
   }
+
+
   @override
   Widget build(BuildContext context) {
     var box = Hive.box("folder");
@@ -137,7 +141,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               ),
-
               SizedBox(height: 5.h),
               Center(
                 child: Text(
@@ -164,7 +167,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 );
               }),
-              buildProfile(Icons.payment, "Payment", () {}),
+
+              buildProfile(Icons.payment, "Payment", () {
+
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>AddMoneyToWalletPage()));
+              }),
+
+              buildProfile(Icons.payment, "Transaction History", () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>TransactionHistoryPage()));
+              }),
+
               buildProfile(Icons.history, "Delivery History", () {
                 Navigator.push(
                   context,
@@ -174,6 +186,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 );
               }),
 
+              buildProfile(Icons.payment, "All India Delivery History", () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>
+                    PackerMoverDeliveryHistory()
+                ));
+
+              }),
+
+              buildProfile(Icons.payment, "Packer Mover Delivery History", () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>AllIndiaDeliveryHistory()));
+              }),
+
+
+
               buildProfile(Icons.contact_support, "Support/FAQ", () {
                 Navigator.push(
                   context,
@@ -182,13 +207,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 );
               }),
-              //buildProfile(Icons.settings, "Setting", () {}),
-              // buildProfile(
-              //   Icons.markunread_mailbox_rounded,
-              //   "Invite Friends",
-              //   () {
-              //   },
-              // ),
+
               SizedBox(height: 50.h),
               InkWell(
                 onTap: () {
@@ -246,3 +265,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 }
+
+
+
+
+

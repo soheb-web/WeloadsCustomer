@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:developer';
-import 'package:delivery_mvp_app/CustomerScreen/selectTrip.screen.dart';
 import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
 import 'package:delivery_mvp_app/data/controller/getDistanceController.dart';
 import 'package:flutter/cupertino.dart';
@@ -44,6 +43,7 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
   String? _currentAddress;
   bool isLoading = false;
   final int maxDrops = 3;
+
   @override
   void initState() {
     super.initState();
@@ -250,166 +250,7 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                           backgroundColor: const Color(0xFF006970),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                         ),
-                        // onPressed: () async {
-                        //   if (pickupController.text.isEmpty ||
-                        //       dropControllers.any((c) => c.text.isEmpty)) {
-                        //     ScaffoldMessenger.of(context).showSnackBar(
-                        //       const SnackBar(content: Text("Please fill pickup and all drop locations")),
-                        //     );
-                        //     return;
-                        //   }
-                        //
-                        //   setState(() => isLoading = true);
-                        //   try {
-                        //     double totalDistKm = await getTotalDistance(
-                        //       pickupLat: pickupLat,
-                        //       pickupLon: pickupLon,
-                        //       dropLats: dropLats,
-                        //       dropLons: dropLons,
-                        //       apiKey: 'YOUR_API_KEY',
-                        //     );
-                        //     print('Total Distance: $totalDistKm km');
-                        //     // Pickup
-                        //     List<Location> pickupLocs = await locationFromAddress(pickupController.text);
-                        //     double pickupLat = pickupLocs.first.latitude;
-                        //     double pickupLon = pickupLocs.first.longitude;
-                        //
-                        //     // All Drops
-                        //     List<double> dropLats = [];
-                        //     List<double> dropLons = [];
-                        //     List<String> dropNames = [];
-                        //
-                        //     for (var controller in dropControllers) {
-                        //       List<Location> locs = await locationFromAddress(controller.text);
-                        //       dropLats.add(locs.first.latitude);
-                        //       dropLons.add(locs.first.longitude);
-                        //       dropNames.add(controller.text);
-                        //     }
-                        //
-                        //     final body = GetDistanceBodyModel(
-                        //       name: nameContr.text.isNotEmpty ? nameContr.text : "${box.get("firstName")}",
-                        //       mobNo: phonContro.text.isNotEmpty ? phonContro.text : "${box.get("phone")}",
-                        //       origName: pickupController.text,
-                        //       picUpType: "Instant",
-                        //       destName: dropNames.join(" | "),
-                        //       origLat: pickupLat,
-                        //       origLon: pickupLon,
-                        //       destLat: dropLats.first,
-                        //       destLon: dropLons.first,
-                        //     );
-                        //
-                        //     await ref.read(getDistanceProvider.notifier).fetchDistance(body);
-                        //
-                        //     await Navigator.push(
-                        //       context,
-                        //       CupertinoPageRoute(
-                        //         builder: (context) => SelectTripScreen(
-                        //           widget.socket,
-                        //           pickupLat,
-                        //           pickupLon,
-                        //           dropLats,
-                        //           dropLons,
-                        //           dropNames,
-                        //         ),
-                        //       ),
-                        //     );
-                        //
-                        //     setState(() => isLoading = false);
-                        //
-                        //   } catch (e) {
-                        //     setState(() => isLoading = false);
-                        //     ScaffoldMessenger.of(context).showSnackBar(
-                        //       SnackBar(content: Text("Error: $e")),
-                        //     );
-                        //   }
-                        //
-                        // },
-                        // onPressed: () async {
-                        //   if (pickupController.text.isEmpty ||
-                        //       dropControllers.any((c) => c.text.isEmpty)) {
-                        //     ScaffoldMessenger.of(context).showSnackBar(
-                        //       const SnackBar(content: Text("Please fill pickup and all drop locations")),
-                        //     );
-                        //     return;
-                        //   }
-                        //
-                        //   setState(() => isLoading = true);
-                        //   try {
-                        //     // Step 1: Get Pickup Coordinates
-                        //     List<Location> pickupLocs = await locationFromAddress(pickupController.text);
-                        //     double pickupLat = pickupLocs.first.latitude;
-                        //     double pickupLon = pickupLocs.first.longitude;
-                        //
-                        //     // Step 2: Get All Drop Coordinates
-                        //     List<double> dropLats = [];
-                        //     List<double> dropLons = [];
-                        //     List<String> dropNames = [];
-                        //
-                        //     for (var controller in dropControllers) {
-                        //       List<Location> locs = await locationFromAddress(controller.text);
-                        //       dropLats.add(locs.first.latitude);
-                        //       dropLons.add(locs.first.longitude);
-                        //       dropNames.add(controller.text);
-                        //     }
-                        //
-                        //     // Step 3: Calculate Total Distance (Pickup → All Drops → Last Drop)
-                        //     double totalDistKm = await getTotalDistance(
-                        //       pickupLat: pickupLat,
-                        //       pickupLon: pickupLon,
-                        //       dropLats: dropLats,
-                        //       dropLons: dropLons,
-                        //       apiKey: 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g', // Replace with your key
-                        //     );
-                        //     print('Total Distance: ${totalDistKm.toStringAsFixed(1)} km');
-                        //
-                        //     // Step 4: Build Body with Multi-Dropoff + totalDistance
-                        //     final body = GetDistanceBodyModel(
-                        //       name: nameContr.text.isNotEmpty ? nameContr.text : box.get("firstName") ?? "User",
-                        //       mobNo: phonContro.text.isNotEmpty ? phonContro.text : box.get("phone") ?? "N/A",
-                        //       origName: pickupController.text,
-                        //       picUpType: "Instant",
-                        //       origLat: pickupLat,
-                        //       origLon: pickupLon,
-                        //       dropoff: dropLats.asMap().entries.map((entry) {
-                        //         int i = entry.key;
-                        //         return Dropoff(
-                        //           name: dropNames[i],
-                        //           lat: dropLats[i],
-                        //           long: dropLons[i],
-                        //         );
-                        //       }).toList(),
-                        //       totalDistance: totalDistKm.round(), // km → int
-                        //     );
-                        //
-                        //     // Step 5: Call Your API
-                        //     final response = await ref.read(getDistanceProvider.notifier).fetchDistance(body);
-                        //
-                        //     // Step 6: Navigate
-                        //     if (mounted) {
-                        //       await Navigator.push(
-                        //         context,
-                        //         CupertinoPageRoute(
-                        //           builder: (context) => SelectTripScreen(
-                        //             widget.socket,
-                        //             pickupLat,
-                        //             pickupLon,
-                        //             dropLats,
-                        //             dropLons,
-                        //             dropNames,
-                        //             // totalDistance: totalDistKm.round(), // Pass to next screen
-                        //           ),
-                        //         ),
-                        //       );
-                        //     }
-                        //
-                        //     setState(() => isLoading = false);
-                        //   } catch (e) {
-                        //     setState(() => isLoading = false);
-                        //     ScaffoldMessenger.of(context).showSnackBar(
-                        //       SnackBar(content: Text("Error: $e")),
-                        //     );
-                        //   }
-                        // },
+
 
 
                         onPressed: () async {
@@ -842,7 +683,10 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
 }
 class PickupPage extends ConsumerStatefulWidget {
   final TextEditingController pickController;
-  const PickupPage({super.key, required this.pickController});
+  final void Function(double lat, double lng)? onLocationPicked; // ← NEW
+  const PickupPage({super.key, required this.pickController,
+    this.onLocationPicked,
+  });
   @override
   ConsumerState<PickupPage> createState() => _PickupPageState();
 }
@@ -965,9 +809,25 @@ class _PickupPageState extends ConsumerState<PickupPage> {
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006970), foregroundColor: Colors.white, minimumSize: Size(double.infinity, 44.h)),
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
+          /*  ElevatedButton(
               onPressed: _pickupController.text.trim().isEmpty ? null : () {
                 widget.pickController.text = _pickupController.text.trim();
+                Navigator.pop(context);
+              },
+              child: Text("Confirm Pickup", style: GoogleFonts.poppins(fontSize: 16.sp, color: Colors.white)),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006970), minimumSize: Size(double.infinity, 48.h)),
+            ),*/
+            ElevatedButton(
+              onPressed: _pickupController.text.trim().isEmpty
+                  ? null
+                  : () {
+                widget.pickController.text = _pickupController.text.trim();
+
+                // NEW: lat/long parent ko bhej do
+                if (widget.onLocationPicked != null && _lat.isNotEmpty && _lon.isNotEmpty) {
+                  widget.onLocationPicked!(double.parse(_lat), double.parse(_lon));
+                }
+
                 Navigator.pop(context);
               },
               child: Text("Confirm Pickup", style: GoogleFonts.poppins(fontSize: 16.sp, color: Colors.white)),
@@ -1013,11 +873,25 @@ class _PickupPageState extends ConsumerState<PickupPage> {
                             const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, color: Colors.red), SizedBox(width: 8), Text("Delete", style: TextStyle(color: Colors.red))])),
                           ],
                         ),
-                        onTap: () {
+                       /* onTap: () {
                           _pickupController.text = addr.name ?? '';
                           widget.pickController.text = _pickupController.text.trim();
                           Navigator.pop(context);
-                        },
+                        },*/
+                        onTap: () {
+
+                          _pickupController.text = addr.name ?? '';
+                          widget.pickController.text = _pickupController.text.trim();
+
+                          // NEW: Saved address se lat/long bhej do
+
+                          if (widget.onLocationPicked != null && addr.lat != null && addr.lon != null) {
+                            widget.onLocationPicked!(addr.lat!, addr.lon!);
+                          }
+
+                          Navigator.pop(context);
+
+                          },
                       );
                     },
                   ),
@@ -1034,7 +908,11 @@ class _PickupPageState extends ConsumerState<PickupPage> {
 }
 class DropPage extends ConsumerStatefulWidget {
   final TextEditingController dropController;
-  const DropPage({super.key, required this.dropController});
+
+  final void Function(double lat, double lng)? onLocationDrop; // ← NEW
+  const DropPage({super.key, required this.dropController,
+    this.onLocationDrop,
+  });
   @override
   ConsumerState<DropPage> createState() => _DropPageState();
 }
@@ -1074,20 +952,17 @@ class _DropPageState extends ConsumerState<DropPage> {
         if (permission == LocationPermission.denied) return _showSnack("Permission denied");
       }
       if (permission == LocationPermission.deniedForever) return _showSnack("Permission permanently denied");
-
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         await Geolocator.openLocationSettings();
         return _showSnack("Enable location services");
       }
-
       final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation);
       final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
       final place = placemarks.first;
       final address = [place.name, place.street, place.subLocality, place.locality, place.administrativeArea, place.postalCode, place.country]
           .where((e) => e?.isNotEmpty ?? false)
           .join(', ');
-
       _dropController.text = address;
       _lat = position.latitude.toString();
       _lon = position.longitude.toString();
@@ -1098,6 +973,7 @@ class _DropPageState extends ConsumerState<DropPage> {
       setState(() => _fetchingCurrent = false);
     }
   }
+
 
   void _showSnack(String msg) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
@@ -1157,9 +1033,23 @@ class _DropPageState extends ConsumerState<DropPage> {
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006970), foregroundColor: Colors.white, minimumSize: Size(double.infinity, 44.h)),
             ),
             const SizedBox(height: 12),
+           /* ElevatedButton(
+              onPressed: () {
+                widget.dropController.text = _dropController.text.trim();
+                Navigator.pop(context);
+              },
+              child: Text("Confirm Drop", style: GoogleFonts.poppins(fontSize: 16.sp, color: Colors.white)),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006970), minimumSize: Size(double.infinity, 48.h)),
+            ),*/
             ElevatedButton(
               onPressed: () {
                 widget.dropController.text = _dropController.text.trim();
+
+                // NEW: lat/long parent ko bhej do (DropPage ke liye)
+                if (widget.onLocationDrop != null && _lat.isNotEmpty && _lon.isNotEmpty) {
+                  widget.onLocationDrop!(double.parse(_lat), double.parse(_lon));
+                }
+
                 Navigator.pop(context);
               },
               child: Text("Confirm Drop", style: GoogleFonts.poppins(fontSize: 16.sp, color: Colors.white)),
@@ -1206,10 +1096,16 @@ class _DropPageState extends ConsumerState<DropPage> {
                           ],
                         ),
                         onTap: () {
+
                           _dropController.text = addr.name ?? '';
                           widget.dropController.text = _dropController.text.trim();
+                          if (widget.onLocationDrop != null && addr.lat != null && addr.lon != null) {
+                            widget.onLocationDrop!(addr.lat!, addr.lon!);
+                          }
+
                           Navigator.pop(context);
-                        },
+
+                          },
                       );
                     },
                   ),

@@ -31,28 +31,87 @@ import 'package:delivery_mvp_app/data/Model/verifyRegisterBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyRegisterResModel.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import '../../CustomerScreen/AllIndia/AllIndiaParselListModel.dart';
+import '../../CustomerScreen/AllIndia/parcelListModel.dart';
 import '../../data/Model/AddAddressModel.dart';
+import '../../data/Model/AllIndiaBodyModel.dart';
+import '../../data/Model/AllIndiaParcelResponseModel.dart';
 import '../../data/Model/CancelOrderModel.dart';
+import '../../data/Model/CreateOrderBodyModel.dart';
+import '../../data/Model/CreateOrderResponseModel.dart';
+import '../../data/Model/CreatePickersAndMoverBooking.dart';
+import '../../data/Model/CreateTransactionResponseModel.dart';
 import '../../data/Model/DeleteAddressModel.dart';
 import '../../data/Model/GetAddressResponseModel.dart';
 import '../../data/Model/GetDeliveryByIdResModel.dart';
 import '../../data/Model/GetDeliveryByIdResModel2.dart';
 import '../../data/Model/GetNearByDriverResponseModel.dart';
 import '../../data/Model/NearByDriverModel.dart';
+import '../../data/Model/PackerCategoryAndSubcategoryModel.dart';
+import '../../data/Model/PickerMoverResponseModel.dart';
 import '../../data/Model/RatingResponseModel.dart';
+import '../../data/Model/RecommendedModel.dart';
 import '../../data/Model/SubmitRatingModel.dart';
 part 'api.state.g.dart';
 
-@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
-// @RestApi(baseUrl: "http://192.168.1.26:4567/api") // local url
 
-// @RestApi(baseUrl: "https://backend.weloads.live/api")
+
+// @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+// @RestApi(baseUrl: "http://192.168.1.22:4567/api") // local url
+
+
+@RestApi(baseUrl: "https://backend.weloads.live/api")
+
+
 // @RestApi(baseUrl: "https://backend.weloads.live/api")
 
 // https://backend.weloads.live/api/
 
 abstract class APIStateNetwork {
+
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
+
+  //////////Payment gateway///////////
+
+
+
+
+  @POST("/v1/user/getParcelList")
+  Future<ParcelResponseListModel> getParcelList();
+
+  @POST("/v1/user/getPackerAndMoveBookingList")
+  Future<AllIndiaResponseListModel> getPackerAndMoveBookingList();
+
+
+
+
+
+  @POST("/v1/user/createParcel")
+  Future<AllIndiaResponseModel> allIndiaBooking(
+      @Body() AllIndiaBodyModel body,
+      );
+
+
+  @POST("/v1/user/createPickersAndMoverBooking")
+  Future<PickerMoverBookingModel> createPickersAndMoverBooking(
+      @Body() CreatePickersAndMoverBooking body,
+      );
+
+
+
+
+
+
+
+
+  @POST("/v1/user/createOrder")
+  Future<CreateOrderResponseModel> createOrder(
+      @Body() CreateOrderModel body,
+      );
+
+
+
+  // getTxList
 
 
   @GET("/v1/user/getDeliveryById")
@@ -60,14 +119,19 @@ abstract class APIStateNetwork {
       @Query("deliveryId") String deliveryId,
       );
 
+
   @POST("/v1/user/bookInstantDelivery")
   Future<BookInstantDeliveryResModel> bookInstantDelivery(
       @Body() BookInstantDeliveryBodyModel body,
       );
 
 
+
+
+
   @POST("/v1/user/reviewRating")
   Future<RatingResponseModel> reviewRating(@Body() SubmitRatingRequest body);
+
 
   @GET("/v1/user/getAllAddresses")
   Future<GetAddressRsponseModel> getAllAddresses();
@@ -99,9 +163,26 @@ abstract class APIStateNetwork {
   @GET("/v1/user/getProfile")
   Future<GetProfileModel> fetchProfile();
 
+  @GET("/v1/user/getTxList")
+  Future<TransactionListResponseModel> getTxList();
+
+  ///////////
+
+
+
+
+
+
+  ////////////
+
+  @GET("/v1/user/packageAppKeyList")
+  Future<RecommendedModel> recommendedList();
+
+  @GET("/v1/user/getPackersCategoryOrSubCategory")
+  Future<PackerCategoryAndSubCategoryModel> getPackersCategoryOrSubCategory();
+
   @POST("/v1/user/getDistance")
   Future<GetDistanceResModel> getDistance(@Body() GetDistanceBodyModel body);
-
 
   @POST("/v1/user/deliveryCancelledByUser")
   Future<DriverCancelDeliveryResModel> deliveryCancelledByUser(
@@ -156,4 +237,15 @@ abstract class APIStateNetwork {
 
   @POST("/v1/ticket/ticketReply")
   Future<TicketReplyResModel> ticketReply(@Body() TicketReplyBodyModel body);
+
+
 }
+
+
+
+
+
+
+
+
+

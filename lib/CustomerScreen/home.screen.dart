@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/packerMover.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +17,9 @@ import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:intl/intl.dart';
 import '../data/controller/getDeliveryHistoryController.dart';
+import 'AllIndiaParcelScreen.dart';
 import 'Newscreen.dart';
+import 'PaymenetPage.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final bool forceSocketRefresh;
@@ -33,9 +35,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     {"image": "assets/bike1.png", "name": "Bike Delivery"},
 
     {"image": "assets/smalltruck1.png", "name": "Mini Truck"},
-    {"image": "assets/truck1.png", "name": "Three Wheeler\nTempo"},
+    {"image": "assets/auto1.png", "name": "Three Wheeler\nTempo"},
 
-    {"image": "assets/auto1.png", "name": "Pickup Van"},
+    // {"image": "assets/auto1.png", "name": "Pickup Van"},
+    {"image": "assets/packer.png", "name": "Packer Mover"},
+    {"image": "assets/indiaParcel.png", "name": "All India Parcel"},
   ];
   final List<Color> cardColors = [
     Color(0xFF87BEB5),
@@ -57,7 +61,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isCheckingLocation = true;
   String? userId;
   late IO.Socket socket;
-
   @override
   void initState() {
     super.initState();
@@ -90,8 +93,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     log('Old socket disconnected & disposed');
   }
   void _connectSocket() {
-    // const socketUrl = 'https://backend.weloads.live';
-    const socketUrl = 'http://192.168.1.43:4567';
+    const socketUrl = 'https://backend.weloads.live';
+    // const socketUrl = 'http://192.168.1.22:4567';
     socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket', 'polling'],
       'autoConnect': false,
@@ -340,7 +343,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       body: selectIndex == 0
-          ? RefreshIndicator(
+          ?
+      RefreshIndicator(
               onRefresh: _handleManualRefresh,
               color: const Color(0xFF006970),
               backgroundColor: Colors.white,
@@ -380,6 +384,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               color: Colors.white,
                             ),
                           ),
+
                           SizedBox(height: 30.h),
 
                           Padding(
@@ -771,25 +776,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         childAspectRatio: 0.70,
                                       ),
                                   itemBuilder: (context, index) {
-                                    return InkWell(
+                                    return
+                                      index == 3?
+                                     /* InkWell(
                                       onTap: () {
-                                        if (index == 4 || index == 5) {
-                                          Fluttertoast.showToast(
-                                            msg: "Comming Soon",
-                                          );
-                                        } else {
+
+
                                           Navigator.push(
                                             context,
                                             CupertinoPageRoute(
                                               builder: (context) =>
-                                                  InstantDeliveryScreen(socket),
+                                                  PackerMoverPage(),
                                             ),
                                           );
-                                        }
+
+
                                       },
                                       child: Container(
                                         width: 160.w,
-                                        height: 175.h,
+                                        height: 205.h,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(
                                             10.r,
@@ -804,30 +809,222 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               10.r,
                                             ),
                                           ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
+                                          child: Stack(
+                                            // crossAxisAlignment:
+                                            //     CrossAxisAlignment.center,
                                             children: [
-                                              SizedBox(height: 30.h),
-                                              Center(
+                                              // SizedBox(height: 30.h),
+                                              Positioned(
+                                                top: 0,
+                                                bottom: 0,
+                                                left: 0,right: 0,
+
                                                 child: Image.asset(
                                                   myList[index]['image'],
-                                                  width: 120.w,
-                                                  height: 120.h,
+                                                  width: 100.w,
+                                                  height:180.h,
+                                                // fit: BoxFit.fill,
                                                 ),
                                               ),
-                                              Padding(
-                                                padding: EdgeInsets.only(
-                                                  top: 4.h,
+
+                                             Positioned(
+                                               top: 140.h,
+                                               // bottom: 0,
+                                               left: 0,right: 0,
+                                               child: Text(
+                                                    myList[index]['name']
+                                                        .toString(),
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 16.sp,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Color(0xFF000000),
+                                                      letterSpacing: -1,
+                                                    ),
+                                                  ),
+                                             ),
+
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )*/
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            CupertinoPageRoute(
+                                              builder: (context) => PackerMoverPage(),
+                                            ),
+                                          );
+                                        },
+                                        child:
+                                        Container(
+                                          width: 160.w,
+                                          height: 205.h,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10.r),
+                                            // agar shadow ya border chahiye to yahan add kar sakte ho
+                                          ),
+                                          child: Card(
+                                            elevation: 5.sp,
+                                            color: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10.r),
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                // Image ko pura card ke center mein rakh rahe hain
+                                              Positioned(
+                                                bottom: 10.h,
+                                              // top: .h,
+                                                // b← neeche se 20 unit upar (adjust kar sakte ho)
+                                              left: 0,
+                                              right: 0,
+                                                child:
+                                                Image.asset(
+                                                      myList[index]['image'],
+                                                      width: 120.w,
+                                                      height: 230.h,           // ← image height ko adjust kiya (180 bahut zyada tha)
+                                                      // fit: BoxFit.contain,     // ← pura dikhega, stretch nahi hoga
+                                                    ),
+                                                  ),
+
+
+                                                // Text ko neeche center mein rakh rahe hain
+                                                Positioned(
+                                                  bottom: 70.h,               // ← neeche se 20 unit upar (adjust kar sakte ho)
+                                                  left: 0,
+                                                  right: 0,
+                                                  child: Text(
+                                                    myList[index]['name'].toString(),
+                                                    textAlign: TextAlign.center,
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 15.sp,         // thoda chhota kiya taki achha lage
+                                                      fontWeight: FontWeight.w600,
+                                                      color: const Color(0xFF000000),
+                                                      letterSpacing: -0.5,
+
+                                                    ),
+                                                  ),
                                                 ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                          :
+
+
+index==4?
+                                    InkWell(
+                                      onTap: () {
+
+
+                                          Navigator.push(
+                                            context,
+                                            CupertinoPageRoute(
+                                              builder: (context) =>
+                                                  AllIndiaParcelBookingScreen(),
+                                            ),
+                                          );
+
+                                      },
+                                      child:
+
+                                      // Container(
+                                      //   width: 160.w,
+                                      //   height: 175.h,
+                                      //   decoration: BoxDecoration(
+                                      //     borderRadius: BorderRadius.circular(
+                                      //       10.r,
+                                      //     ),
+                                      //   ),
+                                      //   child: Card(
+                                      //     elevation: 5.sp,
+                                      //     color: Colors.white,
+                                      //     // color: cardColors[index % cardColors.length],
+                                      //     shape: RoundedRectangleBorder(
+                                      //       borderRadius: BorderRadius.circular(
+                                      //         10.r,
+                                      //       ),
+                                      //     ),
+                                      //     child: Column(
+                                      //       // crossAxisAlignment:
+                                      //       // CrossAxisAlignment.center,
+                                      //       children: [
+                                      //         // SizedBox(height: 30.h),
+                                      //         Image.asset(
+                                      //           myList[index]['image'],
+                                      //           width: 100.w,
+                                      //           height:190.h,
+                                      //           // fit: BoxFit.fill,
+                                      //         ),
+                                      //         Padding(
+                                      //           padding: EdgeInsets.only(
+                                      //             top: 4.h,
+                                      //           ),
+                                      //           child: Text(
+                                      //             myList[index]['name']
+                                      //                 .toString(),
+                                      //             style: GoogleFonts.inter(
+                                      //               fontSize: 16.sp,
+                                      //               fontWeight: FontWeight.w600,
+                                      //               color: Color(0xFF000000),
+                                      //               letterSpacing: -1,
+                                      //             ),
+                                      //           ),
+                                      //         ),
+                                      //       ],
+                                      //     ),
+                                      //   ),
+                                      // ),
+
+                                      Container(
+                                        width: 160.w,
+                                        height: 205.h,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10.r),
+                                          // agar shadow ya border chahiye to yahan add kar sakte ho
+                                        ),
+                                        child: Card(
+                                          elevation: 5.sp,
+                                          color: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10.r),
+                                          ),
+                                          child: Stack(
+                                            children: [
+                                              // Image ko pura card ke center mein rakh rahe hain
+                                              Positioned(
+                                                bottom: 10.h,
+                                                // top: .h,
+                                                // b← neeche se 20 unit upar (adjust kar sakte ho)
+                                                left: 0,
+                                                right: 0,
+                                                child:
+                                                Image.asset(
+                                                  myList[index]['image'],
+                                                  width: 120.w,
+                                                  height: 240.h,           // ← image height ko adjust kiya (180 bahut zyada tha)
+                                                  // fit: BoxFit.contain,     // ← pura dikhega, stretch nahi hoga
+                                                ),
+                                              ),
+
+
+                                              // Text ko neeche center mein rakh rahe hain
+                                              Positioned(
+                                                bottom: 70.h,               // ← neeche se 20 unit upar (adjust kar sakte ho)
+                                                left: 0,
+                                                right: 0,
                                                 child: Text(
-                                                  myList[index]['name']
-                                                      .toString(),
+                                                  myList[index]['name'].toString(),
+                                                  textAlign: TextAlign.center,
                                                   style: GoogleFonts.inter(
-                                                    fontSize: 16.sp,
+                                                    fontSize: 15.sp,         // thoda chhota kiya taki achha lage
                                                     fontWeight: FontWeight.w600,
-                                                    color: Color(0xFF000000),
-                                                    letterSpacing: -1,
+                                                    color: const Color(0xFF000000),
+                                                    letterSpacing: -0.5,
+
                                                   ),
                                                 ),
                                               ),
@@ -835,12 +1032,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           ),
                                         ),
                                       ),
-                                    );
+                                    ):
+
+InkWell(
+  onTap: () {
+
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) =>
+              InstantDeliveryScreen(socket),
+        ),
+      );
+
+  },
+  child: Container(
+    width: 160.w,
+    height: 175.h,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(
+        10.r,
+      ),
+    ),
+    child: Card(
+      elevation: 5.sp,
+      color: Colors.white,
+      // color: cardColors[index % cardColors.length],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          10.r,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: 30.h),
+          Center(
+            child: Image.asset(
+              myList[index]['image'],
+//                                                   width: 1600.w,
+//                                                   height:900.h,
+// fit: BoxFit.fill,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+              top: 4.h,
+            ),
+            child: Text(
+              myList[index]['name']
+                  .toString(),
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF000000),
+                letterSpacing: -1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+);
+
+
+
+
+
                                   },
                                 ),
                               ),
 
-                              SizedBox(height: 20.h),
+                              SizedBox(height: 60.h),
 
                               SizedBox(height: 40.h),
                             ],
@@ -855,7 +1120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           : selectIndex == 1
           ? OrderListScreen()
           : selectIndex == 2
-          ? PaymentScreen()
+          ? AddMoneyToWalletPage()
           : ProfileScreen(socket),
 
       bottomNavigationBar: BottomNavigationBar(
@@ -881,8 +1146,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+
+
     );
   }
+
+
   Widget cardbuild(String image, String name) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
