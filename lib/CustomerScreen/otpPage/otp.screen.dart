@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:delivery_mvp_app/CustomerScreen/otpPage/controller/otpController.dart';
@@ -16,7 +15,6 @@ import '../registerPage/controller/registerController.dart';
 class OtpScreen extends StatefulWidget {
   final String mobile;
 
-
   /// register request data (same as register screen)
   final RegisterBodyModel registerBody;
 
@@ -31,9 +29,11 @@ class OtpScreen extends StatefulWidget {
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen>
-    with OtpController<OtpScreen>, Registercontroller<OtpScreen> {
+// class _OtpScreenState extends State<OtpScreen>
+//     with OtpController<OtpScreen>, Registercontroller<OtpScreen> {
 
+class _OtpScreenState extends State<OtpScreen>
+    with Registercontroller<OtpScreen> {
   Timer? _timer;
   int _remainingSeconds = 60;
   bool canResend = false;
@@ -42,6 +42,7 @@ class _OtpScreenState extends State<OtpScreen>
     super.initState();
     startTimer();
   }
+
   void startTimer() {
     canResend = false;
     _remainingSeconds = 60;
@@ -56,17 +57,18 @@ class _OtpScreenState extends State<OtpScreen>
       }
     });
   }
+
   String get timerText {
     final minutes = (_remainingSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (_remainingSeconds % 60).toString().padLeft(2, '0');
     return "$minutes:$seconds";
   }
+
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -103,13 +105,14 @@ class _OtpScreenState extends State<OtpScreen>
 
               SizedBox(height: 26.h),
 
-
               OtpPinField(
                 key: registerVerifyotpKey,
                 maxLength: 4, // Changed from 6 to 4
                 fieldHeight: 56.h,
-                fieldWidth: 70.w, // Increased width for better look with 4 boxes
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Better spacing for 4 fields
+                fieldWidth:
+                    70.w, // Increased width for better look with 4 boxes
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceEvenly, // Better spacing for 4 fields
                 keyboardType: TextInputType.number,
                 otpPinFieldStyle: OtpPinFieldStyle(
                   textStyle: GoogleFonts.inter(
@@ -122,11 +125,12 @@ class _OtpScreenState extends State<OtpScreen>
                   activeFieldBorderColor: Colors.transparent,
                   defaultFieldBorderColor: Colors.transparent,
                 ),
-                otpPinFieldDecoration: OtpPinFieldDecoration.defaultPinBoxDecoration,
+                otpPinFieldDecoration:
+                    OtpPinFieldDecoration.defaultPinBoxDecoration,
                 onSubmit: (text) {
                   if (text.length == 4) {
                     // Auto trigger verification when 4 digits are entered
-                    sendOTP(registerToken!);
+                    sendOTP();
                   }
                 },
                 onChange: (value) {
@@ -142,28 +146,28 @@ class _OtpScreenState extends State<OtpScreen>
               Center(
                 child: canResend
                     ? Text.rich(
-                  TextSpan(
-                    text: "Didn’t receive OTP? ",
-                    children: [
-                      TextSpan(
-                        text: "Resend OTP",
-                        style: GoogleFonts.inter(
-                          color: const Color(0xFF006970),
-                          fontWeight: FontWeight.w600,
+                        TextSpan(
+                          text: "Didn’t receive OTP? ",
+                          children: [
+                            TextSpan(
+                              text: "Resend OTP",
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFF006970),
+                                fontWeight: FontWeight.w600,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = resendOtp,
+                            ),
+                          ],
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = resendOtp,
-                      ),
-                    ],
-                  ),
-                )
+                      )
                     : Text(
-                  "Resend OTP in $timerText",
-                  style: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    color: Colors.grey,
-                  ),
-                ),
+                        "Resend OTP in $timerText",
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          color: Colors.grey,
+                        ),
+                      ),
               ),
 
               SizedBox(height: 30.h),
@@ -174,15 +178,17 @@ class _OtpScreenState extends State<OtpScreen>
                   minimumSize: Size(double.infinity, 50.h),
                   backgroundColor: const Color(0xFF006970),
                 ),
-                onPressed: otp.length == 4 ? () {
-                  sendOTP(registerToken!);
-                } : null,
+                onPressed: otp.length == 4
+                    ? () {
+                        sendOTP();
+                      }
+                    : null,
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
-                  "Verify",
-                  style: TextStyle(color: Colors.white),
-                ),
+                        "Verify",
+                        style: TextStyle(color: Colors.white),
+                      ),
               ),
             ],
           ),
@@ -190,7 +196,6 @@ class _OtpScreenState extends State<OtpScreen>
       ),
     );
   }
-
 
   Future<void> resendOtp() async {
     if (!canResend) return;
@@ -207,16 +212,8 @@ class _OtpScreenState extends State<OtpScreen>
     );
   }
 
-
-
-
   String maskMobile(String mobile) {
     if (mobile.length <= 4) return mobile;
-    return mobile.replaceRange(
-      2,
-      mobile.length - 2,
-      '*' * (mobile.length - 4),
-    );
+    return mobile.replaceRange(2, mobile.length - 2, '*' * (mobile.length - 4));
   }
-
 }

@@ -26,45 +26,181 @@ class PrivacyPolicyScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             _section(
-              title: "1. Information We Collect",
+              title: "Company Information",
               content:
-              "To provide delivery services, Weloads collects basic customer information such as name, mobile number, email address, pickup and delivery addresses.",
+                  "Company Name: RESOLENT PRIME PRIVATE LIMITED\n"
+                  "Brand Name: Weloads\n"
+                  "Effective Date: 1 November 2025\n\n"
+                  "Registered Address:\n"
+                  "Room No. C-344, Sant Rohidas Ekta Society, Ambujwadi, Azad Nagar, "
+                  "Gate No. 6, Abdul Hamid Road, Nr. Akashwani, Malvani, "
+                  "Malad (W), Mumbai – 400095\n\n"
+                  "Email: support@weloads.com\n"
+                  "Website: www.weloads.com",
             ),
 
             _section(
-              title: "2. How We Use Your Information",
+              title: "1. Introduction",
               content:
-              "Your information is used to create your account, process delivery requests, communicate order updates, and improve our services.",
+                  "RESOLENT PRIME PRIVATE LIMITED (“Weloads”, “we”, “our”, “us”) "
+                  "is committed to protecting your privacy. This Privacy Policy "
+                  "describes how we collect, use, store, and protect your data "
+                  "when you use the Weloads mobile app, website, or any service "
+                  "operated by us.\n\n"
+                  "This policy applies to both customers and driver partners.",
             ),
 
             _section(
-              title: "3. Location Data",
+              title: "Consent (DPDP Act 2023)",
               content:
-              "Location data may be used to find nearby delivery partners, calculate delivery distance, and ensure accurate pickup and drop services.",
+                  "By using Weloads services, you expressly consent to the "
+                  "collection, processing, storage, and sharing of your personal "
+                  "data in accordance with this Privacy Policy and applicable "
+                  "Indian laws, including the DPDP Act 2023.",
             ),
 
             _section(
-              title: "4. Data Security",
+              title: "2. Information We Collect",
               content:
-              "We follow strict security practices to protect your personal data from unauthorized access, misuse, or disclosure.",
+                  "Customer Information:\n"
+                  "• Name, phone number, email\n"
+                  "• Pickup & drop addresses\n"
+                  "• Real-time & historical location data\n"
+                  "• Payment details (processed via secure gateways)\n"
+                  "• Booking history, ratings, complaints\n\n"
+                  "Driver Information:\n"
+                  "• Name, phone, email\n"
+                  "• KYC documents & vehicle details\n"
+                  "• Bank details for settlements\n"
+                  "• Real-time GPS location during trips\n\n"
+                  "Automatically Collected Data:\n"
+                  "• Device info, IP address\n"
+                  "• Analytics, crash logs, usage data",
             ),
 
             _section(
-              title: "5. Data Sharing",
+              title: "3. How We Use Your Information",
               content:
-              "Your data is shared only with delivery partners for order fulfillment. We do not sell your personal information to third parties.",
+                  "We use personal data to:\n"
+                  "• Provide and operate Weloads services\n"
+                  "• Process bookings, payments, and refunds\n"
+                  "• Enable customer–driver communication\n"
+                  "• Track live locations for deliveries\n"
+                  "• Improve performance and safety\n"
+                  "• Detect fraud and verify identity\n"
+                  "• Send notifications and updates\n"
+                  "• Provide customer and driver support",
             ),
 
             _section(
-              title: "6. Your Consent",
+              title: "4. Data Sharing & Disclosure",
               content:
-              "By using the Weloads customer app, you agree to the collection and use of information in accordance with this privacy policy.",
+                  "Operational Sharing:\n"
+                  "• Customer details shared with drivers\n"
+                  "• Driver details shared with customers\n\n"
+                  "Third-Party Providers:\n"
+                  "• Payment gateways\n"
+                  "• Cloud hosting & analytics\n"
+                  "• SMS, OTP & call-masking services\n\n"
+                  "Legal Disclosure:\n"
+                  "• Law enforcement or government authorities if required\n\n"
+                  "Business Transfers:\n"
+                  "• Merger, acquisition, or restructuring\n\n"
+                  "Weloads does NOT sell personal data.",
             ),
 
             _section(
-              title: "7. Policy Updates",
+              title: "5. Phone Number Masking",
               content:
-              "Weloads may update this Privacy Policy periodically. Any changes will be reflected within the app.",
+                  "Weloads may use virtual or masked phone numbers to protect "
+                  "the privacy of customers and drivers.",
+            ),
+
+            _section(
+              title: "6. Cookies & Tracking Technologies",
+              content:
+                  "Cookies and analytics tools are used for:\n"
+                  "• App performance\n"
+                  "• Session management\n"
+                  "• User preferences\n"
+                  "• Fraud prevention\n\n"
+                  "Disabling cookies may affect some features.",
+            ),
+
+            _section(
+              title: "7. Data Retention",
+              content:
+                  "Customer and driver data may be retained for up to 7 years "
+                  "for legal, tax, or audit purposes.\n\n"
+                  "Even after account deletion, certain records such as billing "
+                  "or KYC may be retained as required by law.",
+            ),
+
+            _section(
+              title: "8. Data Security",
+              content:
+                  "We use industry-standard safeguards including encryption, "
+                  "secure servers, access controls, audits, and monitoring.\n\n"
+                  "However, no system can be guaranteed 100% secure.",
+            ),
+
+            _section(
+              title: "9. Data Breach Notification",
+              content:
+                  "In case of a data breach, affected users and the Data "
+                  "Protection Board of India will be notified as required "
+                  "under the DPDP Act 2023.",
+            ),
+
+            _section(
+              title: "10. Your Rights",
+              content:
+                  "You may request:\n"
+                  "• Access to your data\n"
+                  "• Correction of inaccurate data\n"
+                  "• Deletion of personal data (subject to law)\n"
+                  "• Withdrawal of consent\n"
+                  "• Opt-out of marketing communications\n\n"
+                  "Contact: support@weloads.com",
+            ),
+
+            _section(
+              title: "11. Children’s Privacy",
+              content:
+                  "Weloads does not knowingly collect data from individuals "
+                  "under 18 years of age. Such data will be deleted if found.",
+            ),
+
+            _section(
+              title: "12. International Data Transfers",
+              content:
+                  "Data may be stored in India or other permitted regions, "
+                  "in compliance with applicable Indian laws.",
+            ),
+
+            _section(
+              title: "13. Automated Decision-Making",
+              content:
+                  "Automated systems may be used for fraud detection, identity "
+                  "verification, and risk analysis to ensure platform safety.",
+            ),
+
+            _section(
+              title: "14. Updates to Privacy Policy",
+              content:
+                  "This Privacy Policy may be updated at any time. Continued "
+                  "use of Weloads services constitutes acceptance of the "
+                  "updated policy.",
+            ),
+
+            _section(
+              title: "15. Contact Information",
+              content:
+                  "Email: support@weloads.com\n\n"
+                  "Address:\n"
+                  "Room No. C-344, Sant Rohidas Ekta Society, Ambujwadi, "
+                  "Azad Nagar, Gate No. 6, Abdul Hamid Road, "
+                  "Nr. Akashwani, Malvani, Malad (W), Mumbai – 400095",
             ),
 
             const SizedBox(height: 30),
@@ -72,10 +208,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             Center(
               child: Text(
                 "© 2026 Weloads. All rights reserved.",
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
             ),
           ],
@@ -96,7 +229,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Weloads Privacy Policy",
+            "Weloads – Privacy Policy",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -105,7 +238,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            "Weloads is a delivery platform committed to protecting customer data and ensuring transparency.",
+            "Your privacy matters to us. Please read this policy carefully.",
             style: TextStyle(fontSize: 14, height: 1.4),
           ),
         ],
@@ -113,10 +246,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
     );
   }
 
-  Widget _section({
-    required String title,
-    required String content,
-  }) {
+  Widget _section({required String title, required String content}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -131,10 +261,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            content,
-            style: const TextStyle(fontSize: 14, height: 1.5),
-          ),
+          Text(content, style: const TextStyle(fontSize: 14, height: 1.5)),
         ],
       ),
     );

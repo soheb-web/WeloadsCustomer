@@ -405,7 +405,6 @@ class _RegisterScreenState extends State<RegisterScreen>
 }
 */
 
-
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/registerPage/controller/registerController.dart';
 import 'package:flutter/cupertino.dart';
@@ -432,7 +431,6 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen>
     with Registercontroller<RegisterScreen> {
-
   bool isTermsAccepted = false;
 
   @override
@@ -485,8 +483,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                       child: _textField(
                         controller: firstNameController,
                         hint: "First Name",
-                        validator: (v) =>
-                        v == null || v.isEmpty ? "First Name required" : null,
+                        validator: (v) => v == null || v.isEmpty
+                            ? "First Name required"
+                            : null,
                       ),
                     ),
                     SizedBox(width: 20.w),
@@ -494,8 +493,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                       child: _textField(
                         controller: lastNameController,
                         hint: "Last Name",
-                        validator: (v) =>
-                        v == null || v.isEmpty ? "Last Name required" : null,
+                        validator: (v) => v == null || v.isEmpty
+                            ? "Last Name required"
+                            : null,
                       ),
                     ),
                   ],
@@ -509,8 +509,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   initialCountryCode: 'IN',
                   decoration: _inputDecoration("Your Phone Number"),
                   validator: (phone) {
-                    if (phone == null ||
-                        phone.completeNumber.isEmpty) {
+                    if (phone == null || phone.completeNumber.isEmpty) {
                       return "Phone number required";
                     }
                     return null;
@@ -529,8 +528,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                       return "Email required";
                     }
                     if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(value)) {
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
                       return "Enter valid email";
                     }
                     return null;
@@ -541,7 +540,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                 /// TERMS & CONDITIONS
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  // crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Checkbox(
                       value: isTermsAccepted,
@@ -563,6 +562,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontWeight: FontWeight.w500,
+                                color: Color(0xFF006970),
+                                decorationColor: Color(0xFF006970),
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
@@ -570,7 +571,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     context,
                                     CupertinoPageRoute(
                                       builder: (_) =>
-                                      const TermsConditionsScreen(),
+                                          const TermsConditionsScreen(),
                                     ),
                                   );
                                 },
@@ -581,6 +582,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontWeight: FontWeight.w500,
+                                color: Color(0xFF006970),
+                                decorationColor: Color(0xFF006970),
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
@@ -588,7 +591,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                     context,
                                     CupertinoPageRoute(
                                       builder: (_) =>
-                                      const PrivacyPolicyScreen(),
+                                          const PrivacyPolicyScreen(),
                                     ),
                                   );
                                 },
@@ -614,57 +617,58 @@ class _RegisterScreenState extends State<RegisterScreen>
                   onPressed: isLoading
                       ? null
                       : () async {
-                    if (!registerformKey.currentState!.validate()) return;
+                          if (!registerformKey.currentState!.validate()) return;
 
-                    if (!isTermsAccepted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              "Please accept Terms & Conditions"),
-                        ),
-                      );
-                      return;
-                    }
-
-                    // registerUser();
-                    final deviceId = await fcmGetToken();
-
-                    registerUserApi(
-                      body: RegisterBodyModel(
-                        firstName: firstNameController.text,
-                        lastName: lastNameController.text,
-                        email: emailController.text,
-                        phone: phoneNumberController.text,
-                        deviceId: deviceId,
-                      ),
-                      onSuccess: (token) {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (_) => OtpScreen(
-                              mobile: phoneNumberController.text,
-                              registerBody: RegisterBodyModel(
-                                firstName: firstNameController.text,
-                                lastName: lastNameController.text,
-                                email: emailController.text,
-                                phone: phoneNumberController.text,
-                                deviceId: deviceId,
+                          if (!isTermsAccepted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Please accept Terms & Conditions",
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                      onError: (msg) {
-                        Fluttertoast.showToast(msg: msg);
-                      },
-                    );
+                            );
+                            return;
+                          }
 
-                  },
+                          // registerUser();
+                          final deviceId = await fcmGetToken();
+
+                          registerUserApi(
+                            body: RegisterBodyModel(
+                              firstName: firstNameController.text,
+                              lastName: lastNameController.text,
+                              email: emailController.text,
+                              phone: phoneNumberController.text,
+                              deviceId: deviceId,
+                            ),
+                            onSuccess: (token) {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (_) => OtpScreen(
+                                    mobile: phoneNumberController.text,
+                                    registerBody: RegisterBodyModel(
+                                      firstName: firstNameController.text,
+                                      lastName: lastNameController.text,
+                                      email: emailController.text,
+                                      phone: phoneNumberController.text,
+                                      deviceId: deviceId,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            onError: (msg) {
+                              Fluttertoast.showToast(msg: msg);
+                            },
+                          );
+                        },
                   child: isLoading
-                      ? const CircularProgressIndicator(
-                    color: Colors.white,
-                  )
-                      : const Text("Register",style: TextStyle(color: Colors.white),),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Register",
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
 
                 SizedBox(height: 20.h),
@@ -707,9 +711,6 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-
-
-
   /// COMMON TEXTFIELD
   Widget _textField({
     required TextEditingController controller,
@@ -736,7 +737,4 @@ class _RegisterScreenState extends State<RegisterScreen>
       ),
     );
   }
-
-
-
 }
