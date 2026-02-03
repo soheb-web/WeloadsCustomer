@@ -321,12 +321,12 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                                 context,
                                 CupertinoPageRoute(
                                   builder: (context) => ProductTypeSelectScreen(
-                                    widget.socket,
-                                    pickupLat,
-                                    pickupLon,
-                                    dropLats,
-                                    dropLons,
-                                    dropNames,
+                                      widget.socket,
+                                      pickupLat,
+                                      pickupLon,
+                                      dropLats,
+                                      dropLons,
+                                      dropNames,
                                       pickAddress
 
                                     // totalDistance: totalDistKm.round(),
@@ -618,22 +618,22 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
                 if (widget.dropControllers.length > 1)
 
 
-                    InkWell(
-                      onTap: (){
-                        widget.onRemoveDrop(index);
-                      },
-                      child: Container(
-                          decoration: BoxDecoration(
+                  InkWell(
+                    onTap: (){
+                      widget.onRemoveDrop(index);
+                    },
+                    child: Container(
+                        decoration: BoxDecoration(
 
                             borderRadius: BorderRadius.circular(30),
                             color: Colors.red
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Icon(Icons.close, size: 20.sp, color: Colors.white),
-                          )),
-                    )
-                  // )
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(Icons.close, size: 20.sp, color: Colors.white),
+                        )),
+                  )
+                // )
 
 
                 else
@@ -643,30 +643,30 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
                 // Add button - only on the last field
                 if (showAddButton)
 
-          Padding(
-            padding:  EdgeInsets.only(left:10.w),
-            child: InkWell(
+                  Padding(
+                    padding:  EdgeInsets.only(left:10.w),
+                    child: InkWell(
 
-            onTap:(){
-            widget.onAddDrop();
-            },
-            child: Icon(Icons.add_circle, size: 34.sp, color: const Color(0xFF006970))),
-          )
+                        onTap:(){
+                          widget.onAddDrop();
+                        },
+                        child: Icon(Icons.add_circle, size: 34.sp, color: const Color(0xFF006970))),
+                  )
 
 
 
-                  // TextButton.icon(
-                  //   onPressed:
-                  //   icon:
-                  //   label: Text(
-                  //     "",
-                  //     style: GoogleFonts.poppins(
-                  //       fontSize: 13.sp,
-                  //       color: const Color(0xFF006970),
-                  //       fontWeight: FontWeight.w500,
-                  //     ),
-                  //   ),
-                  // )
+                // TextButton.icon(
+                //   onPressed:
+                //   icon:
+                //   label: Text(
+                //     "",
+                //     style: GoogleFonts.poppins(
+                //       fontSize: 13.sp,
+                //       color: const Color(0xFF006970),
+                //       fontWeight: FontWeight.w500,
+                //     ),
+                //   ),
+                // )
                 else if (widget.dropControllers.length < 3)
                   SizedBox(width: 10.w), // Optional: balance spacing
               ],
@@ -809,7 +809,7 @@ class _PickupPageState extends ConsumerState<PickupPage> {
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006970), foregroundColor: Colors.white, minimumSize: Size(double.infinity, 44.h)),
             ),
             const SizedBox(height: 12),
-          /*  ElevatedButton(
+            /*  ElevatedButton(
               onPressed: _pickupController.text.trim().isEmpty ? null : () {
                 widget.pickController.text = _pickupController.text.trim();
                 Navigator.pop(context);
@@ -873,7 +873,7 @@ class _PickupPageState extends ConsumerState<PickupPage> {
                             const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, color: Colors.red), SizedBox(width: 8), Text("Delete", style: TextStyle(color: Colors.red))])),
                           ],
                         ),
-                       /* onTap: () {
+                        /* onTap: () {
                           _pickupController.text = addr.name ?? '';
                           widget.pickController.text = _pickupController.text.trim();
                           Navigator.pop(context);
@@ -891,7 +891,7 @@ class _PickupPageState extends ConsumerState<PickupPage> {
 
                           Navigator.pop(context);
 
-                          },
+                        },
                       );
                     },
                   ),
@@ -1033,7 +1033,7 @@ class _DropPageState extends ConsumerState<DropPage> {
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006970), foregroundColor: Colors.white, minimumSize: Size(double.infinity, 44.h)),
             ),
             const SizedBox(height: 12),
-           /* ElevatedButton(
+            /* ElevatedButton(
               onPressed: () {
                 widget.dropController.text = _dropController.text.trim();
                 Navigator.pop(context);
@@ -1105,7 +1105,7 @@ class _DropPageState extends ConsumerState<DropPage> {
 
                           Navigator.pop(context);
 
-                          },
+                        },
                       );
                     },
                   ),

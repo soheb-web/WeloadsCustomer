@@ -134,35 +134,35 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                       return GestureDetector(
                         onTap: () {
                           history.data!.deliveries![index].status.toString() ==
-                                      "assigned" ||
-                                  history.data!.deliveries![index].status
-                                          .toString() ==
-                                      "ongoing"
+                              "assigned" ||
+                              history.data!.deliveries![index].status
+                                  .toString() ==
+                                  "ongoing"
                               ? Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        PickupScreenNotification(
-                                          socket: widget.socket,
-                                          deliveryId:
-                                              history
-                                                  .data!
-                                                  .deliveries![index]
-                                                  .id ??
-                                              "",
-                                        ),
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PickupScreenNotification(
+                                    socket: widget.socket,
+                                    deliveryId:
+                                    history
+                                        .data!
+                                        .deliveries![index]
+                                        .id ??
+                                        "",
                                   ),
-                                )
+                            ),
+                          )
                               : Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RequestDetailsPage(
-                                      deliveryId:
-                                          history.data!.deliveries![index].id ??
-                                          "",
-                                    ),
-                                  ),
-                                );
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RequestDetailsPage(
+                                deliveryId:
+                                history.data!.deliveries![index].id ??
+                                    "",
+                              ),
+                            ),
+                          );
                         },
                         child: Padding(
                           padding: EdgeInsets.only(
@@ -178,7 +178,7 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                 children: [
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         "Receipient: ${history.data!.deliveries![index].name ?? "Unknow"}",
@@ -257,7 +257,7 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -284,33 +284,33 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                             .dropoff!
                                             .map(
                                               (d) => Padding(
-                                                padding: EdgeInsets.only(
-                                                  left: 3.w,
-                                                  bottom: 4.h,
-                                                ),
-                                                child: Text(
-                                                  d.name ?? "",
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 14.sp,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xFF0C341F),
-                                                  ),
-                                                ),
+                                            padding: EdgeInsets.only(
+                                              left: 3.w,
+                                              bottom: 4.h,
+                                            ),
+                                            child: Text(
+                                              d.name ?? "",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFF0C341F),
                                               ),
-                                            )
+                                            ),
+                                          ),
+                                        )
                                             .toList(),
                                         SizedBox(height: 2.h),
                                         Text(
                                           //2 January 2020, 2:43pm",
                                           DateFormat("dd MMMM yyyy, h:mma")
                                               .format(
-                                                DateTime.fromMillisecondsSinceEpoch(
-                                                  history
-                                                      .data!
-                                                      .deliveries![index]
-                                                      .createdAt!,
-                                                ),
-                                              )
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              history
+                                                  .data!
+                                                  .deliveries![index]
+                                                  .createdAt!,
+                                            ),
+                                          )
                                               .toLowerCase(),
                                           style: GoogleFonts.inter(
                                             fontSize: 12.sp,

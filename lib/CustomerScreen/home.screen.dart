@@ -217,19 +217,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Placemark place = placemarks[0];
         setState(() {
           currentAddress =
-              "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
+          "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
         });
       } else {
         setState(() {
           currentAddress =
-              "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+          "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
         });
       }
     } catch (e) {
       log('Error updating address: $e');
       setState(() {
         currentAddress =
-            "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+        "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
       });
     }
   }
@@ -345,440 +345,440 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: selectIndex == 0
           ?
       RefreshIndicator(
-              onRefresh: _handleManualRefresh,
-              color: const Color(0xFF006970),
-              backgroundColor: Colors.white,
-              strokeWidth: 3,
-              displacement: 40,
-              child: SingleChildScrollView(
-                child: Stack(
+        onRefresh: _handleManualRefresh,
+        color: const Color(0xFF006970),
+        backgroundColor: Colors.white,
+        strokeWidth: 3,
+        displacement: 40,
+        child: SingleChildScrollView(
+          child: Stack(
+            children: [
+              Container(
+                padding: EdgeInsets.only(left: 20.w),
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.r),
+                    topRight: Radius.circular(20.r),
+                  ),
+                  color: Color(0xFF006970),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: EdgeInsets.only(left: 20.w),
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.r),
-                          topRight: Radius.circular(20.r),
-                        ),
-                        color: Color(0xFF006970),
+                    SizedBox(height: 50.h),
+                    Text(
+                      "Hi ${box.get("firstName")},what do you\nwant to send today?",
+                      style: GoogleFonts.inter(
+                        fontSize: 25.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                    ),
+                    Text(
+                      "Fast, affordable and trusted deliveries.",
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    SizedBox(height: 30.h),
+
+                    Padding(
+                      padding: EdgeInsets.only(left: 10.w, right: 10.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(height: 50.h),
-                          Text(
-                            "Hi ${box.get("firstName")},what do you\nwant to send today?",
-                            style: GoogleFonts.inter(
-                              fontSize: 25.sp,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            "Fast, affordable and trusted deliveries.",
-                            style: GoogleFonts.inter(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white,
-                            ),
-                          ),
-
-                          SizedBox(height: 30.h),
-
-                          Padding(
-                            padding: EdgeInsets.only(left: 10.w, right: 10.w),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                delivery("Local"),
-                                delivery("City"),
-                                delivery("Nationwide"),
-                                delivery("Home Shifting"),
-                              ],
-                            ),
-                          ),
+                          delivery("Local"),
+                          delivery("City"),
+                          delivery("Nationwide"),
+                          delivery("Home Shifting"),
                         ],
                       ),
                     ),
-                    SizedBox(height: 10.h),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.h),
 
-                    Positioned(
-                      top: 250,
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20.sp),
-                            topRight: Radius.circular(20.sp),
+              Positioned(
+                top: 250,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.sp),
+                      topRight: Radius.circular(20.sp),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SizedBox(height: 15.h),
+
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 5,
+                            minimumSize: Size(180.w, 50.h),
+                            backgroundColor: Colors.amber,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    InstantDeliveryScreen(socket),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Start a Delivery",
+                            style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              SizedBox(height: 15.h),
 
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 5,
-                                  minimumSize: Size(180.w, 50.h),
-                                  backgroundColor: Colors.amber,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          InstantDeliveryScreen(socket),
-                                    ),
-                                  );
-                                },
+                        SizedBox(height: 20.h),
+
+                        historyProvier.when(
+                          data: (history) {
+                            if (history.data!.deliveries!.isEmpty) {
+                              return Center(
                                 child: Text(
-                                  "Start a Delivery",
+                                  "No ongoing deliveries",
                                   style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey[600],
                                   ),
                                 ),
-                              ),
+                              );
+                            }
 
-                              SizedBox(height: 20.h),
+                            final ongoingDeliveries = history
+                                .data!
+                                .deliveries!
+                                .where(
+                                  (d) => d.status.toString() == "ongoing",
+                            )
+                                .toList();
 
-                              historyProvier.when(
-                                data: (history) {
-                                  if (history.data!.deliveries!.isEmpty) {
-                                    return Center(
-                                      child: Text(
-                                        "No ongoing deliveries",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.grey[600],
-                                        ),
+                            if (ongoingDeliveries.isEmpty) {
+                              return const SizedBox.shrink(); // Nothing to show
+                            }
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics:
+                              const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemCount: ongoingDeliveries.length,
+                              itemBuilder: (context, index) {
+                                final delivery = ongoingDeliveries[index];
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            PickupScreenNotification(
+                                              deliveryId:
+                                              delivery.id ?? "",
+                                            ),
                                       ),
                                     );
-                                  }
-
-                                  final ongoingDeliveries = history
-                                      .data!
-                                      .deliveries!
-                                      .where(
-                                        (d) => d.status.toString() == "ongoing",
-                                      )
-                                      .toList();
-
-                                  if (ongoingDeliveries.isEmpty) {
-                                    return const SizedBox.shrink(); // Nothing to show
-                                  }
-
-                                  return ListView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    padding: EdgeInsets.zero,
-                                    itemCount: ongoingDeliveries.length,
-                                    itemBuilder: (context, index) {
-                                      final delivery = ongoingDeliveries[index];
-
-                                      return GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  PickupScreenNotification(
-                                                    deliveryId:
-                                                        delivery.id ?? "",
-                                                  ),
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: 15.h,
+                                      left: 25.w,
+                                      right: 25.w,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          delivery.id ?? "",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(
+                                              0xFF0C341F,
                                             ),
-                                          );
-                                        },
-                                        child: Padding(
-                                          padding: EdgeInsets.only(
-                                            bottom: 15.h,
-                                            left: 25.w,
-                                            right: 25.w,
                                           ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                delivery.id ?? "",
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Recipient: ${delivery.name ?? "Unknown"}",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 13.sp,
+                                                fontWeight:
+                                                FontWeight.w400,
+                                                color: const Color(
+                                                  0xFF545454,
+                                                ),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Container(
+                                              padding:
+                                              EdgeInsets.symmetric(
+                                                horizontal: 8.w,
+                                                vertical: 4.h,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: const Color(
+                                                  0xFF7DCF4A,
+                                                ).withOpacity(0.2),
+                                                borderRadius:
+                                                BorderRadius.circular(
+                                                  4.r,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                "ONGOING",
                                                 style: GoogleFonts.inter(
-                                                  fontSize: 15.sp,
-                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 11.sp,
+                                                  fontWeight:
+                                                  FontWeight.w600,
                                                   color: const Color(
-                                                    0xFF0C341F,
+                                                    0xFF1B5E20,
                                                   ),
                                                 ),
                                               ),
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "Recipient: ${delivery.name ?? "Unknown"}",
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 13.sp,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: const Color(
-                                                        0xFF545454,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const Spacer(),
-                                                  Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                          horizontal: 8.w,
-                                                          vertical: 4.h,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color: const Color(
-                                                        0xFF7DCF4A,
-                                                      ).withOpacity(0.2),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            4.r,
-                                                          ),
-                                                    ),
-                                                    child: Text(
-                                                      "ONGOING",
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 11.sp,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: const Color(
-                                                          0xFF1B5E20,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(height: 10.h),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10.h),
 
-                                              Row(
+                                        Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              width: 35.w,
+                                              height: 35.h,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                BorderRadius.circular(
+                                                  5.r,
+                                                ),
+                                                color: const Color(
+                                                  0xFFF7F7F7,
+                                                ),
+                                              ),
+                                              child: Center(
+                                                child: Image.asset(
+                                                  "assets/bike1.png",
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 10.w),
+                                            Expanded(
+                                              child: Column(
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                CrossAxisAlignment
+                                                    .start,
                                                 children: [
-                                                  Container(
-                                                    width: 35.w,
-                                                    height: 35.h,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            5.r,
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.location_on,
+                                                        size: 16.sp,
+                                                        color:
+                                                        const Color(
+                                                          0xFF27794D,
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5.w,
+                                                      ),
+                                                      Text(
+                                                        "Drop off",
+                                                        style: GoogleFonts.inter(
+                                                          fontSize: 12.sp,
+                                                          color:
+                                                          const Color(
+                                                            0xFF545454,
                                                           ),
-                                                      color: const Color(
-                                                        0xFFF7F7F7,
+                                                        ),
                                                       ),
-                                                    ),
-                                                    child: Center(
-                                                      child: Image.asset(
-                                                        "assets/bike1.png",
-                                                      ),
-                                                    ),
+                                                    ],
                                                   ),
-                                                  SizedBox(width: 10.w),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
+
+                                                  if (delivery.dropoff !=
+                                                      null &&
+                                                      delivery
+                                                          .dropoff!
+                                                          .isNotEmpty)
+                                                    ...delivery.dropoff!.asMap().entries.map((
+                                                        entry,
+                                                        ) {
+                                                      int idx = entry.key;
+                                                      final drop =
+                                                          entry.value;
+                                                      bool isFinal =
+                                                          idx ==
+                                                              delivery
+                                                                  .dropoff!
+                                                                  .length -
+                                                                  1;
+
+                                                      return Padding(
+                                                        padding:
+                                                        EdgeInsets.only(
+                                                          left: 3.w,
+                                                          top: 6.h,
+                                                        ),
+                                                        child: Row(
+                                                          crossAxisAlignment:
                                                           CrossAxisAlignment
                                                               .start,
-                                                      children: [
-                                                        Row(
                                                           children: [
-                                                            Icon(
-                                                              Icons.location_on,
-                                                              size: 16.sp,
-                                                              color:
-                                                                  const Color(
-                                                                    0xFF27794D,
+                                                            Container(
+                                                              width: 18.w,
+                                                              height:
+                                                              18.h,
+                                                              decoration: const BoxDecoration(
+                                                                color: Colors
+                                                                    .red,
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                              ),
+                                                              child: Center(
+                                                                child: Text(
+                                                                  "${idx + 1}",
+                                                                  style: TextStyle(
+                                                                    color:
+                                                                    Colors.white,
+                                                                    fontSize:
+                                                                    10.sp,
+                                                                    fontWeight:
+                                                                    FontWeight.bold,
                                                                   ),
+                                                                ),
+                                                              ),
                                                             ),
                                                             SizedBox(
-                                                              width: 5.w,
+                                                              width: 8.w,
                                                             ),
-                                                            Text(
-                                                              "Drop off",
-                                                              style: GoogleFonts.inter(
-                                                                fontSize: 12.sp,
-                                                                color:
-                                                                    const Color(
-                                                                      0xFF545454,
+                                                            Expanded(
+                                                              child: RichText(
+                                                                text: TextSpan(
+                                                                  style: GoogleFonts.inter(
+                                                                    fontSize:
+                                                                    14.sp,
+                                                                    color: const Color(
+                                                                      0xFF0C341F,
                                                                     ),
+                                                                  ),
+                                                                  children: [
+                                                                    TextSpan(
+                                                                      text:
+                                                                      drop.name ??
+                                                                          "Drop ${idx + 1}",
+                                                                    ),
+                                                                    if (isFinal)
+                                                                      TextSpan(
+                                                                        text: " (Final)",
+                                                                        style: GoogleFonts.inter(
+                                                                          fontWeight: FontWeight.w600,
+                                                                          color: Colors.red[700],
+                                                                        ),
+                                                                      ),
+                                                                  ],
+                                                                ),
                                                               ),
                                                             ),
                                                           ],
                                                         ),
+                                                      );
+                                                    }).toList(),
 
-                                                        if (delivery.dropoff !=
-                                                                null &&
-                                                            delivery
-                                                                .dropoff!
-                                                                .isNotEmpty)
-                                                          ...delivery.dropoff!.asMap().entries.map((
-                                                            entry,
-                                                          ) {
-                                                            int idx = entry.key;
-                                                            final drop =
-                                                                entry.value;
-                                                            bool isFinal =
-                                                                idx ==
-                                                                delivery
-                                                                        .dropoff!
-                                                                        .length -
-                                                                    1;
+                                                  SizedBox(height: 6.h),
 
-                                                            return Padding(
-                                                              padding:
-                                                                  EdgeInsets.only(
-                                                                    left: 3.w,
-                                                                    top: 6.h,
-                                                                  ),
-                                                              child: Row(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Container(
-                                                                    width: 18.w,
-                                                                    height:
-                                                                        18.h,
-                                                                    decoration: const BoxDecoration(
-                                                                      color: Colors
-                                                                          .red,
-                                                                      shape: BoxShape
-                                                                          .circle,
-                                                                    ),
-                                                                    child: Center(
-                                                                      child: Text(
-                                                                        "${idx + 1}",
-                                                                        style: TextStyle(
-                                                                          color:
-                                                                              Colors.white,
-                                                                          fontSize:
-                                                                              10.sp,
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    width: 8.w,
-                                                                  ),
-                                                                  Expanded(
-                                                                    child: RichText(
-                                                                      text: TextSpan(
-                                                                        style: GoogleFonts.inter(
-                                                                          fontSize:
-                                                                              14.sp,
-                                                                          color: const Color(
-                                                                            0xFF0C341F,
-                                                                          ),
-                                                                        ),
-                                                                        children: [
-                                                                          TextSpan(
-                                                                            text:
-                                                                                drop.name ??
-                                                                                "Drop ${idx + 1}",
-                                                                          ),
-                                                                          if (isFinal)
-                                                                            TextSpan(
-                                                                              text: " (Final)",
-                                                                              style: GoogleFonts.inter(
-                                                                                fontWeight: FontWeight.w600,
-                                                                                color: Colors.red[700],
-                                                                              ),
-                                                                            ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            );
-                                                          }).toList(),
-
-                                                        SizedBox(height: 6.h),
-
-                                                        Text(
-                                                          DateFormat(
-                                                                "dd MMMM yyyy, h:mma",
-                                                              )
-                                                              .format(
-                                                                DateTime.fromMillisecondsSinceEpoch(
-                                                                  delivery
-                                                                      .createdAt!,
-                                                                ),
-                                                              )
-                                                              .toLowerCase(),
-                                                          style:
-                                                              GoogleFonts.inter(
-                                                                fontSize: 12.sp,
-                                                                color:
-                                                                    const Color(
-                                                                      0xFF545454,
-                                                                    ),
-                                                              ),
-                                                        ),
-                                                      ],
+                                                  Text(
+                                                    DateFormat(
+                                                      "dd MMMM yyyy, h:mma",
+                                                    )
+                                                        .format(
+                                                      DateTime.fromMillisecondsSinceEpoch(
+                                                        delivery
+                                                            .createdAt!,
+                                                      ),
+                                                    )
+                                                        .toLowerCase(),
+                                                    style:
+                                                    GoogleFonts.inter(
+                                                      fontSize: 12.sp,
+                                                      color:
+                                                      const Color(
+                                                        0xFF545454,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
-
-                                              SizedBox(height: 12.h),
-                                              const Divider(
-                                                color: Color(0xFFDCE8E9),
-                                              ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                      );
-                                    },
-                                  );
-                                },
-                                error: (error, stackTrace) {
-                                  log("History Error: $error");
-                                  return Center(
-                                    child: Text("Error loading deliveries"),
-                                  );
-                                },
-                                loading: () => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
 
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  left: 15.w,
-                                  right: 15.w,
-                                  bottom: 10.h,
-                                ),
-                                child: GridView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: myList.length,
-                                  padding: EdgeInsets.zero,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                        crossAxisSpacing: 20.w,
-                                        mainAxisSpacing: 20.w,
-                                        childAspectRatio: 0.70,
-                                      ),
-                                  itemBuilder: (context, index) {
-                                    return
-                                      index == 3?
-                                     /* InkWell(
+                                        SizedBox(height: 12.h),
+                                        const Divider(
+                                          color: Color(0xFFDCE8E9),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          error: (error, stackTrace) {
+                            log("History Error: $error");
+                            return Center(
+                              child: Text("Error loading deliveries"),
+                            );
+                          },
+                          loading: () => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: 15.w,
+                            right: 15.w,
+                            bottom: 10.h,
+                          ),
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            itemCount: myList.length,
+                            padding: EdgeInsets.zero,
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 20.w,
+                              mainAxisSpacing: 20.w,
+                              childAspectRatio: 0.70,
+                            ),
+                            itemBuilder: (context, index) {
+                              return
+                                index == 3?
+                                /* InkWell(
                                       onTap: () {
 
 
@@ -848,275 +848,275 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         ),
                                       ),
                                     )*/
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            CupertinoPageRoute(
-                                              builder: (context) => PackerMoverPage(),
-                                            ),
-                                          );
-                                        },
-                                        child:
-                                        Container(
-                                          width: 160.w,
-                                          height: 205.h,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10.r),
-                                            // agar shadow ya border chahiye to yahan add kar sakte ho
-                                          ),
-                                          child: Card(
-                                            elevation: 5.sp,
-                                            color: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10.r),
-                                            ),
-                                            child: Stack(
-                                              children: [
-                                                // Image ko pura card ke center mein rakh rahe hain
-                                              Positioned(
-                                                bottom: 10.h,
-                                              // top: .h,
-                                                // b← neeche se 20 unit upar (adjust kar sakte ho)
-                                              left: 0,
-                                              right: 0,
-                                                child:
-                                                Image.asset(
-                                                      myList[index]['image'],
-                                                      width: 120.w,
-                                                      height: 230.h,           // ← image height ko adjust kiya (180 bahut zyada tha)
-                                                      // fit: BoxFit.contain,     // ← pura dikhega, stretch nahi hoga
-                                                    ),
-                                                  ),
-
-
-                                                // Text ko neeche center mein rakh rahe hain
-                                                Positioned(
-                                                  bottom: 70.h,               // ← neeche se 20 unit upar (adjust kar sakte ho)
-                                                  left: 0,
-                                                  right: 0,
-                                                  child: Text(
-                                                    myList[index]['name'].toString(),
-                                                    textAlign: TextAlign.center,
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 15.sp,         // thoda chhota kiya taki achha lage
-                                                      fontWeight: FontWeight.w600,
-                                                      color: const Color(0xFF000000),
-                                                      letterSpacing: -0.5,
-
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) => PackerMoverPage(),
+                                      ),
+                                    );
+                                  },
+                                  child:
+                                  Container(
+                                    width: 160.w,
+                                    height: 205.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      // agar shadow ya border chahiye to yahan add kar sakte ho
+                                    ),
+                                    child: Card(
+                                      elevation: 5.sp,
+                                      color: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10.r),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          // Image ko pura card ke center mein rakh rahe hain
+                                          Positioned(
+                                            bottom: 10.h,
+                                            // top: .h,
+                                            // b← neeche se 20 unit upar (adjust kar sakte ho)
+                                            left: 0,
+                                            right: 0,
+                                            child:
+                                            Image.asset(
+                                              myList[index]['image'],
+                                              width: 120.w,
+                                              height: 230.h,           // ← image height ko adjust kiya (180 bahut zyada tha)
+                                              // fit: BoxFit.contain,     // ← pura dikhega, stretch nahi hoga
                                             ),
                                           ),
-                                        ),
-                                      )
-                                          :
 
 
-index==4?
-                                    InkWell(
-                                      onTap: () {
+                                          // Text ko neeche center mein rakh rahe hain
+                                          Positioned(
+                                            bottom: 70.h,               // ← neeche se 20 unit upar (adjust kar sakte ho)
+                                            left: 0,
+                                            right: 0,
+                                            child: Text(
+                                              myList[index]['name'].toString(),
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 15.sp,         // thoda chhota kiya taki achha lage
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF000000),
+                                                letterSpacing: -0.5,
 
-
-                                          Navigator.push(
-                                            context,
-                                            CupertinoPageRoute(
-                                              builder: (context) =>
-                                                  AllIndiaParcelBookingScreen(),
-                                            ),
-                                          );
-
-                                      },
-                                      child:
-
-                                      // Container(
-                                      //   width: 160.w,
-                                      //   height: 175.h,
-                                      //   decoration: BoxDecoration(
-                                      //     borderRadius: BorderRadius.circular(
-                                      //       10.r,
-                                      //     ),
-                                      //   ),
-                                      //   child: Card(
-                                      //     elevation: 5.sp,
-                                      //     color: Colors.white,
-                                      //     // color: cardColors[index % cardColors.length],
-                                      //     shape: RoundedRectangleBorder(
-                                      //       borderRadius: BorderRadius.circular(
-                                      //         10.r,
-                                      //       ),
-                                      //     ),
-                                      //     child: Column(
-                                      //       // crossAxisAlignment:
-                                      //       // CrossAxisAlignment.center,
-                                      //       children: [
-                                      //         // SizedBox(height: 30.h),
-                                      //         Image.asset(
-                                      //           myList[index]['image'],
-                                      //           width: 100.w,
-                                      //           height:190.h,
-                                      //           // fit: BoxFit.fill,
-                                      //         ),
-                                      //         Padding(
-                                      //           padding: EdgeInsets.only(
-                                      //             top: 4.h,
-                                      //           ),
-                                      //           child: Text(
-                                      //             myList[index]['name']
-                                      //                 .toString(),
-                                      //             style: GoogleFonts.inter(
-                                      //               fontSize: 16.sp,
-                                      //               fontWeight: FontWeight.w600,
-                                      //               color: Color(0xFF000000),
-                                      //               letterSpacing: -1,
-                                      //             ),
-                                      //           ),
-                                      //         ),
-                                      //       ],
-                                      //     ),
-                                      //   ),
-                                      // ),
-
-                                      Container(
-                                        width: 160.w,
-                                        height: 205.h,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10.r),
-                                          // agar shadow ya border chahiye to yahan add kar sakte ho
-                                        ),
-                                        child: Card(
-                                          elevation: 5.sp,
-                                          color: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10.r),
-                                          ),
-                                          child: Stack(
-                                            children: [
-                                              // Image ko pura card ke center mein rakh rahe hain
-                                              Positioned(
-                                                bottom: 10.h,
-                                                // top: .h,
-                                                // b← neeche se 20 unit upar (adjust kar sakte ho)
-                                                left: 0,
-                                                right: 0,
-                                                child:
-                                                Image.asset(
-                                                  myList[index]['image'],
-                                                  width: 120.w,
-                                                  height: 240.h,           // ← image height ko adjust kiya (180 bahut zyada tha)
-                                                  // fit: BoxFit.contain,     // ← pura dikhega, stretch nahi hoga
-                                                ),
                                               ),
-
-
-                                              // Text ko neeche center mein rakh rahe hain
-                                              Positioned(
-                                                bottom: 70.h,               // ← neeche se 20 unit upar (adjust kar sakte ho)
-                                                left: 0,
-                                                right: 0,
-                                                child: Text(
-                                                  myList[index]['name'].toString(),
-                                                  textAlign: TextAlign.center,
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 15.sp,         // thoda chhota kiya taki achha lage
-                                                    fontWeight: FontWeight.w600,
-                                                    color: const Color(0xFF000000),
-                                                    letterSpacing: -0.5,
-
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                    :
+
+
+                                index==4?
+                                InkWell(
+                                  onTap: () {
+
+
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) =>
+                                            AllIndiaParcelBookingScreen(),
+                                      ),
+                                    );
+
+                                  },
+                                  child:
+
+                                  // Container(
+                                  //   width: 160.w,
+                                  //   height: 175.h,
+                                  //   decoration: BoxDecoration(
+                                  //     borderRadius: BorderRadius.circular(
+                                  //       10.r,
+                                  //     ),
+                                  //   ),
+                                  //   child: Card(
+                                  //     elevation: 5.sp,
+                                  //     color: Colors.white,
+                                  //     // color: cardColors[index % cardColors.length],
+                                  //     shape: RoundedRectangleBorder(
+                                  //       borderRadius: BorderRadius.circular(
+                                  //         10.r,
+                                  //       ),
+                                  //     ),
+                                  //     child: Column(
+                                  //       // crossAxisAlignment:
+                                  //       // CrossAxisAlignment.center,
+                                  //       children: [
+                                  //         // SizedBox(height: 30.h),
+                                  //         Image.asset(
+                                  //           myList[index]['image'],
+                                  //           width: 100.w,
+                                  //           height:190.h,
+                                  //           // fit: BoxFit.fill,
+                                  //         ),
+                                  //         Padding(
+                                  //           padding: EdgeInsets.only(
+                                  //             top: 4.h,
+                                  //           ),
+                                  //           child: Text(
+                                  //             myList[index]['name']
+                                  //                 .toString(),
+                                  //             style: GoogleFonts.inter(
+                                  //               fontSize: 16.sp,
+                                  //               fontWeight: FontWeight.w600,
+                                  //               color: Color(0xFF000000),
+                                  //               letterSpacing: -1,
+                                  //             ),
+                                  //           ),
+                                  //         ),
+                                  //       ],
+                                  //     ),
+                                  //   ),
+                                  // ),
+
+                                  Container(
+                                    width: 160.w,
+                                    height: 205.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      // agar shadow ya border chahiye to yahan add kar sakte ho
+                                    ),
+                                    child: Card(
+                                      elevation: 5.sp,
+                                      color: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10.r),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          // Image ko pura card ke center mein rakh rahe hain
+                                          Positioned(
+                                            bottom: 10.h,
+                                            // top: .h,
+                                            // b← neeche se 20 unit upar (adjust kar sakte ho)
+                                            left: 0,
+                                            right: 0,
+                                            child:
+                                            Image.asset(
+                                              myList[index]['image'],
+                                              width: 120.w,
+                                              height: 240.h,           // ← image height ko adjust kiya (180 bahut zyada tha)
+                                              // fit: BoxFit.contain,     // ← pura dikhega, stretch nahi hoga
+                                            ),
+                                          ),
+
+
+                                          // Text ko neeche center mein rakh rahe hain
+                                          Positioned(
+                                            bottom: 70.h,               // ← neeche se 20 unit upar (adjust kar sakte ho)
+                                            left: 0,
+                                            right: 0,
+                                            child: Text(
+                                              myList[index]['name'].toString(),
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 15.sp,         // thoda chhota kiya taki achha lage
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF000000),
+                                                letterSpacing: -0.5,
+
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ):
+
+                                InkWell(
+                                  onTap: () {
+
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) =>
+                                            InstantDeliveryScreen(socket),
+                                      ),
+                                    );
+
+                                  },
+                                  child: Container(
+                                    width: 160.w,
+                                    height: 175.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(
+                                        10.r,
+                                      ),
+                                    ),
+                                    child: Card(
+                                      elevation: 5.sp,
+                                      color: Colors.white,
+                                      // color: cardColors[index % cardColors.length],
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          10.r,
                                         ),
                                       ),
-                                    ):
-
-InkWell(
-  onTap: () {
-
-      Navigator.push(
-        context,
-        CupertinoPageRoute(
-          builder: (context) =>
-              InstantDeliveryScreen(socket),
-        ),
-      );
-
-  },
-  child: Container(
-    width: 160.w,
-    height: 175.h,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(
-        10.r,
-      ),
-    ),
-    child: Card(
-      elevation: 5.sp,
-      color: Colors.white,
-      // color: cardColors[index % cardColors.length],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          10.r,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 30.h),
-          Center(
-            child: Image.asset(
-              myList[index]['image'],
+                                      child: Column(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox(height: 30.h),
+                                          Center(
+                                            child: Image.asset(
+                                              myList[index]['image'],
 //                                                   width: 1600.w,
 //                                                   height:900.h,
 // fit: BoxFit.fill,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              top: 4.h,
-            ),
-            child: Text(
-              myList[index]['name']
-                  .toString(),
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF000000),
-                letterSpacing: -1,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  ),
-);
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                              top: 4.h,
+                                            ),
+                                            child: Text(
+                                              myList[index]['name']
+                                                  .toString(),
+                                              style: GoogleFonts.inter(
+                                                fontSize: 16.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFF000000),
+                                                letterSpacing: -1,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
 
 
 
 
 
-                                  },
-                                ),
-                              ),
-
-                              SizedBox(height: 60.h),
-
-                              SizedBox(height: 40.h),
-                            ],
+                            },
                           ),
                         ),
-                      ),
+
+                        SizedBox(height: 60.h),
+
+                        SizedBox(height: 40.h),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            )
+            ],
+          ),
+        ),
+      )
           : selectIndex == 1
           ? OrderListScreen()
           : selectIndex == 2

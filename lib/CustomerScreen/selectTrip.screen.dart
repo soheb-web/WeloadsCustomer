@@ -951,7 +951,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                   );
                 },
               ),
- ],
+            ],
           );
         },
         error: (e, s) => Center(child: Text(e.toString())),
@@ -1006,31 +1006,31 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         setState(() => isBooking = true);
         try {
           final body = BookInstantDeliveryBodyModel(
-            vehicleTypeId: selectedVehicle.vehicleTypeId ?? "",
-            origName: pickupAddress,
-            origLat: pickupLat,
-            origLon: pickupLon,
-            coinAmount: 0,
-            copanId: null,
-            productType: widget.productType,
-            dropoff:
-            selectedVehicle.dropoff
-                ?.map(
-                  (d) => BookDropoff(
-                name: d.name.toString(),
-                lat: d.lat ?? 0.0,
-                long: d.long ?? 0.0,
-              ),
-            )
-                .toList() ??
-                [],
-            distance: (selectedVehicle.distance ?? 0).toDouble(),
-            userPayAmount: double.parse(
-              selectedVehicle.price ?? "0",
-            ).toInt(),
-            taxAmount: 18.0,
-            mobNo: phon,
-            name:name
+              vehicleTypeId: selectedVehicle.vehicleTypeId ?? "",
+              origName: pickupAddress,
+              origLat: pickupLat,
+              origLon: pickupLon,
+              coinAmount: 0,
+              copanId: null,
+              productType: widget.productType,
+              dropoff:
+              selectedVehicle.dropoff
+                  ?.map(
+                    (d) => BookDropoff(
+                  name: d.name.toString(),
+                  lat: d.lat ?? 0.0,
+                  long: d.long ?? 0.0,
+                ),
+              )
+                  .toList() ??
+                  [],
+              distance: (selectedVehicle.distance ?? 0).toDouble(),
+              userPayAmount: double.parse(
+                selectedVehicle.price ?? "0",
+              ).toInt(),
+              taxAmount: 18.0,
+              mobNo: phon,
+              name:name
           );
           final service = APIStateNetwork(callPrettyDio());
           final response = await service.bookInstantDelivery(body);
@@ -1054,7 +1054,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                     selectedVehicle.price ?? "0",
                   ).toInt(),
                   distance: (selectedVehicle.distance ?? 0).toDouble(),
-                 id: selectedVehicle.vehicleTypeId ?? "",
+                  id: selectedVehicle.vehicleTypeId ?? "",
 
                   socket: socket!,
                   pickupLat: pickupLat,
@@ -1109,7 +1109,7 @@ class WaitingForDriverScreen extends StatefulWidget {
   final List<double> dropLons;
   final List<String> dropNames;
   final String txId;
-   WaitingForDriverScreen({
+  WaitingForDriverScreen({
     super.key,
     required this.productType,
     required this.mobile,
@@ -1547,24 +1547,24 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     try {
       final body = BookInstantDeliveryBodyModel(
 
-        vehicleTypeId: widget.id,
-        origName: dropNames.first,
-        origLat: pickupLat,
-        origLon: pickupLon,
-        coinAmount: 0,
-        copanId: null,
-        productType: widget.productType,
-        dropoff: dropLats.asMap().entries.map((e) => BookDropoff(
-          name: dropNames[e.key],
-          lat: e.value,
-          long: dropLons[e.key],
-        )).toList(),
-        distance:widget.distance,
-        userPayAmount:widget.userPayAmount,
-        // 270112,
-        taxAmount: 18.0,
-        mobNo:widget.mobile,
-        name:widget.name
+          vehicleTypeId: widget.id,
+          origName: dropNames.first,
+          origLat: pickupLat,
+          origLon: pickupLon,
+          coinAmount: 0,
+          copanId: null,
+          productType: widget.productType,
+          dropoff: dropLats.asMap().entries.map((e) => BookDropoff(
+            name: dropNames[e.key],
+            lat: e.value,
+            long: dropLons[e.key],
+          )).toList(),
+          distance:widget.distance,
+          userPayAmount:widget.userPayAmount,
+          // 270112,
+          taxAmount: 18.0,
+          mobNo:widget.mobile,
+          name:widget.name
       );
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.bookInstantDelivery(body);
@@ -1603,15 +1603,15 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
 // MARK: - Cancel Booking Function
   Future<void> _cancelCurrentBooking() async {
     // try {
-      // final service = APIStateNetwork(callPrettyDio());
-      // final response = await service.cancelDeliveryBooking(widget.txId);
-      //
-      // if (response.code == 0 || response.message?.toLowerCase().contains('cancelled') == true) {
-        Fluttertoast.showToast(msg: "Booking cancelled successfully");
-        _stopSearching(); // Stop all timers & animations
-        setState(() {
-          _isSearching = false; // Show "Try Again" button
-        });
+    // final service = APIStateNetwork(callPrettyDio());
+    // final response = await service.cancelDeliveryBooking(widget.txId);
+    //
+    // if (response.code == 0 || response.message?.toLowerCase().contains('cancelled') == true) {
+    Fluttertoast.showToast(msg: "Booking cancelled successfully");
+    _stopSearching(); // Stop all timers & animations
+    setState(() {
+      _isSearching = false; // Show "Try Again" button
+    });
     //   } else {
     //     Fluttertoast.showToast(msg: response.message ?? "Failed to cancel");
     //   }
