@@ -1,233 +1,4 @@
 /*
-import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginVerifyController.dart';
-import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:otp_pin_field/otp_pin_field.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
-
-class LoginVerifyScreen extends StatefulWidget {
-  final String token;
-  final String email;
-  final String pass;
-  const LoginVerifyScreen({
-    super.key,
-    required this.token,
-    required this.email,
-    required this.pass,
-  });
-
-  @override
-  State<LoginVerifyScreen> createState() => _LoginVerifyScreenState();
-}
-
-class _LoginVerifyScreenState extends State<LoginVerifyScreen>
-    with LoginVerifyController<LoginVerifyScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFFFFFFF),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 70.h),
-            Center(
-              child: Image.asset(
-                "assets/scooter.png",
-                width: 84.w,
-                height: 72.h,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 24.w, right: 24.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 28.h),
-                  Text(
-                    "Enter the 4-digit code",
-                    style: GoogleFonts.inter(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF111111),
-                      letterSpacing: -1,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    "Please input  the verification code sent to your phone number 23480*******90",
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF4F4F4F),
-                    ),
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      minimumSize: Size(0, 30.h),
-                      padding: EdgeInsets.only(left: 0, top: 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      "Change Number?",
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF006970),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 26.h),
-                  OtpPinField(
-                    key: loginVerifyotpKey,
-                    maxLength: 4,
-                    fieldHeight: 50.h,
-                    fieldWidth: 44.w,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    keyboardType: TextInputType.number,
-                    otpPinFieldStyle: OtpPinFieldStyle(
-                      textStyle: GoogleFonts.inter(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF2D2D2D),
-                      ),
-                      activeFieldBackgroundColor: Color(0xFFF0F5F5),
-                      defaultFieldBackgroundColor: Color(0xFFF0F5F5),
-                      activeFieldBorderColor: Colors.transparent,
-                      defaultFieldBorderColor: Colors.transparent,
-                    ),
-                    otpPinFieldDecoration:
-                        OtpPinFieldDecoration.defaultPinBoxDecoration,
-                    onSubmit: (text) {},
-                    onChange: (value) {
-                      setState(() {
-                        otp = value;
-                      });
-                    },
-                  ),
-
-
-
-                SizedBox(height: 20.h),
-                  Text.rich(
-                    TextSpan(
-                      text: "Didn’t get any code yet? ",
-                      style: GoogleFonts.inter(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF4F4F4F),
-                      ),
-                      children: [
-                        TextSpan(
-                          text: "Resend code",
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF006970),
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              resendOTP(widget.email, '');
-                            },
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 30.h),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(327.w, 50.h),
-                      backgroundColor: Color(0xFF006970),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                        side: BorderSide.none,
-                      ),
-                    ),
-                    onPressed: loading
-                        ? null
-                        : () async {
-                            verifyLogin(widget.token);
-                          },
-                    child: loading
-                        ? Center(
-                            child: SizedBox(
-                              width: 30.w,
-                              height: 30.h,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.w,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            "Verify",
-                            style: GoogleFonts.inter(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFFFFFFFF),
-                            ),
-                          ),
-                  ),
-                  SizedBox(height: 25.h),
-                  Center(
-                    child: Text(
-                      "By signing up, you agree to snap",
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF111111),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Text.rich(
-                      TextSpan(
-                        text: "Terms of Service ",
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF111111),
-                          decoration: TextDecoration.underline,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: "and",
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF111111),
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                          TextSpan(
-                            text: " Privacy Policy.",
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF111111),
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/
 
 
 
@@ -243,13 +14,11 @@ import 'package:otp_pin_field/otp_pin_field.dart';
 class LoginVerifyScreen extends StatefulWidget {
   final String token;
   final String email;
-  // final String pass;
 
   const LoginVerifyScreen({
     super.key,
     required this.token,
     required this.email,
-    // required this.pass,
   });
 
   @override
@@ -404,31 +173,6 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
               // SizedBox(height: 28.h),
 
               Expanded(child: SizedBox()),
-              /// BOTTOM TEXT
-              // Text.rich(
-              //   TextSpan(
-              //     text: "Didn't receive the code? ",
-              //     style: GoogleFonts.inter(
-              //       fontSize: 13.sp,
-              //       fontWeight: FontWeight.w400,
-              //       color: Colors.grey.shade600,
-              //     ),
-              //     children: [
-              //       TextSpan(
-              //         text: "Try again",
-              //         style: GoogleFonts.inter(
-              //           fontSize: 13.sp,
-              //           fontWeight: FontWeight.w600,
-              //           color: Color(0xFF006970),
-              //         ),
-              //         recognizer: TapGestureRecognizer()
-              //           ..onTap = () {
-              //             resendOTP(widget.email, '');
-              //           },
-              //       ),
-              //     ],
-              //   ),
-              // ),
 
 
 
@@ -456,6 +200,428 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
               ),
 
               SizedBox(height: 20.h),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+*//*
+
+
+import 'dart:async';
+
+import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginVerifyController.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:otp_pin_field/otp_pin_field.dart';
+
+import '../../config/utils/navigatorKey.dart';
+
+class LoginVerifyScreen extends StatefulWidget {
+  final String token;
+  final String email; // in your case this is actually the phone number
+
+  const LoginVerifyScreen({
+    super.key,
+    required this.token,
+    required this.email,
+  });
+
+  @override
+  State<LoginVerifyScreen> createState() => _LoginVerifyScreenState();
+}
+
+class _LoginVerifyScreenState extends State<LoginVerifyScreen>
+    with LoginVerifyController<LoginVerifyScreen> {
+  // ────────────────────────────────────────────────
+  //  Mask phone number (first 2 + last 2 digits visible)
+  // ────────────────────────────────────────────────
+  String get maskedPhone {
+    final phone = widget.email.trim();
+    if (phone.length != 10) return phone;
+
+    return "${phone.substring(0, 2)}${'*' * 6}${phone.substring(8)}";
+    // Example: 9876543210 → 98******10
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 60.h),
+
+              // Logo
+              Image.asset(
+                "assets/scooter.png",
+                width: 84.w,
+                height: 72.h,
+              ),
+
+              SizedBox(height: 40.h),
+
+              // Title
+              Text(
+                "Verify Your Number",
+                style: GoogleFonts.inter(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF006970),
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              // Subtitle with masked phone number
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: "Code sent to ",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF6B7280), // gray-600
+                      ),
+                    ),
+                    TextSpan(
+                      text: "+91 $maskedPhone",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF006970),
+                      ),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              SizedBox(height: 40.h),
+
+              // OTP field
+              OtpPinField(
+                key: loginVerifyotpKey,
+                maxLength: 4,
+                fieldHeight: 50.h,
+                fieldWidth: 50.w,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                keyboardType: TextInputType.number,
+                otpPinFieldStyle: OtpPinFieldStyle(
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF006970),
+                  ),
+                  activeFieldBackgroundColor: Colors.white,
+                  defaultFieldBackgroundColor: Colors.white,
+                  activeFieldBorderColor: const Color(0xFF006970),
+                  defaultFieldBorderColor: const Color(0xFFCBD5E1),
+                  fieldBorderWidth: 1.5,
+                  errorFieldBorderColor: Colors.red,
+                ),
+                otpPinFieldDecoration: OtpPinFieldDecoration.defaultPinBoxDecoration,
+                onChange: (value) {
+                  otp = value;
+                },
+                onSubmit: (value) {
+                  otp = value;
+                  if (otp.length == 4 && !loading) {
+                    verifyLogin(widget.token);
+                  }
+                },
+              ),
+
+              SizedBox(height: 24.h),
+
+              // Resend OTP section with timer
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!canResend) ...[
+                    Text(
+                      "Resend in 0:${resendTimer.toString().padLeft(2, '0')}",
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF006970),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                  ],
+                  GestureDetector(
+                    onTap: canResend && !loading ? resendOTP : null,
+                    child: Text(
+                      "Resend OTP",
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: canResend
+                            ? const Color(0xFF006970)
+                            : Colors.grey.shade400,
+                        decoration:
+                        canResend ? TextDecoration.underline : null,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 48.h),
+
+              // VERIFY button
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF006970),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: loading || otp.length != 4
+                      ? null
+                      : () => verifyLogin(widget.token),
+                  child: loading
+                      ? SizedBox(
+                    width: 26.w,
+                    height: 26.h,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                      : Text(
+                    "VERIFY",
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+              ),
+
+              const Spacer(),
+
+              // Bottom sign up section
+              Text(
+                "Don’t have an account?",
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF4F4F4F),
+                ),
+              ),
+
+              GestureDetector(
+                onTap: () {
+                  // TODO: Navigate to Register screen
+                  // Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
+                },
+                child: Text(
+                  "Sign up",
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF006970),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 32.h),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}*/
+
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:otp_pin_field/otp_pin_field.dart';
+
+import '../../config/utils/navigatorKey.dart';
+import 'controller/loginController.dart';
+
+class LoginVerifyScreen extends StatefulWidget {
+
+  final String phone; // actually phone number
+
+  const LoginVerifyScreen({super.key, required this.phone});
+
+  @override
+  State<LoginVerifyScreen> createState() => _LoginVerifyScreenState();
+}
+
+
+class _LoginVerifyScreenState extends State<LoginVerifyScreen> with LoginController<LoginVerifyScreen> {
+
+  String get maskedPhone {
+    final p = widget.phone.trim();
+    if (p.length != 10) return p;
+    return "${p.substring(0, 2)}${'*' * 6}${p.substring(8)}"; // 98******45
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ Start resend timer when screen opens
+    startResendTimer();
+  }
+
+  @override
+  void dispose() {
+    disposeController(); // dispose mixin stuff
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 60.h),
+              Image.asset("assets/scooter.png", width: 84.w, height: 72.h),
+              SizedBox(height: 40.h),
+
+              Text(
+                "Verify Your Number",
+                style: GoogleFonts.inter(fontSize: 22.sp, fontWeight: FontWeight.w600, color: const Color(0xFF006970)),
+              ),
+              SizedBox(height: 8.h),
+
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(text: "Code sent to ", style: TextStyle(fontSize: 14, color: Colors.grey)),
+                    TextSpan(
+                      text: "+91 $maskedPhone",
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF006970)),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              SizedBox(height: 40.h),
+
+
+              OtpPinField(
+                key: loginVerifyotpKey,
+                maxLength: 4,
+                fieldHeight: 50.h,
+                fieldWidth: 50.w,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                keyboardType: TextInputType.number,
+                otpPinFieldStyle: OtpPinFieldStyle(
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF006970),
+                  ),
+                  activeFieldBackgroundColor: Colors.white,
+                  defaultFieldBackgroundColor: Colors.white,
+                  activeFieldBorderColor: const Color(0xFF006970),
+                  defaultFieldBorderColor: const Color(0xFFCBD5E1),
+                  fieldBorderWidth: 1.5,
+                  // errorFieldBorderColor: Colors.red,
+                ),
+                otpPinFieldDecoration: OtpPinFieldDecoration.defaultPinBoxDecoration,
+                onChange: (value) {
+                  otp = value;
+                },
+                onSubmit: (value) {
+                  otp = value;
+                  if (otp.length == 4 && !loading) {
+                    verifyLogin();
+                  }
+                },
+              ),
+
+
+              SizedBox(height: 32.h),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!canResend)
+                    Text(
+                      "Resend in 0:${resendTimer.toString().padLeft(2, '0')}",
+                      style: GoogleFonts.inter(fontSize: 14.sp, color: const Color(0xFF006970)),
+                    ),
+                  if (!canResend) SizedBox(width: 12.w),
+
+
+                  GestureDetector(
+                    onTap: canResend && !loading ? () => resendOTP(phone: widget.phone) : null,
+                    child: Text(
+                      "Resend OTP",
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: canResend ? const Color(0xFF006970) : Colors.grey,
+                        decoration: canResend ? TextDecoration.underline : null,
+                      ),
+                    ),
+                  ),
+
+
+                ],
+              ),
+
+              SizedBox(height: 48.h),
+
+              SizedBox(
+                width: double.infinity,
+                height: 54.h,
+                child: ElevatedButton(
+                  onPressed: loading || otp.length != 4 ? null : () => verifyLogin(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF006970),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
+                  ),
+                  child: loading
+                      ? const SizedBox(width: 26, height: 26, child: CircularProgressIndicator(color: Colors.white))
+                      : Text(
+                    "VERIFY",
+                    style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
+                ),
+              ),
+
+              const Spacer(),
+
+              Text("Don’t have an account?", style: GoogleFonts.inter(fontSize: 14.sp, color: Colors.grey.shade700)),
+              GestureDetector(
+                onTap: () {
+                  // Navigator.push(... RegisterScreen());
+                },
+                child: Text(
+                  "Sign up",
+                  style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: const Color(0xFF006970)),
+                ),
+              ),
+              SizedBox(height: 40.h),
             ],
           ),
         ),

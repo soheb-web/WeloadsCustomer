@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../CustomerScreen/AllIndia/AllIndiaParselListModel.dart';
 import '../../CustomerScreen/AllIndia/parcelListModel.dart';
+import '../../CustomerScreen/QrTransactionHistory.dart';
 import '../Model/CreateTransactionResponseModel.dart';
 import '../Model/PackerCategoryAndSubcategoryModel.dart';
+import '../Model/QrTransactionHistory.dart';
 import '../Model/RecommendedModel.dart';
 
 
@@ -44,6 +46,23 @@ final getTransactionController = FutureProvider.autoDispose<TransactionListRespo
   final service = APIStateNetwork(callPrettyDio());
   return await service.getTxList();
 });
+
+
+
+
+final getWalletTransactionsController = FutureProvider.autoDispose<QrTransactionHistoryModel>((
+    ref,
+    ) async {
+  final service = APIStateNetwork(callPrettyDio());
+  return await service.getWalletTransactions();
+});
+
+
+
+
+
+
+
 
 
 final getPackersCategoryController = FutureProvider.autoDispose<PackerCategoryAndSubCategoryModel>((

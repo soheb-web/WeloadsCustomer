@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:delivery_mvp_app/data/Model/UpdateAddressBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantDeliveryResModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
@@ -30,7 +31,9 @@ import 'package:delivery_mvp_app/data/Model/verifyOrResetPassResModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyRegisterBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyRegisterResModel.dart';
 import 'package:dio/dio.dart';
+
 import 'package:retrofit/retrofit.dart';
+
 import '../../CustomerScreen/AllIndia/AllIndiaParselListModel.dart';
 import '../../CustomerScreen/AllIndia/parcelListModel.dart';
 import '../../data/Model/AddAddressModel.dart';
@@ -42,6 +45,8 @@ import '../../data/Model/CreateOrderResponseModel.dart';
 import '../../data/Model/CreatePickersAndMoverBooking.dart';
 import '../../data/Model/CreateTransactionResponseModel.dart';
 import '../../data/Model/DeleteAddressModel.dart';
+import '../../data/Model/DeliveryBodyModel.dart';
+import '../../data/Model/DeliveryResponseModel.dart';
 import '../../data/Model/GetAddressResponseModel.dart';
 import '../../data/Model/GetDeliveryByIdResModel.dart';
 import '../../data/Model/GetDeliveryByIdResModel2.dart';
@@ -49,8 +54,10 @@ import '../../data/Model/GetNearByDriverResponseModel.dart';
 import '../../data/Model/NearByDriverModel.dart';
 import '../../data/Model/PackerCategoryAndSubcategoryModel.dart';
 import '../../data/Model/PickerMoverResponseModel.dart';
+import '../../data/Model/QrTransactionHistory.dart';
 import '../../data/Model/RatingResponseModel.dart';
 import '../../data/Model/RecommendedModel.dart';
+import '../../data/Model/SendMoneyModel.dart';
 import '../../data/Model/SubmitRatingModel.dart';
 part 'api.state.g.dart';
 
@@ -91,6 +98,11 @@ abstract class APIStateNetwork {
       @Body() AllIndiaBodyModel body,
       );
 
+  @POST("/v1/user/sendWalletMoney")
+  Future<AllIndiaResponseModel> sendWalletMoney(
+      @Body() SendMoneyBodyModel body,
+      );
+
 
   @POST("/v1/user/createPickersAndMoverBooking")
   Future<PickerMoverBookingModel> createPickersAndMoverBooking(
@@ -107,6 +119,11 @@ abstract class APIStateNetwork {
   @POST("/v1/user/createOrder")
   Future<CreateOrderResponseModel> createOrder(
       @Body() CreateOrderModel body,
+      );
+
+  @POST("/v1/user/getDeliveryStatus")
+  Future<DeliveryResponseModel> getDeliveryStatus(
+      @Body() DeliveryBodyModel body,
       );
 
 
@@ -166,14 +183,13 @@ abstract class APIStateNetwork {
   @GET("/v1/user/getTxList")
   Future<TransactionListResponseModel> getTxList();
 
-  ///////////
 
-
-
-
+  @POST("/v1/user/getWalletTransactions")
+  Future<QrTransactionHistoryModel> getWalletTransactions();
 
 
   ////////////
+
 
   @GET("/v1/user/packageAppKeyList")
   Future<RecommendedModel> recommendedList();

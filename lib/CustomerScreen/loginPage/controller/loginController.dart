@@ -1,126 +1,213 @@
+import 'dart:async';
 import 'dart:developer';
-import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
-import 'package:delivery_mvp_app/CustomerScreen/loginPage/loginVerify.screen.dart';
-import 'package:delivery_mvp_app/config/network/api.state.dart';
-import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
-import 'package:delivery_mvp_app/data/Model/loginBodyModel.dart';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../otpPage/otp.screen.dart';
-import '../OtpScreen.dart';
+import '../../../config/network/api.state.dart';
+import '../../../config/utils/navigatorKey.dart';
+import '../../../config/utils/pretty.dio.dart';
+import '../../../data/Model/loginBodyModel.dart';
+import '../../../data/Model/loginVerifyBodyModel.dart';
+import '../../Chat/chating.page.dart' as Hive;
+import '../../home.screen.dart';
+import '../loginVerify.screen.dart';
 
-mixin LoginController<T extends LoginScreen> on State<T> {
+mixin LoginController<T extends StatefulWidget> on State<T> {
   final loginformKey = GlobalKey<FormState>();
-  bool isShow = true;
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  bool loadind = false;
+  final phoneController = TextEditingController();
 
- Future<String> getDeviceToken() async {
+  bool isShow = true;
+  bool loadind = false;
+  bool loading = false;
+
+  /// ✅ SHARED LOGIN TOKEN
+  static String? loginToken;
+
+  /// OTP
+  String otp = "";
+
+  /// RESEND
+  int resendTimer = 60;
+  bool canResend = false;
+  Timer? _timer;
+
+  /* --------------------------------------------------
+   * DEVICE TOKEN
+   * -------------------------------------------------- */
+
+  Future<String> _getDeviceToken() async {
     try {
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
-      String? token = await messaging.getToken();
-      return token ?? "unknown_device";
+      return await FirebaseMessaging.instance.getToken() ?? "unknown_device";
     } catch (e) {
-      log("Error getting device token: $e");
+      log("Device token error: $e");
       return "unknown_device";
     }
   }
 
-  Future<String> fcmGetToken() async {
-    // Permission request करें (iOS/Android पर जरूरी)
-    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: true, // iOS के लिए provisional permission
-      carPlay: true,
-    );
+  /* --------------------------------------------------
+   * LOGIN → SEND OTP
+   * -------------------------------------------------- */
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted permission');
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-      print('User granted provisional permission');
-    } else {
-      print('User declined or has not accepted permission');
-      return "no_permission"; // Return a fallback string instead of void
-    }
+  Future<void> loginUser() async {
+    if (!loginformKey.currentState!.validate()) return;
 
-    // FCM Token निकालें
-    String? token = await FirebaseMessaging.instance.getToken();
-    // setState(() {
-    //   _fcmToken = token;
-    // });
-    print('FCM Token: $token'); // Console में print होगा - moved before return
-    return token ?? "unknown_device";
-  }
-  void loginUser() async {
+    setState(() => loadind = true);
 
-   // Navigator.push(context, MaterialPageRoute(builder: (context)=>OtpScreenNew()));
-    final diviceID = await fcmGetToken();
-    if (!loginformKey.currentState!.validate()) {
-      setState(() {
-        loadind = false;
-      });
-      return;
-    }
-
-    setState(() {
-      loadind = true;
-    });
-    final body = LoginBodyModel(
-      loginType: emailController.text,
-      // password: passwordController.text,
-      deviceId:diviceID,
-    );
     try {
+      final body = LoginBodyModel(
+        loginType: phoneController.text.trim(),
+        deviceId: await _getDeviceToken(),
+      );
+
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.login(body);
 
       if (response.error == false) {
-        Fluttertoast.showToast(msg: response.message);
-        Navigator.pushAndRemoveUntil(
+        /// ✅ SAVE TOKEN
+        loginToken = response.data?.token;
+
+        Fluttertoast.showToast(
+          msg: response.message ?? "OTP sent successfully",
+        );
+
+        if (!mounted) return;
+
+        Navigator.push(
           context,
           CupertinoPageRoute(
-            builder: (context) => LoginVerifyScreen(
-              token: response.data!.token,
-              email: emailController.text,
-
-              // passwordController.text,
+            builder: (_) => LoginVerifyScreen(
+              phone: phoneController.text.trim(),
             ),
           ),
-          (route) => false,
         );
-        setState(() {
-          loadind = false;
-        });
       } else {
-        Fluttertoast.showToast(msg: response.message);
-        setState(() {
-          loadind = false;
-        });
+        Fluttertoast.showToast(msg: response.message ?? "Login failed");
       }
-    } catch (e, st) {
-      setState(() {
-        loadind = false;
-      });
-      log("${e.toString()} / ${st.toString()}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error:${e.toString()}"),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(left: 15.w, bottom: 15.h, right: 15.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.r),
-            side: BorderSide.none,
-          ),
-        ),
-      );
+    } catch (e) {
+      log("Login error: $e");
+      Fluttertoast.showToast(msg: "Something went wrong");
+    } finally {
+      if (mounted) setState(() => loadind = false);
     }
   }
+
+  /* --------------------------------------------------
+   * OTP VERIFY
+   * -------------------------------------------------- */
+
+  Future<void> verifyLogin() async {
+    if (otp.length != 4) {
+      Fluttertoast.showToast(msg: "Enter 4 digit OTP");
+      return;
+    }
+
+    if (loginToken == null) {
+      Fluttertoast.showToast(msg: "Session expired, please login again");
+      return;
+    }
+
+    setState(() => loading = true);
+
+    try {
+      final body = LoginverifyBodyModel(
+        token: loginToken!,
+        otp: otp,
+      );
+
+      final service = APIStateNetwork(callPrettyDio());
+      final response = await service.verifyLogin(body);
+
+      if (response.error == false) {
+        final box = Hive.box;
+        await box.put("token", response.data!.token);
+        await box.put("email", response.data!.email);
+        await box.put("firstName", response.data!.firstName);
+        await box.put("lastName", response.data!.lastName);
+        await box.put("phone", response.data!.phone);
+        await box.put("id", response.data!.id);
+
+        Fluttertoast.showToast(msg: response.message ?? "Login successful");
+
+        if (!mounted) return;
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          CupertinoPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
+        );
+      } else {
+        Fluttertoast.showToast(msg: response.message ?? "Invalid OTP");
+        otp = "";
+        loginVerifyotpKey.currentState?.clearOtp();
+      }
+    } catch (e) {
+      log("Verify error: $e");
+      Fluttertoast.showToast(msg: "Something went wrong");
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  /* --------------------------------------------------
+   * RESEND OTP
+   * -------------------------------------------------- */
+
+  Future<void> resendOTP({required String phone}) async {
+    if (!canResend) return;
+
+    setState(() => loading = true);
+
+    try {
+      final body = LoginBodyModel(
+        loginType: phone.trim(),  // ✅ Use phone from widget
+        deviceId: await _getDeviceToken(),
+      );
+
+      final service = APIStateNetwork(callPrettyDio());
+      final response = await service.login(body);
+
+      if (response.error == false) {
+        loginToken = response.data?.token;
+        Fluttertoast.showToast(msg: "OTP resent successfully");
+        startResendTimer();
+      } else {
+        Fluttertoast.showToast(msg: response.message ?? "Resend failed");
+      }
+    } catch (e) {
+      log("Resend error: $e");
+      Fluttertoast.showToast(msg: "Something went wrong");
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+
+  /* --------------------------------------------------
+   * TIMER (CALL FROM SCREEN)
+   * -------------------------------------------------- */
+
+  void startResendTimer() {
+    resendTimer = 60;
+    canResend = false;
+
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (resendTimer > 0) {
+        setState(() => resendTimer--);
+      } else {
+        timer.cancel();
+        setState(() => canResend = true);
+      }
+    });
+  }
+
+  void disposeController() {
+    phoneController.dispose();
+    _timer?.cancel();
+  }
+
+
+
 }

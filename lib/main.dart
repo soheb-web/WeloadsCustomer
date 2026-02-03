@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             navigatorKey: navigatorKey, // Attach the global navigator key
             debugShowCheckedModeBanner: false,
-            title: 'Flutter Demo',
+            title: 'Weloads',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             ),

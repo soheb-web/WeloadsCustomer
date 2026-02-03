@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/packerMover.page.dart';
-import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -94,6 +93,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   void _connectSocket() {
     const socketUrl = 'https://backend.weloads.live';
+    // const socketUrl = 'http://192.168.1.43:4567';
     // const socketUrl = 'http://192.168.1.22:4567';
     socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket', 'polling'],

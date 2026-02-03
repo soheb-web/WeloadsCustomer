@@ -1,3 +1,4 @@
+/*
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/otpPage/otp.screen.dart';
 import 'package:delivery_mvp_app/config/network/api.state.dart';
@@ -17,16 +18,7 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
-  Future<String> _getDeviceToken() async {
-    try {
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
-      String? token = await messaging.getToken();
-      return token ?? "unknown_device";
-    } catch (e) {
-      log("Error getting device token: $e");
-      return "unknown_device";
-    }
-  }
+
   Future<String> fcmGetToken() async {
     // Permission request करें (iOS/Android पर जरूरी)
     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
@@ -54,6 +46,8 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
     print('FCM Token: $token'); // Console में print होगा - moved before return
     return token ?? "unknown_device";
   }
+
+
   void registerUser() async {
     final deviceId = await fcmGetToken();
     if (!registerformKey.currentState!.validate()) {
@@ -99,6 +93,52 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
       // );
+    }
+  }
+
+
+}
+*/
+
+
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+import '../../../config/network/api.state.dart';
+import '../../../config/utils/pretty.dio.dart';
+import '../../../data/Model/registerBodyModel.dart';
+mixin Registercontroller<T extends StatefulWidget> on State<T> {
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final phoneNumberController = TextEditingController();
+  final emailController = TextEditingController();
+
+  bool isLoading = false;
+  /// 🔐 STORE REGISTER TOKEN
+  String? registerToken;
+
+  Future<void> registerUserApi({
+    required RegisterBodyModel body,
+    required Function(String token) onSuccess,
+    Function(String message)? onError,
+  }) async {
+    setState(() => isLoading = true);
+
+    try {
+      final service = APIStateNetwork(callPrettyDio());
+      final response = await service.userRegister(body);
+
+      if (response.error == false) {
+        registerToken = response.data?.token;
+
+        onSuccess?.call(registerToken!);
+      } else {
+        onError?.call(response.message);
+      }
+    } catch (e) {
+      onError?.call(e.toString());
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 }

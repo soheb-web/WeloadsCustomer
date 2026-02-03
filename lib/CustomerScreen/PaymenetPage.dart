@@ -37,46 +37,7 @@ class _AddMoneyToWalletPageState extends State<AddMoneyToWalletPage> {
     super.dispose();
   }
 
-  // ────────────────────────────────────────────────
-  // Create order on your backend
-  // ────────────────────────────────────────────────
-  // Future<void> _createOrder(int amountInPaise) async {
-  //   setState(() => _isLoading = true);
-  //
-  //   try {
-  //     final service = APIStateNetwork(callPrettyDio());
-  //     final response = await service.createOrder(
-  //
-  //       CreateOrderModel(
-  //         amount: amountInPaise,
-  //         currency: "INR",
-  //       ),
-  //
-  //     );
-  //
-  //     // IMPORTANT: Adjust according to your actual response model
-  //     // Assuming response has field like response.orderId or response.data['orderId']
-  //     // setState(() {
-  //     //   _createdOrderId = response.orderId; // ← change to correct field name!
-  //     // });
-  //
-  //     Fluttertoast.showToast(
-  //       msg: "Order created successfully!",
-  //       backgroundColor: Colors.green,
-  //     );
-  //
-  //     _openCheckout(amountInPaise);
-  //
-  //   } catch (e) {
-  //     Fluttertoast.showToast(
-  //       msg: "Order creation failed: ${e.toString().split('\n').first}",
-  //       toastLength: Toast.LENGTH_LONG,
-  //       backgroundColor: Colors.red,
-  //     );
-  //   } finally {
-  //     setState(() => _isLoading = false);
-  //   }
-  // }
+
 
   Future<void> _createOrder(int amountInPaise) async {
     setState(() => _isLoading = true);
@@ -123,8 +84,10 @@ class _AddMoneyToWalletPageState extends State<AddMoneyToWalletPage> {
       return;
     }
 
+
     var options = {
-      'key': 'rzp_test_S3KH88gvOeaAOh', // ← YOUR KEY (test/live)
+      'key': 'rzp_live_SATOHYwE0so41p', // ← YOUR KEY (test/live)
+      // 'key': 'rzp_test_S3KH88gvOeaAOh', // ← YOUR KEY (test/live)
       'amount': amountInPaise,            // in paise
       'name': 'WeLoads',
       'description': 'Wallet Top-up',
@@ -147,16 +110,11 @@ class _AddMoneyToWalletPageState extends State<AddMoneyToWalletPage> {
       Fluttertoast.showToast(msg: "Checkout error: $e");
     }
   }
-
-  // ────────────────────────────────────────────────
-  // Payment Handlers
-  // ────────────────────────────────────────────────
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+ void _handlePaymentSuccess(PaymentSuccessResponse response) {
     Fluttertoast.showToast(
       msg: "Payment Successful! 🎉\nPayment ID: ${response.paymentId}",
       toastLength: Toast.LENGTH_LONG,
     );
-
     // MUST DO: Verify on backend
     _verifyAndAddToWallet(
       paymentId: response.paymentId!,
@@ -164,13 +122,11 @@ class _AddMoneyToWalletPageState extends State<AddMoneyToWalletPage> {
       signature: response.signature!,
       amount: int.parse(_amountController.text.trim()),
     );
-
     // Clear field & order id after success
     _amountController.clear();
     setState(() => _createdOrderId = null);
-
     // Optional: Navigate back or show success screen
-    // Navigator.pop(context, true);
+    Navigator.pop(context, true);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -191,15 +147,6 @@ class _AddMoneyToWalletPageState extends State<AddMoneyToWalletPage> {
     required int amount,
   }) async {
 
-    // TODO: Call your backend verify + add to wallet API
-    // Example payload:
-    // {
-    //   "paymentId": paymentId,
-    //   "orderId": orderId,
-    //   "signature": signature,
-    //   "amount": amount,
-    // }
-    // After successful verification → update wallet balance in UI / via provider / bloc
 
     Fluttertoast.showToast(msg: "Wallet updated! Balance refreshed soon.");
 

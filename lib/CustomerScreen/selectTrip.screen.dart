@@ -19,6 +19,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
+import '../data/Model/DeliveryBodyModel.dart';
 import '../data/Model/GetNearByDriverResponseModel.dart';
 import '../data/Model/NearByDriverModel.dart';
 import '../data/Model/bookInstantdeliveryBodyModel.dart';
@@ -31,7 +32,7 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   final List<double> dropLats;
   final List<double> dropLons;
   final List<String> dropNames;
-  final String productType; // 👈 NEW
+  final String productType;
 
   const SelectTripScreen(
       this.socket,
@@ -77,6 +78,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   bool _iconsLoaded = false;
   late BitmapDescriptor _number1Icon;
   late BitmapDescriptor _number2Icon;
+   String? delivery_id;
   @override
   void initState() {
     super.initState();
@@ -95,7 +97,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     _loadCustomIcons();
     _createNumberIcons();
   }
-
   void _setupDriverAssignedListener() {
     // Duplicate listener न लगे, इसलिए पहले off करो
     socket?.off('user:driver_assigned');
@@ -104,53 +105,225 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 
       if (!mounted) return;
 
-      _navigateToPickupScreen(payload);
+      _navigateToPickupScreen(payload,delivery_id);
     });
   }
+  // void _navigateToPickupScreen(dynamic payload, String? delivery_id,) async {
+  //   try {
+  //     final deliveryId = payload['deliveryId'] as String?;
+  //     if (deliveryId == null) return;
+  //
+  //     final driver = Map<String, dynamic>.from(payload['driver'] ?? {});
+  //     final otp = payload['otp']?.toString() ?? 'N/A';
+  //     final pickup = Map<String, dynamic>.from(payload['pickup'] ?? {});
+  //     final dropoffList = (payload['dropoff'] as List?)
+  //         ?.map((e) => Map<String, dynamic>.from(e))
+  //         .toList() ?? [];
+  //     final amount = payload['amount'] ?? 0;
+  //     final vehicleType = Map<String, dynamic>.from(payload['vehicleType'] ?? {});
+  //     final status = payload['status']?.toString() ?? 'assigned';
+  //
+  //     // txId Hive से लो (booking के बाद save किया था)
+  //     final txId = box.get("current_booking_txId") ?? "";
+  //
+  //     Fluttertoast.showToast(msg: "Driver Assigned!");
+  //
+  //     Navigator.pushReplacement(
+  //       context,
+  //       CupertinoPageRoute(
+  //         builder: (context) => PickupScreen(
+  //           socket: socket!,
+  //           deliveryId: deliveryId,
+  //           driver: driver,
+  //           otp: otp,
+  //           pickup: pickup,
+  //           dropoff: dropoffList,
+  //           amount: amount,
+  //           vehicleType: vehicleType,
+  //           vehicleDetail: payload['vehicleDetails'],
+  //           status: status,
+  //           txId: txId,
+  //         ),
+  //       ),
+  //     );
+  //   } catch (e, s) {
+  //     log("Navigation error from SelectTripScreen: $e\n$s");
+  //   }
+  // }
 
+  Future<void> _navigateToPickupScreen(dynamic payload, String? deliveryId) async {
+    if (!mounted) return;
 
-  void _navigateToPickupScreen(dynamic payload) async {
+    if (deliveryId == null || deliveryId.isEmpty) {
+      log("Cannot navigate: deliveryId is null or empty");
+      Fluttertoast.showToast(msg: "Booking information missing");
+      return;
+    }
+
     try {
-      final deliveryId = payload['deliveryId'] as String?;
-      if (deliveryId == null) return;
+      // Default values + socket se jitna mil sake le lo
+      Map<String, dynamic> driver = {};
+      String otp = 'N/A';
+      Map<String, dynamic> pickup = {};
+      List<Map<String, dynamic>> dropoff = [];
+      int amount = 0;
+      Map<String, dynamic> vehicleType = {};
+      dynamic vehicleDetail;
+      String status = 'assigned';
 
-      final driver = Map<String, dynamic>.from(payload['driver'] ?? {});
-      final otp = payload['otp']?.toString() ?? 'N/A';
-      final pickup = Map<String, dynamic>.from(payload['pickup'] ?? {});
-      final dropoffList = (payload['dropoff'] as List?)
-          ?.map((e) => Map<String, dynamic>.from(e))
-          .toList() ?? [];
-      final amount = payload['amount'] ?? 0;
-      final vehicleType = Map<String, dynamic>.from(payload['vehicleType'] ?? {});
-      final status = payload['status']?.toString() ?? 'assigned';
+      bool dataFromSocket = false;
 
-      // txId Hive से लो (booking के बाद save किया था)
+      // ── Try to extract from socket payload ───────────────────────────────
+      if (payload is Map<String, dynamic>) {
+        dataFromSocket = true;
+
+        // Driver
+        final driverRaw = payload['driver'];
+        if (driverRaw is Map<String, dynamic>) {
+          driver = driverRaw;
+        } else if (driverRaw is List && driverRaw.isNotEmpty) {
+          driver = Map<String, dynamic>.from(driverRaw.firstWhere(
+                (e) => e is Map<String, dynamic>,
+            orElse: () => <String, dynamic>{},
+          ));
+        }
+
+        otp = payload['otp']?.toString() ?? 'N/A';
+
+        // Pickup
+        final pickupRaw = payload['pickup'];
+        if (pickupRaw is Map) {
+          pickup = Map<String, dynamic>.from(pickupRaw);
+        }
+
+        // Dropoff
+        final dropoffRaw = payload['dropoff'];
+        if (dropoffRaw is List) {
+          dropoff = dropoffRaw
+              .where((e) => e is Map)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+        }
+
+        amount = (payload['amount'] as num?)?.toInt() ?? 0;
+
+        final vtRaw = payload['vehicleType'];
+        if (vtRaw is Map) {
+          vehicleType = Map<String, dynamic>.from(vtRaw);
+        }
+
+        vehicleDetail = payload['vehicleDetails'];
+
+        status = payload['status']?.toString() ?? 'assigned';
+      }
+
+      // ── Check if we have enough data from socket ──────────────────────────
+      final bool isDataIncomplete =
+          driver.isEmpty || pickup.isEmpty || dropoff.isEmpty;
+
+      if (isDataIncomplete) {
+        log("Socket payload incomplete → fetching full details via API");
+
+        final service = APIStateNetwork(callPrettyDio());
+
+        final apiResponse = await service.getDeliveryStatus(
+          DeliveryBodyModel(deliveryId: deliveryId),
+        );
+
+        if (apiResponse.error == true || apiResponse.data == null) {
+          Fluttertoast.showToast(msg: "Unable to load delivery details");
+          return;
+        }
+
+        final data = apiResponse.data!;
+
+        // Fill / override missing parts (socket ke data ko prefer karo agar mila ho)
+        if (otp == 'N/A') otp = data.otp ?? 'N/A';
+        if (amount == 0) amount = data.amount ?? 0;
+        status = data.status ?? status;
+
+        if (driver.isEmpty && data.driver != null) {
+          driver = {
+            'id': data.driver!.id ?? '',
+            'firstName': data.driver!.firstName ?? '',
+            'lastName': data.driver!.lastName ?? '',
+            'phone': data.driver!.phone ?? '',
+            'averageRating': data.driver!.averageRating,
+          };
+        }
+
+        if (pickup.isEmpty && data.pickup != null) {
+          pickup = {
+            'name': data.pickup!.name ?? '',
+            'lat': data.pickup!.lat,
+            'long': data.pickup!.long,
+            '_id': data.pickup!.id ?? '',
+          };
+        }
+
+        if (dropoff.isEmpty && data.dropoff != null && data.dropoff!.isNotEmpty) {
+          dropoff = data.dropoff!.map((p) {
+            return {
+              'name': p.name ?? '',
+              'lat': p.lat,
+              'long': p.long,
+              '_id': p.id ?? '',
+            };
+          }).toList();
+        }
+
+        if (vehicleType.isEmpty && data.vehicleType != null) {
+          vehicleType = {
+            'name': data.vehicleType!.name ?? '',
+            // add more only if needed by PickupScreen
+          };
+        }
+
+        if (vehicleDetail == null && data.vehicleDetails != null) {
+          vehicleDetail = {
+            'vehicle': data.vehicleDetails!.vehicle,
+            'numberPlate': data.vehicleDetails!.numberPlate,
+            'model': data.vehicleDetails!.model,
+            // ... add more fields if PickupScreen uses them
+          };
+        }
+
+        Fluttertoast.showToast(msg: "Details loaded from server");
+      } else if (dataFromSocket) {
+        Fluttertoast.showToast(msg: "Driver Assigned!");
+      }
+
+      // ── txId from Hive (booking ke time save kiya tha) ─────────────────────
       final txId = box.get("current_booking_txId") ?? "";
 
-      Fluttertoast.showToast(msg: "Driver Assigned!");
-
-      Navigator.pushReplacement(
-        context,
-        CupertinoPageRoute(
-          builder: (context) => PickupScreen(
-            socket: socket!,
-            deliveryId: deliveryId,
-            driver: driver,
-            otp: otp,
-            pickup: pickup,
-            dropoff: dropoffList,
-            amount: amount,
-            vehicleType: vehicleType,
-            vehicleDetail: payload['vehicleDetails'],
-            status: status,
-            txId: txId,
+      // ── Navigate ───────────────────────────────────────────────────────────
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => PickupScreen(
+              socket: socket!,
+              deliveryId: deliveryId,
+              driver: driver,
+              otp: otp,
+              pickup: pickup,
+              dropoff: dropoff,
+              amount: amount,
+              vehicleType: vehicleType,
+              vehicleDetail: vehicleDetail,
+              status: status,
+              txId: txId,
+            ),
           ),
-        ),
-      );
-    } catch (e, s) {
-      log("Navigation error from SelectTripScreen: $e\n$s");
+        );
+      }
+    } catch (e, stackTrace) {
+      log("Navigation error from SelectTripScreen: $e\n$stackTrace");
+      Fluttertoast.showToast(msg: "Something went wrong while loading ride");
     }
   }
+
+
   Future<void> _createNumberIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
     _number2Icon = await _createNumberIcon("2", Colors.orange);
@@ -488,6 +661,31 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       northeast: LatLng(maxLat, maxLng),
     );
   }
+
+
+
+  String? selectedMethod = 'cash'; // default selected
+  final List<Map<String, dynamic>> methods = [
+    {
+      'value': 'cash',
+      'label': 'Cash',
+      'icon': Icons.monetization_on,
+    },
+    {
+      'value': 'wallet',
+      'label': 'Wallet',
+      'icon': Icons.wallet,
+    },
+    // You can add more later: 'upi', 'card', etc.
+  ];
+  void _selectMethod(String value) {
+    setState(() {
+      selectedMethod = value;
+    });
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
     final distanceProviderState = ref.watch(getDistanceProvider);
@@ -539,52 +737,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                 ),
               ),
 
-              // if (totalDistance != null)
-              //   Positioned(
-              //     bottom: 70.h,
-              //     left: 16.w,
-              //     right: 16.w,
-              //     child: Container(
-              //       padding: EdgeInsets.all(12.w),
-              //       decoration: BoxDecoration(
-              //         color: Colors.white,
-              //         borderRadius: BorderRadius.circular(8.r),
-              //         boxShadow: [
-              //           BoxShadow(
-              //             color: Colors.black12,
-              //             blurRadius: 8,
-              //           ),
-              //         ],
-              //       ),
-              //       child: Column(
-              //         mainAxisSize: MainAxisSize.min,
-              //         children: [
-              //           if (toPickupDistance != null)
-              //             Text(
-              //               'To Pickup: $toPickupDistance | $toPickupDuration',
-              //               style: GoogleFonts.inter(fontSize: 14.sp),
-              //             ),
-              //           ...dropDistances.asMap().entries.map(
-              //                 (e) => e.value.isNotEmpty
-              //                 ? Text(
-              //               'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
-              //               style: GoogleFonts.inter(
-              //                 fontSize: 13.sp,
-              //               ),
-              //             )
-              //                 : const SizedBox(),
-              //           ),
-              //           Text(
-              //             'Total: $totalDistance | $totalDuration',
-              //             style: GoogleFonts.inter(
-              //               fontSize: 14.sp,
-              //               fontWeight: FontWeight.bold,
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
+
 
               if (totalDistance != null)
                 Positioned(
@@ -814,40 +967,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                             ),
 
 
-                                            // Row(
-                                            //   children: [
-                                            //     Text(
-                                            //       response
-                                            //           .data![dataIndex]
-                                            //           .name
-                                            //           .toString(),
-                                            //       style:
-                                            //       GoogleFonts.inter(
-                                            //         fontSize:
-                                            //         isSelected
-                                            //             ? 15.sp
-                                            //             : 13.sp,
-                                            //       ),
-                                            //     ),
-                                            //     SizedBox(width: 5.w),
-                                            //     CircleAvatar(
-                                            //       radius: 4.r,
-                                            //       backgroundColor:
-                                            //       Colors.grey,
-                                            //     ),
-                                            //     SizedBox(width: 5.w),
-                                            //     Text(
-                                            //       "${response.data![dataIndex].distance.toString()} away",
-                                            //       style:
-                                            //       GoogleFonts.inter(
-                                            //         fontSize:
-                                            //         isSelected
-                                            //             ? 15.sp
-                                            //             : 13.sp,
-                                            //       ),
-                                            //     ),
-                                            //   ],
-                                            // ),
                                           ],
                                         ),
                                         Spacer(),
@@ -869,7 +988,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                             ),
                           );
                         }),
-                        Container(
+                     /*   Container(
                           margin: EdgeInsets.only(top: 10.h),
                           width: double.infinity,
                           height: 50.h,
@@ -886,12 +1005,13 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Image.asset(
-                                    "assets/cash.png",
-                                    height: 20.h,
-                                    width: 20.w,
-                                  ),
-                                  SizedBox(width: 10.w),
+                                  Icon(Icons.monetization_on,color:Color(0xFF006970),)
+                                  // Image.asset(
+                                  //   "assets/cash.png",
+                                  //   height: 20.h,
+                                  //   width: 20.w,
+                                  // ),
+                                 , SizedBox(width: 10.w),
                                   Text(
                                     "Cash",
                                     style: GoogleFonts.inter(
@@ -900,41 +1020,158 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                   ),
                                 ],
                               ),
+
                               Row(
                                 children: [
-                                  Image.asset(
-                                    "assets/promo.png",
-                                    height: 20.h,
-                                    width: 20.w,
-                                  ),
-                                  SizedBox(width: 10.w),
+                                  Icon(Icons.wallet,color:Color(0xFF006970),)
+
+                                  // Image.asset(
+                                  //   "assets/cash.png",
+                                  //   height: 20.h,
+                                  //   width: 20.w,
+                                  // ),
+                                 , SizedBox(width: 10.w),
                                   Text(
-                                    "Promo Code",
+                                    "Cash",
                                     style: GoogleFonts.inter(
                                       fontSize: 14.sp,
                                     ),
                                   ),
                                 ],
                               ),
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    "assets/note.png",
-                                    height: 20.h,
-                                    width: 20.w,
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Text(
-                                    "Add Note",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14.sp,
-                                    ),
-                                  ),
-                                ],
-                              ),
+
                             ],
                           ),
+                        ),*/
+
+
+
+                  Container(
+                  margin: EdgeInsets.only(top: 10.h),
+                  width: 300.w,
+                  height: 50.h,
+                  decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                  color: Colors.grey.shade300,
+                  width: 1.w,
+                  ),
+                  ),
+                  child: Row(
+
+                    children: [
+
+                      SizedBox(width: 10.w,),
+
+                      Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: methods.map((method) {
+                      final isSelected = selectedMethod == method['value'];
+
+                      return
+
+                        Row(
+                          children: [
+                            GestureDetector(
+                                              onTap: () => _selectMethod(method['value']),
+                                              child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                              decoration: BoxDecoration(
+                                              color: isSelected ? const Color(0xFF006970).withOpacity(0.08) : null,
+                                              borderRadius: BorderRadius.circular(8.r),
+                                              ),
+                                              child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                              Icon(
+                                              method['icon'],
+                                              color: isSelected ? const Color(0xFF006970) : Colors.grey.shade600,
+                                              size: 20.sp,
+                                              ),
+                                              SizedBox(width: 8.w),
+                                              Text(
+                                              method['label'],
+                                              style: GoogleFonts.inter(
+                                              fontSize: 14.sp,
+                                              color: isSelected ? const Color(0xFF006970) : Colors.black87,
+                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                              ),
+                                              ),
+                                              ],
+                                              ),
+                                              ),
+                                              ),
+
+
+                          ],
+                        );
+                      }).toList(),
+                      ),
+
+                      Expanded(child: SizedBox()),
+
+                      Container(
+                        decoration: BoxDecoration(
+                            color: Color(0xFF006970),
+                            borderRadius: BorderRadius.circular(5.sp)),
+                        padding: EdgeInsets.all(4.sp),
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              "assets/promo.png",
+                              height: 20.h,
+                              width: 20.w, 
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              "Promo Code",
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                color: Colors.white
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
+                      SizedBox(width: 10.w,)
+                    ],
+                  ),
+                  ),
+
+                      /*  Row(
+                          children: [
+                            Image.asset(
+                              "assets/promo.png",
+                              height: 20.h,
+                              width: 20.w,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              "Promo Code",
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Image.asset(
+                              "assets/note.png",
+                              height: 20.h,
+                              width: 20.w,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              "Add Note",
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ],
+                        ),*/
+
                         SizedBox(height: 10.h),
                         _buildBookNowButton(
                           name: vehicle.name ?? "",
@@ -1005,7 +1242,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           : () async {
         setState(() => isBooking = true);
         try {
-          final body = BookInstantDeliveryBodyModel(
+
+          final body =
+          BookInstantDeliveryBodyModel(
               vehicleTypeId: selectedVehicle.vehicleTypeId ?? "",
               origName: pickupAddress,
               origLat: pickupLat,
@@ -1014,26 +1253,24 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
               copanId: null,
               productType: widget.productType,
               dropoff:
-              selectedVehicle.dropoff
-                  ?.map(
-                    (d) => BookDropoff(
+              selectedVehicle.dropoff?.map((d) => BookDropoff(
                   name: d.name.toString(),
                   lat: d.lat ?? 0.0,
                   long: d.long ?? 0.0,
-                ),
-              )
-                  .toList() ??
-                  [],
+                ),).toList() ?? [],
               distance: (selectedVehicle.distance ?? 0).toDouble(),
-              userPayAmount: double.parse(
-                selectedVehicle.price ?? "0",
+              userPayAmount: double.parse(selectedVehicle.price ?? "0",
               ).toInt(),
               taxAmount: 18.0,
               mobNo: phon,
-              name:name
+              name:name,
+              paymentMethod: selectedMethod.toString()
           );
+
           final service = APIStateNetwork(callPrettyDio());
+
           final response = await service.bookInstantDelivery(body);
+
           if (response.code == 0) {
             final dataMap = response;
             final txId = dataMap.data.txId.toString();
@@ -1042,11 +1279,11 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
               return;
             }
             box.put("current_booking_txId", txId);
+            delivery_id=response.data.id;
             Navigator.push(
               context,
               CupertinoPageRoute(
                 builder: (context) => WaitingForDriverScreen(
-
                   productType: widget.productType,
                   mobile :phon,
                   name:name,
@@ -1055,7 +1292,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                   ).toInt(),
                   distance: (selectedVehicle.distance ?? 0).toDouble(),
                   id: selectedVehicle.vehicleTypeId ?? "",
-
                   socket: socket!,
                   pickupLat: pickupLat,
                   pickupLon: pickupLon,
@@ -1063,33 +1299,49 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                   dropLons: dropLons,
                   dropNames: dropNames,
                   txId: txId,
+                  paymentMethod: selectedMethod.toString(),
+                  deliveryId: response.data.id,
                 ),
               ),
             );
             Fluttertoast.showToast(msg: "Delivery booked!");
-          } else {
-            // response.data is List or null
+          }
+
+          else {
+
             final errorMsg =
                 response.message ?? "Invalid response from server";
+
             log(
               "Booking failed: $errorMsg | data type: ${response.data.runtimeType}",
             );
+
             Fluttertoast.showToast(msg: errorMsg);
+
           }
-        } catch (e, s) {
+
+        }
+
+        catch (e, s) {
           log("Booking error: $e\n$s");
           Fluttertoast.showToast(msg: "Booking error: ${e.toString()}");
-        } finally {
+        }
+
+        finally {
           setState(() => isBooking = false);
         }
+
       },
+
       child: isBooking
           ? const CircularProgressIndicator(color: Colors.white)
           : Text(
         "Book Now",
         style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.white),
       ),
+
     );
+
   }
 }
 
@@ -1097,6 +1349,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class WaitingForDriverScreen extends StatefulWidget {
   String productType;
+  String deliveryId;
   String mobile;
   String name;
   int userPayAmount;
@@ -1109,9 +1362,11 @@ class WaitingForDriverScreen extends StatefulWidget {
   final List<double> dropLons;
   final List<String> dropNames;
   final String txId;
+  final String paymentMethod;
   WaitingForDriverScreen({
     super.key,
     required this.productType,
+    required this.deliveryId,
     required this.mobile,
     required this.name,
     required this.userPayAmount,
@@ -1124,6 +1379,7 @@ class WaitingForDriverScreen extends StatefulWidget {
     required this.dropLons,
     required this.dropNames,
     required this.txId,
+    required this.paymentMethod,
   });
 
   @override
@@ -1314,6 +1570,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
   //   _socket.on('user:driver_assigned', _handleAssigned);
   // }
 
+/*
 
   Future<void> _handleAssigned(dynamic payload) async {
     if (!mounted) return;
@@ -1387,10 +1644,204 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
             ),
           ),
         );
+      }else{
+
+        final service = APIStateNetwork(callPrettyDio());
+        final response = await service.getDeliveryStatus(
+            DeliveryBodyModel(
+              deliveryId: deliveryId
+
+            )
+
+        );
+
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => PickupScreen(
+              socket: widget.socket,
+              deliveryId: deliveryId,
+              driver: driver,
+              otp: otp,
+              pickup: pickup,           // Fixed
+              dropoff: dropoff,         // Already List<Map<String, dynamic>>
+              amount: amount,
+              vehicleType: vehicleType, // Fixed
+              vehicleDetail: vehicleDetailRaw, // Fixed
+              status: status,
+              txId: widget.txId,
+            ),
+          ),
+        );
       }
     } catch (e, s) {
       log("Driver assign error: $e\n$s");
       Fluttertoast.showToast(msg: "Error: $e");
+    }
+  }
+*/
+
+  Future<void> _handleAssigned(dynamic payload,) async {
+    if (!mounted) return;
+
+    print("payload socket accept data: $payload");
+    // print("Received deliveryId from caller: $widget.deliveryId");
+
+    Map<String, dynamic> driver = {};
+    String? otp;
+    Map<String, dynamic> pickup = {};
+    List<Map<String, dynamic>> dropoff = [];
+    Map<String, dynamic> vehicleType = {};
+    dynamic vehicleDetail;
+    int amount = 0;
+    String status = 'pending';
+
+    try {
+      // ── 1. Socket se jitna possible data le lo (but deliveryId ko trust mat karo) ──
+      if (payload is Map<String, dynamic>) {
+        // Optional: check if payload deliveryId matches the one we already have
+        final payloadDeliveryId = payload['deliveryId'] as String?;
+        if (payloadDeliveryId != null && payloadDeliveryId != widget.deliveryId) {
+          log("Warning: socket deliveryId mismatch! Expected: $widget.deliveryId, Got: $payloadDeliveryId");
+          // You can decide: continue with known deliveryId or throw error
+        }
+
+        // Driver
+        final driverRaw = payload['driver'];
+        if (driverRaw is Map<String, dynamic>) {
+          driver = driverRaw;
+        } else if (driverRaw is List && driverRaw.isNotEmpty && driverRaw[0] is Map) {
+          driver = Map<String, dynamic>.from(driverRaw[0]);
+        }
+
+        otp = payload['otp']?.toString();
+
+        // Pickup
+        final pickupRaw = payload['pickup'];
+        if (pickupRaw is Map) pickup = Map<String, dynamic>.from(pickupRaw);
+
+        // Dropoff
+        final dropoffRaw = payload['dropoff'];
+        if (dropoffRaw is List) {
+          dropoff = dropoffRaw
+              .whereType<Map>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList();
+        }
+
+        // Vehicle Type
+        final vtRaw = payload['vehicleType'];
+        if (vtRaw is Map) vehicleType = Map<String, dynamic>.from(vtRaw);
+
+        vehicleDetail = payload['vehicleDetails'];
+
+        amount = (payload['amount'] as num?)?.toInt() ?? 0;
+        status = payload['status']?.toString() ?? 'pending';
+      }
+
+      // ── 2. Agar important cheezein missing hain to API se fill karo ───────────
+      final bool needsApiCall = driver.isEmpty || pickup.isEmpty || dropoff.isEmpty;
+
+      if (needsApiCall) {
+        log("Socket data incomplete → calling getDeliveryStatus API");
+
+        final service = APIStateNetwork(callPrettyDio());
+
+        final apiResponse = await service.getDeliveryStatus(
+          DeliveryBodyModel(deliveryId: widget.deliveryId), // ← yahi trusted ID use kar rahe
+        );
+
+        if (apiResponse.error == true || apiResponse.data == null) {
+          Fluttertoast.showToast(msg: "Failed to load delivery details from server");
+          return;
+        }
+
+        final data = apiResponse.data!;
+
+        // Fill only what's missing (don't override if socket already gave good data)
+        otp ??= data.otp;
+        amount = data.amount ?? amount;
+        status = data.status ?? status;
+
+        if (driver.isEmpty && data.driver != null) {
+          driver = {
+            'id': data.driver!.id,
+            'firstName': data.driver!.firstName ?? '',
+            'lastName': data.driver!.lastName ?? '',
+            'phone': data.driver!.phone ?? '',
+            'averageRating': data.driver!.averageRating,
+          };
+        }
+
+        if (pickup.isEmpty && data.pickup != null) {
+          pickup = {
+            'name': data.pickup!.name ?? '',
+            'lat': data.pickup!.lat,
+            'long': data.pickup!.long,
+            '_id': data.pickup!.id,
+          };
+        }
+
+        if (dropoff.isEmpty && data.dropoff != null && data.dropoff!.isNotEmpty) {
+          dropoff = data.dropoff!.map((p) => {
+            'name': p.name ?? '',
+            'lat': p.lat,
+            'long': p.long,
+            '_id': p.id,
+          }).toList();
+        }
+
+        if (vehicleType.isEmpty && data.vehicleType != null) {
+          vehicleType = {
+            'name': data.vehicleType!.name ?? '',
+            // add more fields only if PickupScreen actually uses them
+          };
+        }
+
+        if (vehicleDetail == null && data.vehicleDetails != null) {
+          vehicleDetail = {
+            'vehicle': data.vehicleDetails!.vehicle,
+            'numberPlate': data.vehicleDetails!.numberPlate,
+            'model': data.vehicleDetails!.model,
+            // ... add only what's actually needed downstream
+          };
+        }
+
+        Fluttertoast.showToast(msg: "Details loaded from server");
+      }
+
+      // ── 3. Driver name toast ───────────────────────────────────────────────
+      final driverName = '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
+      if (driverName.isNotEmpty) {
+        Fluttertoast.showToast(msg: "Driver Assigned: $driverName");
+      } else {
+        Fluttertoast.showToast(msg: "Driver assigned (details loading...)");
+      }
+
+      // ── 4. Navigate ────────────────────────────────────────────────────────
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => PickupScreen(
+              socket: widget.socket,
+              deliveryId: widget.deliveryId,           // ← guaranteed non-null
+              driver: driver,
+              otp: otp ?? 'N/A',
+              pickup: pickup,
+              dropoff: dropoff,
+              amount: amount,
+              vehicleType: vehicleType,
+              vehicleDetail: vehicleDetail,
+              status: status,
+              txId: widget.txId,
+            ),
+          ),
+        );
+      }
+    } catch (e, stack) {
+      log("Driver assign handler failed: $e\n$stack");
+      Fluttertoast.showToast(msg: "Error: ${e.toString().split('\n').first}");
     }
   }
 
@@ -1564,7 +2015,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
           // 270112,
           taxAmount: 18.0,
           mobNo:widget.mobile,
-          name:widget.name
+          name:widget.name,
+          paymentMethod:widget.paymentMethod
       );
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.bookInstantDelivery(body);
@@ -1602,23 +2054,12 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
 
 // MARK: - Cancel Booking Function
   Future<void> _cancelCurrentBooking() async {
-    // try {
-    // final service = APIStateNetwork(callPrettyDio());
-    // final response = await service.cancelDeliveryBooking(widget.txId);
-    //
-    // if (response.code == 0 || response.message?.toLowerCase().contains('cancelled') == true) {
     Fluttertoast.showToast(msg: "Booking cancelled successfully");
     _stopSearching(); // Stop all timers & animations
     setState(() {
       _isSearching = false; // Show "Try Again" button
     });
-    //   } else {
-    //     Fluttertoast.showToast(msg: response.message ?? "Failed to cancel");
-    //   }
-    // } catch (e) {
-    //   Fluttertoast.showToast(msg: "Cancel failed: $e");
-    // }
-  }
+   }
   @override
   Widget build(BuildContext context) {
     final dots = '.' * _dotCount;
@@ -1771,13 +2212,16 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
+
                         onPressed: _retrySearch,
                         child: const Text("Try Again", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white)),
+
                       ),
                     ],
                   ),

@@ -135,10 +135,11 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                         onTap: () {
                           history.data!.deliveries![index].status.toString() ==
                               "assigned" ||
-                              history.data!.deliveries![index].status
-                                  .toString() ==
-                                  "ongoing"
-                              ? Navigator.push(
+                              history.data!.deliveries![index].status.toString() ==
+                                  "ongoing"|| history.data!.deliveries![index].status.toString() ==
+                              "arrived"
+                              ?
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
@@ -153,7 +154,9 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                   ),
                             ),
                           )
-                              : Navigator.push(
+
+                              :
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => RequestDetailsPage(

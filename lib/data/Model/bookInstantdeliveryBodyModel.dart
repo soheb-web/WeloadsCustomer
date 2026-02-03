@@ -21,6 +21,7 @@ class BookInstantDeliveryBodyModel {
     final String mobNo;
     final String name;
     final String productType;
+    final String paymentMethod;
 
     BookInstantDeliveryBodyModel({
         required this.vehicleTypeId,
@@ -36,6 +37,7 @@ class BookInstantDeliveryBodyModel {
         required this.mobNo,
         required this.name,
         required this.productType,
+        required this.paymentMethod,
     });
 
     factory BookInstantDeliveryBodyModel.fromJson(Map<String, dynamic> json) =>
@@ -53,6 +55,7 @@ class BookInstantDeliveryBodyModel {
             mobNo: json["mobNo"],
             name: json["name"],
             productType: json["productType"],
+            paymentMethod: json["paymentMethod"],
         );
 
     Map<String, dynamic> toJson() => {
@@ -70,6 +73,7 @@ class BookInstantDeliveryBodyModel {
         "mobNo": mobNo,
         "name": name,
         "productType": productType,
+        "paymentMethod": paymentMethod,
     };
 }
 
