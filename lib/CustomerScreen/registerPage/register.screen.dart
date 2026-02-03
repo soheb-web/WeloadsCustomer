@@ -414,7 +414,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-
 import '../../config/utils/navigatorKey.dart';
 import '../../data/Model/registerBodyModel.dart';
 import '../NotifierFolder/notificationservice1.dart';
@@ -455,9 +454,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     height: 72.h,
                   ),
                 ),
-
                 SizedBox(height: 28.h),
-
                 Text(
                   "Let’s get started",
                   style: GoogleFonts.inter(
@@ -473,7 +470,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     color: const Color(0xFF4F4F4F),
                   ),
                 ),
-
                 SizedBox(height: 35.h),
 
                 /// NAME
@@ -500,7 +496,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                   ],
                 ),
-
                 SizedBox(height: 30.h),
 
                 /// PHONE
@@ -515,7 +510,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     return null;
                   },
                 ),
-
                 SizedBox(height: 30.h),
 
                 /// EMAIL
@@ -535,7 +529,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     return null;
                   },
                 ),
-
                 SizedBox(height: 24.h),
 
                 /// TERMS & CONDITIONS
@@ -602,7 +595,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                   ],
                 ),
-
                 SizedBox(height: 30.h),
 
                 /// REGISTER BUTTON
@@ -618,7 +610,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ? null
                       : () async {
                           if (!registerformKey.currentState!.validate()) return;
-
                           if (!isTermsAccepted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -629,10 +620,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                             );
                             return;
                           }
-
                           // registerUser();
                           final deviceId = await fcmGetToken();
-
                           registerUserApi(
                             body: RegisterBodyModel(
                               firstName: firstNameController.text,
@@ -701,7 +690,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                   ),
                 ),
-
                 SizedBox(height: 20.h),
               ],
             ),
