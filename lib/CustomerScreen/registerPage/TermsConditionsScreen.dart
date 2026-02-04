@@ -200,9 +200,7 @@ class TermsConditionsScreen extends StatelessWidget {
                   "Gate No. 6, Abdul Hamid Road, Nr. Akashwani, Malvani, "
                   "Malad (W), Mumbai – 400095",
             ),
-
             const SizedBox(height: 30),
-
             Center(
               child: Text(
                 "© 2026 Weloads. All rights reserved.",

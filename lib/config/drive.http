@@ -1,6 +1,6 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQyOTU1ZWRkNWMxYjUzMGFlYjhmZmYiLCJ1c2VyVHlwZSI6ImRyaXZlciIsImlhdCI6MTc1ODcxNDg0NiwiZXhwIjoxNzkwMjUwODQ2fQ.E_iTbxXaYYum_UU778b5Pxmva75wrVqSeIEQfeyL5Yw
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTgxZDkwOTliYjBmNzdiNDExMDk1YzYiLCJ1c2VyVHlwZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzcwMTE3Mzg1LCJleHAiOjE4MDE2NTMzODV9.f6U15ljGxWWSMavEzWnu13lyb9g9Qbf5rgvSTRD1vlY
 # @url =  http://localhost:4567
-@url =  http://192.168.1.43:4567
+@url =  http://192.168.1.82:4567
 
 
 //updateCostumerProfile
@@ -16,5 +16,3 @@ Authorization: {{token}}
 }
 
 
-post http://localhost:4567/api/v1/uploadImage
-file

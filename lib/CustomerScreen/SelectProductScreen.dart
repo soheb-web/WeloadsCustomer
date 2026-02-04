@@ -325,7 +325,6 @@ class _ProductTypeSelectScreenState
 }
 */
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -343,15 +342,15 @@ class ProductTypeSelectScreen extends ConsumerStatefulWidget {
   final String pickupLocs;
 
   const ProductTypeSelectScreen(
-      this.socket,
-      this.pickupLat,
-      this.pickupLon,
-      this.dropLats,
-      this.dropLons,
-      this.dropNames,
-      this.pickupLocs, {
-        super.key,
-      });
+    this.socket,
+    this.pickupLat,
+    this.pickupLon,
+    this.dropLats,
+    this.dropLons,
+    this.dropNames,
+    this.pickupLocs, {
+    super.key,
+  });
 
   @override
   ConsumerState<ProductTypeSelectScreen> createState() =>
@@ -390,10 +389,7 @@ class _ProductTypeSelectScreenState
         elevation: 0,
         title: const Text(
           "What are you sending?",
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         ),
         leading: const BackButton(color: Colors.white),
       ),
@@ -411,10 +407,7 @@ class _ProductTypeSelectScreenState
             /// 📦 TITLE
             const Text(
               "Select product type",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 14),
@@ -451,30 +444,30 @@ class _ProductTypeSelectScreenState
                   onPressed: selectedProduct == null
                       ? null
                       : () async {
-                    if (!mounted) return;
+                          if (!mounted) return;
 
-                    // "Others" ke case mein details bhi bhej sakte ho
-                    final details = selectedProduct == "Others"
-                        ? _detailsController.text.trim()
-                        : selectedProduct;
+                          // "Others" ke case mein details bhi bhej sakte ho
+                          final details = selectedProduct == "Others"
+                              ? _detailsController.text.trim()
+                              : selectedProduct;
 
-                    await Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (_) => SelectTripScreen(
-                          widget.socket,
-                          widget.pickupLat,
-                          widget.pickupLon,
-                          widget.dropLats,
-                          widget.dropLons,
-                          widget.dropNames,
-                          details!,
-                          // Agar SelectTripScreen mein details parameter banana ho to yahan pass kar dena
-                          // details: details,
-                        ),
-                      ),
-                    );
-                  },
+                          await Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (_) => SelectTripScreen(
+                                widget.socket,
+                                widget.pickupLat,
+                                widget.pickupLon,
+                                widget.dropLats,
+                                widget.dropLons,
+                                widget.dropNames,
+                                details!,
+                                // Agar SelectTripScreen mein details parameter banana ho to yahan pass kar dena
+                                // details: details,
+                              ),
+                            ),
+                          );
+                        },
                   child: const Text(
                     "Continue",
                     style: TextStyle(
@@ -506,8 +499,7 @@ class _ProductTypeSelectScreenState
         minLines: 1,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
-          hintText:
-          "Kya bhej rahe ho bhai? (jaise: gift box, 3kg dry fruits, medicines, etc.)",
+          hintText: "Enter item details.",
           hintStyle: TextStyle(color: Colors.grey.shade500),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -668,10 +660,7 @@ class _ProductTypeSelectScreenState
             width: 1.5,
           ),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
           ],
         ),
         child: Row(
@@ -695,14 +684,3 @@ class _ProductTypeSelectScreenState
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-

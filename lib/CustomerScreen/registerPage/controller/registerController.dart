@@ -101,7 +101,6 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
 */
 
 import 'dart:developer';
-
 import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:delivery_mvp_app/data/Model/verifyRegisterBodyModel.dart';
@@ -109,7 +108,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
-
 import '../../../config/network/api.state.dart';
 import '../../../config/utils/pretty.dio.dart';
 import '../../../data/Model/registerBodyModel.dart';

@@ -61,27 +61,17 @@ import '../../data/Model/SendMoneyModel.dart';
 import '../../data/Model/SubmitRatingModel.dart';
 part 'api.state.g.dart';
 
-
-
 // @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 // @RestApi(baseUrl: "http://192.168.1.22:4567/api") // local url
 
-
 @RestApi(baseUrl: "https://backend.weloads.live/api")
-
-
+//@RestApi(baseUrl: "http://192.168.1.82:4567/api")  /// new laptop local url julkar
 // @RestApi(baseUrl: "https://backend.weloads.live/api")
-
 // https://backend.weloads.live/api/
-
 abstract class APIStateNetwork {
-
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
   //////////Payment gateway///////////
-
-
-
 
   @POST("/v1/user/getParcelList")
   Future<ParcelResponseListModel> getParcelList();
@@ -89,66 +79,41 @@ abstract class APIStateNetwork {
   @POST("/v1/user/getPackerAndMoveBookingList")
   Future<AllIndiaResponseListModel> getPackerAndMoveBookingList();
 
-
-
-
-
   @POST("/v1/user/createParcel")
-  Future<AllIndiaResponseModel> allIndiaBooking(
-      @Body() AllIndiaBodyModel body,
-      );
+  Future<AllIndiaResponseModel> allIndiaBooking(@Body() AllIndiaBodyModel body);
 
   @POST("/v1/user/sendWalletMoney")
   Future<AllIndiaResponseModel> sendWalletMoney(
-      @Body() SendMoneyBodyModel body,
-      );
-
+    @Body() SendMoneyBodyModel body,
+  );
 
   @POST("/v1/user/createPickersAndMoverBooking")
   Future<PickerMoverBookingModel> createPickersAndMoverBooking(
-      @Body() CreatePickersAndMoverBooking body,
-      );
-
-
-
-
-
-
-
+    @Body() CreatePickersAndMoverBooking body,
+  );
 
   @POST("/v1/user/createOrder")
-  Future<CreateOrderResponseModel> createOrder(
-      @Body() CreateOrderModel body,
-      );
+  Future<CreateOrderResponseModel> createOrder(@Body() CreateOrderModel body);
 
   @POST("/v1/user/getDeliveryStatus")
   Future<DeliveryResponseModel> getDeliveryStatus(
-      @Body() DeliveryBodyModel body,
-      );
-
-
+    @Body() DeliveryBodyModel body,
+  );
 
   // getTxList
 
-
   @GET("/v1/user/getDeliveryById")
   Future<GetDeliveryByIdResModel2> getDeliveryById2(
-      @Query("deliveryId") String deliveryId,
-      );
-
+    @Query("deliveryId") String deliveryId,
+  );
 
   @POST("/v1/user/bookInstantDelivery")
   Future<BookInstantDeliveryResModel> bookInstantDelivery(
-      @Body() BookInstantDeliveryBodyModel body,
-      );
-
-
-
-
+    @Body() BookInstantDeliveryBodyModel body,
+  );
 
   @POST("/v1/user/reviewRating")
   Future<RatingResponseModel> reviewRating(@Body() SubmitRatingRequest body);
-
 
   @GET("/v1/user/getAllAddresses")
   Future<GetAddressRsponseModel> getAllAddresses();
@@ -183,13 +148,10 @@ abstract class APIStateNetwork {
   @GET("/v1/user/getTxList")
   Future<TransactionListResponseModel> getTxList();
 
-
   @POST("/v1/user/getWalletTransactions")
   Future<QrTransactionHistoryModel> getWalletTransactions();
 
-
   ////////////
-
 
   @GET("/v1/user/packageAppKeyList")
   Future<RecommendedModel> recommendedList();
@@ -212,8 +174,6 @@ abstract class APIStateNetwork {
   Future<GetDeliveryByIdResModel> getDeliveryById(
     @Query("deliveryId") String deliveryId,
   );
-
-
 
   @POST("/v1/user/addAddress")
   Future<HttpResponse<dynamic>> addAddress(@Body() AddAddressModel body);
@@ -253,15 +213,4 @@ abstract class APIStateNetwork {
 
   @POST("/v1/ticket/ticketReply")
   Future<TicketReplyResModel> ticketReply(@Body() TicketReplyBodyModel body);
-
-
 }
-
-
-
-
-
-
-
-
-

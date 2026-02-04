@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -35,20 +34,20 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   final String productType;
 
   const SelectTripScreen(
-      this.socket,
-      this.pickupLat,
-      this.pickupLon,
-      this.dropLats,
-      this.dropLons,
-      this.dropNames,
-      this.productType,
-      {
-        super.key,
-      });
+    this.socket,
+    this.pickupLat,
+    this.pickupLon,
+    this.dropLats,
+    this.dropLons,
+    this.dropNames,
+    this.productType, {
+    super.key,
+  });
 
   @override
   ConsumerState<SelectTripScreen> createState() => _SelectTripScreenState();
 }
+
 class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   final box = Hive.box("folder");
   GoogleMapController? _mapController;
@@ -78,7 +77,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   bool _iconsLoaded = false;
   late BitmapDescriptor _number1Icon;
   late BitmapDescriptor _number2Icon;
-   String? delivery_id;
+  String? delivery_id;
   @override
   void initState() {
     super.initState();
@@ -97,6 +96,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     _loadCustomIcons();
     _createNumberIcons();
   }
+
   void _setupDriverAssignedListener() {
     // Duplicate listener न लगे, इसलिए पहले off करो
     socket?.off('user:driver_assigned');
@@ -105,53 +105,14 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 
       if (!mounted) return;
 
-      _navigateToPickupScreen(payload,delivery_id);
+      _navigateToPickupScreen(payload, delivery_id);
     });
   }
-  // void _navigateToPickupScreen(dynamic payload, String? delivery_id,) async {
-  //   try {
-  //     final deliveryId = payload['deliveryId'] as String?;
-  //     if (deliveryId == null) return;
-  //
-  //     final driver = Map<String, dynamic>.from(payload['driver'] ?? {});
-  //     final otp = payload['otp']?.toString() ?? 'N/A';
-  //     final pickup = Map<String, dynamic>.from(payload['pickup'] ?? {});
-  //     final dropoffList = (payload['dropoff'] as List?)
-  //         ?.map((e) => Map<String, dynamic>.from(e))
-  //         .toList() ?? [];
-  //     final amount = payload['amount'] ?? 0;
-  //     final vehicleType = Map<String, dynamic>.from(payload['vehicleType'] ?? {});
-  //     final status = payload['status']?.toString() ?? 'assigned';
-  //
-  //     // txId Hive से लो (booking के बाद save किया था)
-  //     final txId = box.get("current_booking_txId") ?? "";
-  //
-  //     Fluttertoast.showToast(msg: "Driver Assigned!");
-  //
-  //     Navigator.pushReplacement(
-  //       context,
-  //       CupertinoPageRoute(
-  //         builder: (context) => PickupScreen(
-  //           socket: socket!,
-  //           deliveryId: deliveryId,
-  //           driver: driver,
-  //           otp: otp,
-  //           pickup: pickup,
-  //           dropoff: dropoffList,
-  //           amount: amount,
-  //           vehicleType: vehicleType,
-  //           vehicleDetail: payload['vehicleDetails'],
-  //           status: status,
-  //           txId: txId,
-  //         ),
-  //       ),
-  //     );
-  //   } catch (e, s) {
-  //     log("Navigation error from SelectTripScreen: $e\n$s");
-  //   }
-  // }
 
-  Future<void> _navigateToPickupScreen(dynamic payload, String? deliveryId) async {
+  Future<void> _navigateToPickupScreen(
+    dynamic payload,
+    String? deliveryId,
+  ) async {
     if (!mounted) return;
 
     if (deliveryId == null || deliveryId.isEmpty) {
@@ -182,10 +143,12 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         if (driverRaw is Map<String, dynamic>) {
           driver = driverRaw;
         } else if (driverRaw is List && driverRaw.isNotEmpty) {
-          driver = Map<String, dynamic>.from(driverRaw.firstWhere(
-                (e) => e is Map<String, dynamic>,
-            orElse: () => <String, dynamic>{},
-          ));
+          driver = Map<String, dynamic>.from(
+            driverRaw.firstWhere(
+              (e) => e is Map<String, dynamic>,
+              orElse: () => <String, dynamic>{},
+            ),
+          );
         }
 
         otp = payload['otp']?.toString() ?? 'N/A';
@@ -261,7 +224,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           };
         }
 
-        if (dropoff.isEmpty && data.dropoff != null && data.dropoff!.isNotEmpty) {
+        if (dropoff.isEmpty &&
+            data.dropoff != null &&
+            data.dropoff!.isNotEmpty) {
           dropoff = data.dropoff!.map((p) {
             return {
               'name': p.name ?? '',
@@ -323,11 +288,11 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     }
   }
 
-
   Future<void> _createNumberIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
     _number2Icon = await _createNumberIcon("2", Colors.orange);
   }
+
   Future<BitmapDescriptor> _createNumberIcon(String number, Color color) async {
     final size = 80.0;
     final recorder = ui.PictureRecorder();
@@ -364,6 +329,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
+
   Future<void> _loadCustomIcons() async {
     try {
       driverCarIcon = await BitmapDescriptor.fromAssetImage(
@@ -394,6 +360,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       log("Icon load error: $e");
     }
   }
+
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -426,9 +393,11 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       _fitAllMarkersAndDrivers();
     }
   }
+
   void safeSetState(VoidCallback fn) {
     if (mounted) setState(fn);
   }
+
   void startLocationStream() {
     _locationSubscription =
         Geolocator.getPositionStream(
@@ -441,6 +410,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           _currentPosition = position;
         });
   }
+
   void updateUserLocation(double lat, double lon) {
     if (socket?.connected == true && userId != null) {
       socket!.emitWithAck('user:location_update', {
@@ -450,9 +420,11 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       });
     }
   }
+
   void _setupEventListeners() {
     socket?.on('receive_message', (data) => log('Message: $data'));
   }
+
   @override
   void dispose() {
     socket?.off('user:driver_assigned'); // important: memory leak avoid
@@ -462,6 +434,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     socket?.disconnect();
     super.dispose();
   }
+
   void _addMarkers() {
     _markers.clear();
     _markers.add(
@@ -496,6 +469,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     }
     safeSetState(() {});
   }
+
   void _addNearbyDriverMarkers() {
     if (nearbyDrivers.data == null ||
         nearbyDrivers.data!.isEmpty ||
@@ -538,7 +512,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           infoWindow: InfoWindow(
             title: "${driver.firstName} ${driver.lastName}",
             snippet:
-            "${driver.vehicleDetails?[0].model} • ${(driver.distance! / 1000).toStringAsFixed(1)} km",
+                "${driver.vehicleDetails?[0].model} • ${(driver.distance! / 1000).toStringAsFixed(1)} km",
           ),
         ),
       );
@@ -546,6 +520,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     safeSetState(() {});
     _fitAllMarkersAndDrivers();
   }
+
   void _fitAllMarkersAndDrivers() {
     if (_markers.isEmpty || _mapController == null) return;
     final positions = _markers.map((m) => m.position).toList();
@@ -558,6 +533,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     final bounds = _calculateBounds(positions);
     _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
   }
+
   Future<void> _fetchMultiStopRoute() async {
     const apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
     double totalDistKm = 0.0;
@@ -573,11 +549,11 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           : '${dropLats[i - 1]},${dropLons[i - 1]}';
       final dest = '${dropLats[i]},${dropLons[i]}';
 
-      final url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-        'origin': origin,
-        'destination': dest,
-        'key': apiKey,
-      });
+      final url = Uri.https(
+        'maps.googleapis.com',
+        '/maps/api/directions/json',
+        {'origin': origin, 'destination': dest, 'key': apiKey},
+      );
 
       try {
         final res = await http.get(url);
@@ -620,6 +596,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       _fitAllMarkersAndDrivers();
     }
   }
+
   List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
     int index = 0, len = encoded.length;
@@ -647,6 +624,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     }
     return points;
   }
+
   LatLngBounds _calculateBounds(List<LatLng> points) {
     double minLat = points[0].latitude, maxLat = points[0].latitude;
     double minLng = points[0].longitude, maxLng = points[0].longitude;
@@ -662,28 +640,16 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     );
   }
 
-
-
   String? selectedMethod = 'cash'; // default selected
   final List<Map<String, dynamic>> methods = [
-    {
-      'value': 'cash',
-      'label': 'Cash',
-      'icon': Icons.monetization_on,
-    },
-    {
-      'value': 'wallet',
-      'label': 'Wallet',
-      'icon': Icons.wallet,
-    },
+    {'value': 'cash', 'label': 'Cash', 'icon': Icons.monetization_on},
+    {'value': 'wallet', 'label': 'Wallet', 'icon': Icons.wallet},
     // You can add more later: 'upi', 'card', etc.
   ];
   void _selectMethod(String value) {
     setState(() {
       selectedMethod = value;
     });
-
-
   }
 
   @override
@@ -691,9 +657,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     final distanceProviderState = ref.watch(getDistanceProvider);
     return Scaffold(
       backgroundColor: Colors.white,
-      body:
-
-      distanceProviderState.when(
+      body: distanceProviderState.when(
         data: (response) {
           if (response.data == null || response.data!.isEmpty) {
             return Center(child: Text("No vehicles available"));
@@ -704,291 +668,297 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           return _currentLatlng == null
               ? const Center(child: CircularProgressIndicator())
               : Stack(
-            children: [
-              GoogleMap(
-                padding: EdgeInsets.only(top: 40.h, right: 16.w),
-                initialCameraPosition: CameraPosition(
-                  target: _currentLatlng!,
-                  zoom: 15,
-                ),
-                onMapCreated: (controller) {
-                  _mapController = controller;
-                  _addMarkers();
-                  _fetchMultiStopRoute();
-                },
-                myLocationEnabled: false,
-                myLocationButtonEnabled: false,
-                markers: _markers,
-                polylines: _polylines,
-              ),
-
-              Positioned(
-                left: 10.w,
-                top: 40.h,
-                child: FloatingActionButton(
-                  mini: true,
-                  backgroundColor: Colors.white,
-                  shape: const CircleBorder(),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Icon(
-                    Icons.arrow_back_ios,
-                    color: Color(0xFF1D3557),
-                  ),
-                ),
-              ),
-
-
-
-              if (totalDistance != null)
-                Positioned(
-                  bottom: 70.h,
-                  left: 16.w,
-                  right: 16.w,
-                  child: Container(
-                    // ... decoration same
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Remove this block completely:
-                        // if (toPickupDistance != null)
-                        //   Text('To Pickup: $toPickupDistance | $toPickupDuration', ...),
-
-                        ...dropDistances.asMap().entries.map(
-                              (e) => e.value.isNotEmpty
-                              ? Text(
-                            'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
-                            style: GoogleFonts.inter(fontSize: 13.sp),
-                          )
-                              : const SizedBox(),
-                        ),
-                        Text(
-                          'Total: $totalDistance | $totalDuration',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              DraggableScrollableSheet(
-                initialChildSize: 0.50,
-                minChildSize: 0.30,
-                maxChildSize: 0.80,
-                builder: (context, scrollController) {
-                  return Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 16.h,
-                      horizontal: 16.w,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(30.r),
+                  children: [
+                    GoogleMap(
+                      padding: EdgeInsets.only(top: 40.h, right: 16.w),
+                      initialCameraPosition: CameraPosition(
+                        target: _currentLatlng!,
+                        zoom: 15,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          spreadRadius: 5,
-                        ),
-                      ],
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                        _addMarkers();
+                        _fetchMultiStopRoute();
+                      },
+                      myLocationEnabled: false,
+                      myLocationButtonEnabled: false,
+                      markers: _markers,
+                      polylines: _polylines,
                     ),
-                    child: ListView(
-                      controller: scrollController,
-                      padding: EdgeInsets.zero,
-                      children: [
-                        // ---- Top drag handle ----
-                        Center(
-                          child: Container(
-                            margin: EdgeInsets.only(bottom: 10.h),
-                            width: 60.w,
-                            height: 5.h,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.grey[300],
-                            ),
+
+                    Positioned(
+                      left: 10.w,
+                      top: 40.h,
+                      child: FloatingActionButton(
+                        mini: true,
+                        backgroundColor: Colors.white,
+                        shape: const CircleBorder(),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Color(0xFF1D3557),
+                        ),
+                      ),
+                    ),
+
+                    if (totalDistance != null)
+                      Positioned(
+                        bottom: 70.h,
+                        left: 16.w,
+                        right: 16.w,
+                        child: Container(
+                          // ... decoration same
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Remove this block completely:
+                              // if (toPickupDistance != null)
+                              //   Text('To Pickup: $toPickupDistance | $toPickupDuration', ...),
+                              ...dropDistances.asMap().entries.map(
+                                (e) => e.value.isNotEmpty
+                                    ? Text(
+                                        'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13.sp,
+                                        ),
+                                      )
+                                    : const SizedBox(),
+                              ),
+                              Text(
+                                'Total: $totalDistance | $totalDuration',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-
-                        // ---- LIST OF VEHICLES ----
-                        ...List.generate(response.data!.length, (
-                            dataIndex,
-                            ) {
-                          final isSelected = selectIndex == dataIndex;
-                          return InkWell(
-                            onTap: () async {
-                              setState(() {
-                                selectIndex = dataIndex;
-                                isLoadingDrivers = true;
-                                _markers.removeWhere(
-                                      (m) => m.markerId.value.startsWith(
-                                    'driver_',
-                                  ),
-                                );
-                              });
-
-                              try {
-                                final selectedVehicle =
-                                response.data![dataIndex];
-                                final body = NearByDriverModel(
-                                  lat: pickupLat,
-                                  long: pickupLon,
-                                  vehicleId: selectedVehicle
-                                      .vehicleTypeId
-                                      .toString(),
-                                );
-
-                                final drivers = await APIStateNetwork(
-                                  callPrettyDio(),
-                                ).getNearByDriverList(body);
-                                setState(() {
-                                  nearbyDrivers = drivers;
-                                  isLoadingDrivers = false;
-                                  if (drivers.data != null &&
-                                      drivers.data!.isNotEmpty) {
-                                    _addNearbyDriverMarkers();
-                                  }
-                                });
-                              } catch (e) {
-                                setState(
-                                      () => isLoadingDrivers = false,
-                                );
-                              }
-                            },
-                            child: AnimatedContainer(
-                              margin: EdgeInsets.only(bottom: 15.h),
-                              duration: Duration(milliseconds: 250),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Color(0xFFE5F0F1)
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                  15.r,
-                                ),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Colors.black
-                                      : Colors.grey.shade300,
-                                  width: isSelected ? 1.5 : 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: isSelected
-                                        ? Colors.black26
-                                        : Colors.black12,
-                                    blurRadius: isSelected ? 8 : 4,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
+                      ),
+                    DraggableScrollableSheet(
+                      initialChildSize: 0.50,
+                      minChildSize: 0.30,
+                      maxChildSize: 0.80,
+                      builder: (context, scrollController) {
+                        return Container(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 16.h,
+                            horizontal: 16.w,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(30.r),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 10,
+                                spreadRadius: 5,
                               ),
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  left: 12.w,
-                                  right: 12.w,
-                                  top: isSelected ? 8 : 16.h,
-                                  bottom: isSelected ? 10 : 16.h,
+                            ],
+                          ),
+                          child: ListView(
+                            controller: scrollController,
+                            padding: EdgeInsets.zero,
+                            children: [
+                              // ---- Top drag handle ----
+                              Center(
+                                child: Container(
+                                  margin: EdgeInsets.only(bottom: 10.h),
+                                  width: 60.w,
+                                  height: 5.h,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.grey[300],
+                                  ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: [
-                                    if (isSelected)
-                                      Center(
-                                        child: Image.network(
-                                          response
-                                              .data![dataIndex]
-                                              .image
-                                              .toString(),
-                                          width: isSelected
-                                              ? 100.w
-                                              : 70.w,
-                                          height: isSelected
-                                              ? 60.h
-                                              : 50.h,
-                                          fit: BoxFit.contain,
+                              ),
+
+                              // ---- LIST OF VEHICLES ----
+                              ...List.generate(response.data!.length, (
+                                dataIndex,
+                              ) {
+                                final isSelected = selectIndex == dataIndex;
+                                return InkWell(
+                                  onTap: () async {
+                                    setState(() {
+                                      selectIndex = dataIndex;
+                                      isLoadingDrivers = true;
+                                      _markers.removeWhere(
+                                        (m) => m.markerId.value.startsWith(
+                                          'driver_',
                                         ),
+                                      );
+                                    });
+
+                                    try {
+                                      final selectedVehicle =
+                                          response.data![dataIndex];
+                                      final body = NearByDriverModel(
+                                        lat: pickupLat,
+                                        long: pickupLon,
+                                        vehicleId: selectedVehicle.vehicleTypeId
+                                            .toString(),
+                                      );
+
+                                      final drivers = await APIStateNetwork(
+                                        callPrettyDio(),
+                                      ).getNearByDriverList(body);
+                                      setState(() {
+                                        nearbyDrivers = drivers;
+                                        isLoadingDrivers = false;
+                                        if (drivers.data != null &&
+                                            drivers.data!.isNotEmpty) {
+                                          _addNearbyDriverMarkers();
+                                        }
+                                      });
+                                    } catch (e) {
+                                      setState(() => isLoadingDrivers = false);
+                                    }
+                                  },
+                                  child: AnimatedContainer(
+                                    margin: EdgeInsets.only(bottom: 15.h),
+                                    duration: Duration(milliseconds: 250),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? Color(0xFFE5F0F1)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(15.r),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? Colors.black
+                                            : Colors.grey.shade300,
+                                        width: isSelected ? 1.5 : 1,
                                       ),
-                                    Row(
-                                      children: [
-                                        if (!isSelected)
-                                          Image.network(
-                                            response
-                                                .data![dataIndex]
-                                                .image
-                                                .toString(),
-                                            width: isSelected
-                                                ? 100.w
-                                                : 70.w,
-                                            height: isSelected
-                                                ? 70.h
-                                                : 50.h,
-                                            fit: BoxFit.contain,
-                                          ),
-                                        SizedBox(width: 8.w),
-                                        Column(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .start,
-                                          children: [
-                                            Text(
-                                              response
-                                                  .data![dataIndex]
-                                                  .vehicleType ??
-                                                  "",
-                                              style:
-                                              GoogleFonts.inter(
-                                                fontSize:
-                                                isSelected
-                                                    ? 20.sp
-                                                    : 16.sp,
-                                                fontWeight:
-                                                isSelected
-                                                    ? FontWeight
-                                                    .w600
-                                                    : FontWeight
-                                                    .w400,
-                                              ),
-                                            ),
-
-
-                                            Text(
-                                              _getEstimatedTime(
-                                                vehicleType: response.data![dataIndex].vehicleType ?? "",
-                                                distance: response.data![dataIndex].distance?.toDouble() ?? 7.0,
-                                              ),
-                                              style: GoogleFonts.inter(
-                                                fontSize: isSelected ? 14.sp : 12.sp,
-                                                color: Colors.grey[700],
-                                              ),
-                                            ),
-
-
-                                          ],
-                                        ),
-                                        Spacer(),
-                                        Text(
-                                          "₹${response.data![dataIndex].price}",
-                                          style: GoogleFonts.inter(
-                                            fontSize: isSelected
-                                                ? 18.sp
-                                                : 15.sp,
-                                            fontWeight:
-                                            FontWeight.w600,
-                                          ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isSelected
+                                              ? Colors.black26
+                                              : Colors.black12,
+                                          blurRadius: isSelected ? 8 : 4,
+                                          offset: Offset(0, 4),
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                     /*   Container(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        left: 12.w,
+                                        right: 12.w,
+                                        top: isSelected ? 8 : 16.h,
+                                        bottom: isSelected ? 10 : 16.h,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          if (isSelected)
+                                            Center(
+                                              child: Image.network(
+                                                response.data![dataIndex].image
+                                                    .toString(),
+                                                width: isSelected
+                                                    ? 100.w
+                                                    : 70.w,
+                                                height: isSelected
+                                                    ? 60.h
+                                                    : 50.h,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          Row(
+                                            children: [
+                                              if (!isSelected)
+                                                Image.network(
+                                                  response
+                                                      .data![dataIndex]
+                                                      .image
+                                                      .toString(),
+                                                  width: isSelected
+                                                      ? 100.w
+                                                      : 70.w,
+                                                  height: isSelected
+                                                      ? 70.h
+                                                      : 50.h,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              SizedBox(width: 8.w),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    response
+                                                            .data![dataIndex]
+                                                            .vehicleType ??
+                                                        "",
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: isSelected
+                                                          ? 20.sp
+                                                          : 16.sp,
+                                                      fontWeight: isSelected
+                                                          ? FontWeight.w600
+                                                          : FontWeight.w400,
+                                                    ),
+                                                  ),
+
+                                                  Text(
+                                                    _getEstimatedTime(
+                                                      vehicleType:
+                                                          response
+                                                              .data![dataIndex]
+                                                              .vehicleType ??
+                                                          "",
+                                                      distance:
+                                                          response
+                                                              .data![dataIndex]
+                                                              .distance
+                                                              ?.toDouble() ??
+                                                          7.0,
+                                                    ),
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: isSelected
+                                                          ? 14.sp
+                                                          : 12.sp,
+                                                      color: Colors.grey[700],
+                                                    ),
+                                                  ),
+
+                                                  Text(
+                                                    "Size: ${response.data![dataIndex].vehicleDimensions?.length}L x "
+                                                    "${response.data![dataIndex].vehicleDimensions?.width}W x "
+                                                    "${response.data![dataIndex].vehicleDimensions?.height}H cm",
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 11.sp,
+                                                      color: Colors.grey[800],
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Spacer(),
+                                              Text(
+                                                "₹${response.data![dataIndex].price}",
+                                                style: GoogleFonts.inter(
+                                                  fontSize: isSelected
+                                                      ? 18.sp
+                                                      : 15.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+
+                              /*   Container(
                           margin: EdgeInsets.only(top: 10.h),
                           width: double.infinity,
                           height: 50.h,
@@ -1043,103 +1013,124 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                             ],
                           ),
                         ),*/
+                              Container(
+                                margin: EdgeInsets.only(top: 10.h),
+                                width: 300.w,
+                                height: 50.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 1.w,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 10.w),
 
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: methods.map((method) {
+                                        final isSelected =
+                                            selectedMethod == method['value'];
 
-
-                  Container(
-                  margin: EdgeInsets.only(top: 10.h),
-                  width: 300.w,
-                  height: 50.h,
-                  decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(
-                  color: Colors.grey.shade300,
-                  width: 1.w,
-                  ),
-                  ),
-                  child: Row(
-
-                    children: [
-
-                      SizedBox(width: 10.w,),
-
-                      Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: methods.map((method) {
-                      final isSelected = selectedMethod == method['value'];
-
-                      return
-
-                        Row(
-                          children: [
-                            GestureDetector(
-                                              onTap: () => _selectMethod(method['value']),
+                                        return Row(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () => _selectMethod(
+                                                method['value'],
+                                              ),
                                               child: Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                                              decoration: BoxDecoration(
-                                              color: isSelected ? const Color(0xFF006970).withOpacity(0.08) : null,
-                                              borderRadius: BorderRadius.circular(8.r),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 12.w,
+                                                  vertical: 8.h,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: isSelected
+                                                      ? const Color(
+                                                          0xFF006970,
+                                                        ).withOpacity(0.08)
+                                                      : null,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        8.r,
+                                                      ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      method['icon'],
+                                                      color: isSelected
+                                                          ? const Color(
+                                                              0xFF006970,
+                                                            )
+                                                          : Colors
+                                                                .grey
+                                                                .shade600,
+                                                      size: 20.sp,
+                                                    ),
+                                                    SizedBox(width: 8.w),
+                                                    Text(
+                                                      method['label'],
+                                                      style: GoogleFonts.inter(
+                                                        fontSize: 14.sp,
+                                                        color: isSelected
+                                                            ? const Color(
+                                                                0xFF006970,
+                                                              )
+                                                            : Colors.black87,
+                                                        fontWeight: isSelected
+                                                            ? FontWeight.w600
+                                                            : FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                              Icon(
-                                              method['icon'],
-                                              color: isSelected ? const Color(0xFF006970) : Colors.grey.shade600,
-                                              size: 20.sp,
-                                              ),
-                                              SizedBox(width: 8.w),
-                                              Text(
-                                              method['label'],
-                                              style: GoogleFonts.inter(
+                                            ),
+                                          ],
+                                        );
+                                      }).toList(),
+                                    ),
+
+                                    Expanded(child: SizedBox()),
+
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF006970),
+                                        borderRadius: BorderRadius.circular(
+                                          5.sp,
+                                        ),
+                                      ),
+                                      padding: EdgeInsets.all(4.sp),
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                            "assets/promo.png",
+                                            height: 20.h,
+                                            width: 20.w,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 10.w),
+                                          Text(
+                                            "Promo Code",
+                                            style: GoogleFonts.inter(
                                               fontSize: 14.sp,
-                                              color: isSelected ? const Color(0xFF006970) : Colors.black87,
-                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                              ),
-                                              ),
-                                              ],
-                                              ),
-                                              ),
-                                              ),
-
-
-                          ],
-                        );
-                      }).toList(),
-                      ),
-
-                      Expanded(child: SizedBox()),
-
-                      Container(
-                        decoration: BoxDecoration(
-                            color: Color(0xFF006970),
-                            borderRadius: BorderRadius.circular(5.sp)),
-                        padding: EdgeInsets.all(4.sp),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              "assets/promo.png",
-                              height: 20.h,
-                              width: 20.w, 
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              "Promo Code",
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                color: Colors.white
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 10.w),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 10.w,)
-                    ],
-                  ),
-                  ),
 
-                      /*  Row(
+                              /*  Row(
                           children: [
                             Image.asset(
                               "assets/promo.png",
@@ -1171,32 +1162,38 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                             ),
                           ],
                         ),*/
+                              SizedBox(height: 10.h),
+                              _buildBookNowButton(
+                                name: vehicle.name ?? "",
+                                phon: vehicle.mobNo ?? "",
+                                pickupAddress: vehicle.origName ?? "",
+                                dropAddress: dropNames.join(" → "),
+                                selectedVehicle: vehicle,
+                              ),
 
-                        SizedBox(height: 10.h),
-                        _buildBookNowButton(
-                          name: vehicle.name ?? "",
-                          phon: vehicle.mobNo ?? "",
-                          pickupAddress: vehicle.origName ?? "",
-                          dropAddress: dropNames.join(" → "),
-                          selectedVehicle: vehicle,
-                        ),
-
-                        // _buildBookNowButton(name, phon, pickupAddress, dropAddress),
-                        SizedBox(height: 40.h),
-                      ],
+                              // _buildBookNowButton(name, phon, pickupAddress, dropAddress),
+                              SizedBox(height: 40.h),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-            ],
-          );
+                  ],
+                );
         },
-        error: (e, s) => Center(child: Text(e.toString())),
+        error: (e, s) {
+          log(s.toString());
+          return Center(child: Text(e.toString()));
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }
-  String _getEstimatedTime({required String vehicleType, required double distance}) {
+
+  String _getEstimatedTime({
+    required String vehicleType,
+    required double distance,
+  }) {
     // distance is assumed in KM (your API returns 7 → 7 km)
     final double distanceKm = distance;
 
@@ -1218,10 +1215,12 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     final int timeInMinutes = (timeInHours * 60).ceil();
 
     if (timeInMinutes < 5) return "~5 min";
-    if (timeInMinutes > 60) return "${(timeInMinutes / 60).toStringAsFixed(1)} hr";
+    if (timeInMinutes > 60)
+      return "${(timeInMinutes / 60).toStringAsFixed(1)} hr";
 
     return "~$timeInMinutes min";
   }
+
   Widget _buildBookNowButton({
     required String name,
     required String phon,
@@ -1240,111 +1239,102 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       onPressed: isBooking
           ? null
           : () async {
-        setState(() => isBooking = true);
-        try {
-
-          final body =
-          BookInstantDeliveryBodyModel(
-              vehicleTypeId: selectedVehicle.vehicleTypeId ?? "",
-              origName: pickupAddress,
-              origLat: pickupLat,
-              origLon: pickupLon,
-              coinAmount: 0,
-              copanId: null,
-              productType: widget.productType,
-              dropoff:
-              selectedVehicle.dropoff?.map((d) => BookDropoff(
-                  name: d.name.toString(),
-                  lat: d.lat ?? 0.0,
-                  long: d.long ?? 0.0,
-                ),).toList() ?? [],
-              distance: (selectedVehicle.distance ?? 0).toDouble(),
-              userPayAmount: double.parse(selectedVehicle.price ?? "0",
-              ).toInt(),
-              taxAmount: 18.0,
-              mobNo: phon,
-              name:name,
-              paymentMethod: selectedMethod.toString()
-          );
-
-          final service = APIStateNetwork(callPrettyDio());
-
-          final response = await service.bookInstantDelivery(body);
-
-          if (response.code == 0) {
-            final dataMap = response;
-            final txId = dataMap.data.txId.toString();
-            if (txId.isEmpty) {
-              Fluttertoast.showToast(msg: "Booking failed: No txId");
-              return;
-            }
-            box.put("current_booking_txId", txId);
-            delivery_id=response.data.id;
-            Navigator.push(
-              context,
-              CupertinoPageRoute(
-                builder: (context) => WaitingForDriverScreen(
+              setState(() => isBooking = true);
+              try {
+                final body = BookInstantDeliveryBodyModel(
+                  vehicleTypeId: selectedVehicle.vehicleTypeId ?? "",
+                  origName: pickupAddress,
+                  origLat: pickupLat,
+                  origLon: pickupLon,
+                  coinAmount: 0,
+                  copanId: null,
                   productType: widget.productType,
-                  mobile :phon,
-                  name:name,
-                  userPayAmount:double.parse(
+                  dropoff:
+                      selectedVehicle.dropoff
+                          ?.map(
+                            (d) => BookDropoff(
+                              name: d.name.toString(),
+                              lat: d.lat ?? 0.0,
+                              long: d.long ?? 0.0,
+                            ),
+                          )
+                          .toList() ??
+                      [],
+                  distance: (selectedVehicle.distance ?? 0).toDouble(),
+                  userPayAmount: double.parse(
                     selectedVehicle.price ?? "0",
                   ).toInt(),
-                  distance: (selectedVehicle.distance ?? 0).toDouble(),
-                  id: selectedVehicle.vehicleTypeId ?? "",
-                  socket: socket!,
-                  pickupLat: pickupLat,
-                  pickupLon: pickupLon,
-                  dropLats: dropLats,
-                  dropLons: dropLons,
-                  dropNames: dropNames,
-                  txId: txId,
+                  taxAmount: 18.0,
+                  mobNo: phon,
+                  name: name,
                   paymentMethod: selectedMethod.toString(),
-                  deliveryId: response.data.id,
-                ),
-              ),
-            );
-            Fluttertoast.showToast(msg: "Delivery booked!");
-          }
+                );
 
-          else {
+                final service = APIStateNetwork(callPrettyDio());
 
-            final errorMsg =
-                response.message ?? "Invalid response from server";
+                final response = await service.bookInstantDelivery(body);
 
-            log(
-              "Booking failed: $errorMsg | data type: ${response.data.runtimeType}",
-            );
+                if (response.code == 0) {
+                  final dataMap = response;
+                  final txId = dataMap.data.txId.toString();
+                  if (txId.isEmpty) {
+                    Fluttertoast.showToast(msg: "Booking failed: No txId");
+                    return;
+                  }
+                  box.put("current_booking_txId", txId);
+                  delivery_id = response.data.id;
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => WaitingForDriverScreen(
+                        productType: widget.productType,
+                        mobile: phon,
+                        name: name,
+                        userPayAmount: double.parse(
+                          selectedVehicle.price ?? "0",
+                        ).toInt(),
+                        distance: (selectedVehicle.distance ?? 0).toDouble(),
+                        id: selectedVehicle.vehicleTypeId ?? "",
+                        socket: socket!,
+                        pickupLat: pickupLat,
+                        pickupLon: pickupLon,
+                        dropLats: dropLats,
+                        dropLons: dropLons,
+                        dropNames: dropNames,
+                        txId: txId,
+                        paymentMethod: selectedMethod.toString(),
+                        deliveryId: response.data.id,
+                      ),
+                    ),
+                  );
+                  Fluttertoast.showToast(msg: "Delivery booked!");
+                } else {
+                  final errorMsg =
+                      response.message ?? "Invalid response from server";
 
-            Fluttertoast.showToast(msg: errorMsg);
+                  log(
+                    "Booking failed: $errorMsg | data type: ${response.data.runtimeType}",
+                  );
 
-          }
-
-        }
-
-        catch (e, s) {
-          log("Booking error: $e\n$s");
-          Fluttertoast.showToast(msg: "Booking error: ${e.toString()}");
-        }
-
-        finally {
-          setState(() => isBooking = false);
-        }
-
-      },
+                  Fluttertoast.showToast(msg: errorMsg);
+                }
+              } catch (e, s) {
+                log("Booking error: $e\n$s");
+                Fluttertoast.showToast(msg: "Booking error: ${e.toString()}");
+              } finally {
+                setState(() => isBooking = false);
+              }
+            },
 
       child: isBooking
           ? const CircularProgressIndicator(color: Colors.white)
           : Text(
-        "Book Now",
-        style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.white),
-      ),
-
+              "Book Now",
+              style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.white),
+            ),
     );
-
   }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class WaitingForDriverScreen extends StatefulWidget {
@@ -1385,6 +1375,7 @@ class WaitingForDriverScreen extends StatefulWidget {
   @override
   State<WaitingForDriverScreen> createState() => _WaitingForDriverScreenState();
 }
+
 class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     with TickerProviderStateMixin {
   final box = Hive.box("folder");
@@ -1413,8 +1404,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
   late BitmapDescriptor _number2Icon;
   late BitmapDescriptor _dotIcon;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -1428,9 +1417,10 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 40, end: 100).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
-    );
+    _pulseAnimation = Tween<double>(
+      begin: 40,
+      end: 100,
+    ).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeOut));
     // _setupEventListeners1();
     _socket.off('user:driver_assigned'); // duplicate avoid
     _socket.on('user:driver_assigned', _handleAssigned);
@@ -1439,71 +1429,99 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     _loadIconsAndInitMap();
   }
 
-
   // MARK: - Icon Loading
   Future<void> _loadIconsAndInitMap() async {
     await _createCustomIcons();
     setState(() => _iconsLoaded = true);
     _initMap();
   }
+
   Future<void> _createCustomIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
     _number2Icon = await _createNumberIcon("2", Colors.orange);
     _dotIcon = await _createDotIcon();
   }
+
   Future<BitmapDescriptor> _createNumberIcon(String number, Color color) async {
     final size = 80.0;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, Paint()..color = color);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 8, Paint()..color = Colors.white);
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2,
+      Paint()..color = color,
+    );
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2 - 8,
+      Paint()..color = Colors.white,
+    );
 
     final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
     textPainter.text = TextSpan(
       text: number,
-      style: const TextStyle(color: Colors.black, fontSize: 40, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        color: Colors.black,
+        fontSize: 40,
+        fontWeight: FontWeight.bold,
+      ),
     );
     textPainter.layout();
-    textPainter.paint(canvas, Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2));
+    textPainter.paint(
+      canvas,
+      Offset((size - textPainter.width) / 2, (size - textPainter.height) / 2),
+    );
 
     final picture = recorder.endRecording();
     final img = await picture.toImage(size.toInt(), size.toInt());
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
+
   Future<BitmapDescriptor> _createDotIcon() async {
     final size = 40.0;
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    canvas.drawCircle(Offset(size / 2, size / 2), size / 2, Paint()..color = Colors.blue);
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2,
+      Paint()..color = Colors.blue,
+    );
     final picture = recorder.endRecording();
     final img = await picture.toImage(size.toInt(), size.toInt());
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
+
   void _startPulseMarkerUpdater() {
-    _pulseUpdateTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _pulseUpdateTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      timer,
+    ) {
       if (mounted && _mapController != null && _iconsLoaded) {
         _updatePulsatingPickupMarker();
       }
     });
   }
+
   Future<void> _updatePulsatingPickupMarker() async {
     final icon = await _createPulsatingMarkerIcon();
     if (mounted) {
       setState(() {
         _markers.removeWhere((m) => m.markerId.value == 'pickup_pulse');
-        _markers.add(Marker(
-          markerId: const MarkerId('pickup_pulse'),
-          position: LatLng(pickupLat, pickupLon),
-          icon: icon,
-          anchor: const Offset(0.5, 0.5),
-          zIndex: 100,
-        ));
+        _markers.add(
+          Marker(
+            markerId: const MarkerId('pickup_pulse'),
+            position: LatLng(pickupLat, pickupLon),
+            icon: icon,
+            anchor: const Offset(0.5, 0.5),
+            zIndex: 100,
+          ),
+        );
       });
     }
   }
+
   Future<BitmapDescriptor> _createPulsatingMarkerIcon() async {
     final size = 180.0;
     final recorder = ui.PictureRecorder();
@@ -1511,10 +1529,28 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     final center = Offset(size / 2, size / 2);
     final pulseRadius = _pulseAnimation.value / 2;
 
-    canvas.drawCircle(center, pulseRadius, Paint()..color = Colors.blueAccent.withOpacity(0.3));
-    canvas.drawCircle(center, pulseRadius, Paint()..color = Colors.blueAccent.withOpacity(0.6)..style = PaintingStyle.stroke..strokeWidth = 4);
+    canvas.drawCircle(
+      center,
+      pulseRadius,
+      Paint()..color = Colors.blueAccent.withOpacity(0.3),
+    );
+    canvas.drawCircle(
+      center,
+      pulseRadius,
+      Paint()
+        ..color = Colors.blueAccent.withOpacity(0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
+    );
     canvas.drawCircle(center, 24, Paint()..color = Colors.blueAccent);
-    canvas.drawCircle(center, 24, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 4);
+    canvas.drawCircle(
+      center,
+      24,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
+    );
 
     final path = Path();
     path.moveTo(center.dx, center.dy - 18);
@@ -1528,21 +1564,25 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
+
   // MARK: - Map Init
   void _initMap() {
     if (!_iconsLoaded) return;
     _addMarkers();
     _fetchMultiStopRoute();
   }
+
   void _addMarkers() {
     _markers.clear();
-    _markers.add(Marker(
-      markerId: const MarkerId('pickup_static'),
-      position: LatLng(pickupLat, pickupLon),
-      infoWindow: const InfoWindow(title: 'Pickup'),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      zIndex: 99,
-    ));
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('pickup_static'),
+        position: LatLng(pickupLat, pickupLon),
+        infoWindow: const InfoWindow(title: 'Pickup'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        zIndex: 99,
+      ),
+    );
 
     for (int i = 0; i < dropLats.length; i++) {
       final lat = dropLats[i];
@@ -1550,27 +1590,31 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       final name = dropNames[i];
 
       BitmapDescriptor icon;
-      if (i == 0) icon = _number1Icon;
-      else if (i == 1) icon = _number2Icon;
-      else icon = _dotIcon;
+      if (i == 0)
+        icon = _number1Icon;
+      else if (i == 1)
+        icon = _number2Icon;
+      else
+        icon = _dotIcon;
 
-      _markers.add(Marker(
-        markerId: MarkerId('drop_$i'),
-        position: LatLng(lat, lon),
-        infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
-        icon: icon,
-        anchor: const Offset(0.5, 0.5),
-      ));
+      _markers.add(
+        Marker(
+          markerId: MarkerId('drop_$i'),
+          position: LatLng(lat, lon),
+          infoWindow: InfoWindow(title: 'Drop ${i + 1}', snippet: name),
+          icon: icon,
+          anchor: const Offset(0.5, 0.5),
+        ),
+      );
     }
     _updatePulsatingPickupMarker();
   }
-
 
   // void _setupEventListeners1() {
   //   _socket.on('user:driver_assigned', _handleAssigned);
   // }
 
-/*
+  /*
 
   Future<void> _handleAssigned(dynamic payload) async {
     if (!mounted) return;
@@ -1681,7 +1725,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
   }
 */
 
-  Future<void> _handleAssigned(dynamic payload,) async {
+  Future<void> _handleAssigned(dynamic payload) async {
     if (!mounted) return;
 
     print("payload socket accept data: $payload");
@@ -1701,8 +1745,11 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       if (payload is Map<String, dynamic>) {
         // Optional: check if payload deliveryId matches the one we already have
         final payloadDeliveryId = payload['deliveryId'] as String?;
-        if (payloadDeliveryId != null && payloadDeliveryId != widget.deliveryId) {
-          log("Warning: socket deliveryId mismatch! Expected: $widget.deliveryId, Got: $payloadDeliveryId");
+        if (payloadDeliveryId != null &&
+            payloadDeliveryId != widget.deliveryId) {
+          log(
+            "Warning: socket deliveryId mismatch! Expected: $widget.deliveryId, Got: $payloadDeliveryId",
+          );
           // You can decide: continue with known deliveryId or throw error
         }
 
@@ -1710,7 +1757,9 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         final driverRaw = payload['driver'];
         if (driverRaw is Map<String, dynamic>) {
           driver = driverRaw;
-        } else if (driverRaw is List && driverRaw.isNotEmpty && driverRaw[0] is Map) {
+        } else if (driverRaw is List &&
+            driverRaw.isNotEmpty &&
+            driverRaw[0] is Map) {
           driver = Map<String, dynamic>.from(driverRaw[0]);
         }
 
@@ -1740,7 +1789,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       }
 
       // ── 2. Agar important cheezein missing hain to API se fill karo ───────────
-      final bool needsApiCall = driver.isEmpty || pickup.isEmpty || dropoff.isEmpty;
+      final bool needsApiCall =
+          driver.isEmpty || pickup.isEmpty || dropoff.isEmpty;
 
       if (needsApiCall) {
         log("Socket data incomplete → calling getDeliveryStatus API");
@@ -1748,11 +1798,15 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         final service = APIStateNetwork(callPrettyDio());
 
         final apiResponse = await service.getDeliveryStatus(
-          DeliveryBodyModel(deliveryId: widget.deliveryId), // ← yahi trusted ID use kar rahe
+          DeliveryBodyModel(
+            deliveryId: widget.deliveryId,
+          ), // ← yahi trusted ID use kar rahe
         );
 
         if (apiResponse.error == true || apiResponse.data == null) {
-          Fluttertoast.showToast(msg: "Failed to load delivery details from server");
+          Fluttertoast.showToast(
+            msg: "Failed to load delivery details from server",
+          );
           return;
         }
 
@@ -1782,13 +1836,19 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
           };
         }
 
-        if (dropoff.isEmpty && data.dropoff != null && data.dropoff!.isNotEmpty) {
-          dropoff = data.dropoff!.map((p) => {
-            'name': p.name ?? '',
-            'lat': p.lat,
-            'long': p.long,
-            '_id': p.id,
-          }).toList();
+        if (dropoff.isEmpty &&
+            data.dropoff != null &&
+            data.dropoff!.isNotEmpty) {
+          dropoff = data.dropoff!
+              .map(
+                (p) => {
+                  'name': p.name ?? '',
+                  'lat': p.lat,
+                  'long': p.long,
+                  '_id': p.id,
+                },
+              )
+              .toList();
         }
 
         if (vehicleType.isEmpty && data.vehicleType != null) {
@@ -1811,7 +1871,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       }
 
       // ── 3. Driver name toast ───────────────────────────────────────────────
-      final driverName = '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
+      final driverName =
+          '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
       if (driverName.isNotEmpty) {
         Fluttertoast.showToast(msg: "Driver Assigned: $driverName");
       } else {
@@ -1825,7 +1886,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
           CupertinoPageRoute(
             builder: (context) => PickupScreen(
               socket: widget.socket,
-              deliveryId: widget.deliveryId,           // ← guaranteed non-null
+              deliveryId: widget.deliveryId, // ← guaranteed non-null
               driver: driver,
               otp: otp ?? 'N/A',
               pickup: pickup,
@@ -1855,19 +1916,20 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     dropDurations = List.filled(dropLats.length, '');
 
     for (int i = 0; i < dropLats.length; i++) {
-      final origin = i == 0 ? '$pickupLat,$pickupLon' : '${dropLats[i-1]},${dropLons[i-1]}';
+      final origin = i == 0
+          ? '$pickupLat,$pickupLon'
+          : '${dropLats[i - 1]},${dropLons[i - 1]}';
       final dest = '${dropLats[i]},${dropLons[i]}';
 
-      final url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-        'origin': origin,
-        'destination': dest,
-        'key': apiKey,
-      });
+      final url = Uri.https(
+        'maps.googleapis.com',
+        '/maps/api/directions/json',
+        {'origin': origin, 'destination': dest, 'key': apiKey},
+      );
 
       try {
         final response = await http.get(url);
         if (response.statusCode == 200) {
-
           final data = json.decode(response.body);
           if (data['status'] == 'OK') {
             final poly = data['routes'][0]['overview_polyline']['points'];
@@ -1879,7 +1941,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
             totalDistKm += (leg['distance']['value'] as num) / 1000;
             totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
           }
-
         }
       } catch (e) {
         log("Route error $i: $e");
@@ -1890,12 +1951,14 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       setState(() {
         _polylines.clear();
         if (allPoints.isNotEmpty) {
-          _polylines.add(Polyline(
-            polylineId: const PolylineId('full_route'),
-            points: allPoints,
-            color: Colors.blue,
-            width: 5,
-          ));
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('full_route'),
+              points: allPoints,
+              color: Colors.blue,
+              width: 5,
+            ),
+          );
         }
         totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
         totalDuration = '$totalTimeMin min';
@@ -1908,8 +1971,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
       }
     }
-
   }
+
   List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
     int index = 0, len = encoded.length;
@@ -1937,6 +2000,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     }
     return points;
   }
+
   LatLngBounds _calculateBounds(List<LatLng> points) {
     double minLat = points[0].latitude, maxLat = points[0].latitude;
     double minLng = points[0].longitude, maxLng = points[0].longitude;
@@ -1946,7 +2010,10 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       if (p.longitude < minLng) minLng = p.longitude;
       if (p.longitude > maxLng) maxLng = p.longitude;
     }
-    return LatLngBounds(southwest: LatLng(minLat, minLng), northeast: LatLng(maxLat, maxLng));
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
   }
   // MARK: - Timer & Search
 
@@ -1997,26 +2064,31 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     setState(() => _isSearching = true);
     try {
       final body = BookInstantDeliveryBodyModel(
-
-          vehicleTypeId: widget.id,
-          origName: dropNames.first,
-          origLat: pickupLat,
-          origLon: pickupLon,
-          coinAmount: 0,
-          copanId: null,
-          productType: widget.productType,
-          dropoff: dropLats.asMap().entries.map((e) => BookDropoff(
-            name: dropNames[e.key],
-            lat: e.value,
-            long: dropLons[e.key],
-          )).toList(),
-          distance:widget.distance,
-          userPayAmount:widget.userPayAmount,
-          // 270112,
-          taxAmount: 18.0,
-          mobNo:widget.mobile,
-          name:widget.name,
-          paymentMethod:widget.paymentMethod
+        vehicleTypeId: widget.id,
+        origName: dropNames.first,
+        origLat: pickupLat,
+        origLon: pickupLon,
+        coinAmount: 0,
+        copanId: null,
+        productType: widget.productType,
+        dropoff: dropLats
+            .asMap()
+            .entries
+            .map(
+              (e) => BookDropoff(
+                name: dropNames[e.key],
+                lat: e.value,
+                long: dropLons[e.key],
+              ),
+            )
+            .toList(),
+        distance: widget.distance,
+        userPayAmount: widget.userPayAmount,
+        // 270112,
+        taxAmount: 18.0,
+        mobNo: widget.mobile,
+        name: widget.name,
+        paymentMethod: widget.paymentMethod,
       );
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.bookInstantDelivery(body);
@@ -2034,8 +2106,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         setState(() => _isSearching = false);
         Fluttertoast.showToast(msg: response.message ?? "Retry failed");
       }
-    }
-    catch (e) {
+    } catch (e) {
       setState(() => _isSearching = false);
       Fluttertoast.showToast(msg: "Retry failed: $e");
     }
@@ -2052,14 +2123,15 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     super.dispose();
   }
 
-// MARK: - Cancel Booking Function
+  // MARK: - Cancel Booking Function
   Future<void> _cancelCurrentBooking() async {
     Fluttertoast.showToast(msg: "Booking cancelled successfully");
     _stopSearching(); // Stop all timers & animations
     setState(() {
       _isSearching = false; // Show "Try Again" button
     });
-   }
+  }
+
   @override
   Widget build(BuildContext context) {
     final dots = '.' * _dotCount;
@@ -2068,174 +2140,253 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       backgroundColor: Colors.white,
       body: _routeFetched && _iconsLoaded
           ? Stack(
-        children: [
-
-          GoogleMap(
-            padding: EdgeInsets.only(top: 40.h, right: 16.w),
-            initialCameraPosition: CameraPosition(target: LatLng(pickupLat, pickupLon), zoom: 15),
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _centerCameraOnPickup();
-            },
-            markers: _markers,
-            polylines: _polylines,
-            myLocationEnabled: false,
-            zoomControlsEnabled: false,
-            mapType: MapType.normal,
-          ),
-
-
-          Positioned(
-            left: 10.w, top: 40.h,
-            child: FloatingActionButton(
-              mini: true,
-              backgroundColor: Colors.white,
-              shape: const CircleBorder(),
-              onPressed: () => Navigator.pop(context),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
-              ),
-            ),
-          ),
-
-          // Route Info
-
-          Positioned(
-            bottom: 210.h, left: 16.w, right: 16.w,
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // ...dropDistances.asMap().entries.map((e) => e.value.isNotEmpty
-                  //     ? Text('Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}', style: GoogleFonts.inter(fontSize: 13.sp))
-                  //     : const SizedBox()),
-                  // if (totalDistance != null)
-                  //   Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
-
-                  ...dropDistances.asMap().entries.map((e) => e.value.isNotEmpty
-                      ? Text('Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}', style: GoogleFonts.inter(fontSize: 13.sp))
-                      : const SizedBox()),
-                  if (totalDistance != null)
-                    Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
-
-                ],
-              ),
-            ),
-          ),
-
-          Positioned(
-            bottom: 50.h, left: 16.w, right: 16.w,
-            child: Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _isSearching
-                        ? "Searching for nearby drivers$dots"
-                        : "No driver found in 5 minutes",
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-                    textAlign: TextAlign.center,
+              children: [
+                GoogleMap(
+                  padding: EdgeInsets.only(top: 40.h, right: 16.w),
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(pickupLat, pickupLon),
+                    zoom: 15,
                   ),
-                  const SizedBox(height: 12),
-                  _isSearching
-                      ? Column(
-                    children: [
-                      Text(
-                        "Please wait... (${_formatTime(_remainingSeconds)})",
-                        style: const TextStyle(fontSize: 15, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          // Cancel Button (Anytime during search)
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  title: const Text("Cancel Booking?"),
-                                  content: const Text("Are you sure you want to cancel this ride request?"),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(ctx, false),
-                                      child: const Text("No"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(ctx, true),
-                                      child: const Text("Yes, Cancel", style: TextStyle(color: Colors.red)),
-                                    ),
-                                  ],
-                                ),
-                              );
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _centerCameraOnPickup();
+                  },
+                  markers: _markers,
+                  polylines: _polylines,
+                  myLocationEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapType: MapType.normal,
+                ),
 
-                              if (confirm == true) {
-                                await _cancelCurrentBooking();
-                              }
-                            },
-                            child: const Text("Cancel", style: TextStyle(fontSize: 15, color: Colors.white)),
-                          ),
-
-                          // Optional: You can also keep a small "Wait" hint or just loader
-                          const CircularProgressIndicator(strokeWidth: 3, color: Colors.blueAccent),
-                        ],
+                Positioned(
+                  left: 10.w,
+                  top: 40.h,
+                  child: FloatingActionButton(
+                    mini: true,
+                    backgroundColor: Colors.white,
+                    shape: const CircleBorder(),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 8),
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: Color(0xFF1D3557),
                       ),
-                    ],
-                  )
-                      : Column(
-                    children: [
-                      const Text(
-                        "No drivers available right now.",
-                        style: TextStyle(fontSize: 15, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
+                    ),
+                  ),
+                ),
 
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                // Route Info
+                Positioned(
+                  bottom: 210.h,
+                  left: 16.w,
+                  right: 16.w,
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
-
-                        onPressed: _retrySearch,
-                        child: const Text("Try Again", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white)),
-
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // ...dropDistances.asMap().entries.map((e) => e.value.isNotEmpty
+                        //     ? Text('Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}', style: GoogleFonts.inter(fontSize: 13.sp))
+                        //     : const SizedBox()),
+                        // if (totalDistance != null)
+                        //   Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                        ...dropDistances.asMap().entries.map(
+                          (e) => e.value.isNotEmpty
+                              ? Text(
+                                  'Drop ${e.key + 1}: ${e.value} | ${dropDurations[e.key]}',
+                                  style: GoogleFonts.inter(fontSize: 13.sp),
+                                )
+                              : const SizedBox(),
+                        ),
+                        if (totalDistance != null)
+                          Text(
+                            'Total: $totalDistance | $totalDuration',
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      )
+                ),
+
+                Positioned(
+                  bottom: 50.h,
+                  left: 16.w,
+                  right: 16.w,
+                  child: Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(12.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _isSearching
+                              ? "Searching for nearby drivers$dots"
+                              : "No driver found.",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        _isSearching
+                            ? Column(
+                                children: [
+                                  // Text(
+                                  //   "Please wait... (${_formatTime(_remainingSeconds)})",
+                                  //   style: const TextStyle(
+                                  //     fontSize: 15,
+                                  //     color: Colors.grey,
+                                  //   ),
+                                  //   textAlign: TextAlign.center,
+                                  // ),
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      // Cancel Button (Anytime during search)
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.redAccent,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed: () async {
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              title: const Text(
+                                                "Cancel Booking?",
+                                              ),
+                                              content: const Text(
+                                                "Are you sure you want to cancel this ride request?",
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, false),
+                                                  child: const Text("No"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, true),
+                                                  child: const Text(
+                                                    "Yes, Cancel",
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+
+                                          if (confirm == true) {
+                                            await _cancelCurrentBooking();
+                                          }
+                                        },
+                                        child: const Text(
+                                          "Cancel",
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Optional: You can also keep a small "Wait" hint or just loader
+                                      const CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  const Text(
+                                    "No drivers available right now.",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blueAccent,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 40,
+                                        vertical: 14,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+
+                                    onPressed: _retrySearch,
+                                    child: const Text(
+                                      "Try Again",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )
           : const Center(child: CircularProgressIndicator()),
     );
   }
 
   void _centerCameraOnPickup() {
-    _mapController?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(pickupLat, pickupLon), zoom: 15.5)));
+    _mapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: LatLng(pickupLat, pickupLon), zoom: 15.5),
+      ),
+    );
   }
 }
