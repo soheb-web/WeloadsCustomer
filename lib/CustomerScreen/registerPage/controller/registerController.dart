@@ -172,7 +172,7 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
         Navigator.pushAndRemoveUntil(
           context,
           CupertinoPageRoute(builder: (context) => HomeScreen()),
-          (route) => false,
+              (route) => false,
         );
         setState(() {
           loading = false;

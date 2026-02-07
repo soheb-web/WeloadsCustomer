@@ -96,6 +96,14 @@ class _PickupScreenState extends State<PickupScreen> {
         "${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}";
   }
 
+
+
+  late BitmapDescriptor driverCarIcon;
+  late BitmapDescriptor driverBikeIcon;
+  late BitmapDescriptor driverAutoIcon;
+  late BitmapDescriptor driverTruckIcon;
+  late BitmapDescriptor driverCycleIcon;
+
   @override
   void initState() {
     super.initState();
@@ -105,38 +113,61 @@ class _PickupScreenState extends State<PickupScreen> {
     _emitDriverArrivedAtPickup();
     _setupEventListeners();
     _createNumberIcons();
-    loadSimpleDriverIcon().then((_) {
-      if (mounted) setState(() {});
-    });
+    _loadCustomIcons();
+    // loadSimpleDriverIcon().then((_) {
+    //   if (mounted) setState(() {});
+    // });
+
   }
 
   int _maxFreeWaitingSeconds = 300; // डिफ़ॉल्ट 5 मिनट (fallback)
   DateTime? _localArrivedAt; // Jab driver ne button dabaya tab ka time
+  // Future<void> loadSimpleDriverIcon() async {
+  //   final recorder = ui.PictureRecorder();
+  //   final canvas = Canvas(recorder);
+  //
+  //   const size = 100.0;
+  //
+  //   canvas.drawCircle(
+  //     const Offset(size / 2, size / 2),
+  //     size / 2 - 18,
+  //     Paint()..color = const Color(0xFFD57430), // Bright Green
+  //   );
+  //
+  //   canvas.drawCircle(
+  //     const Offset(size / 2, size / 2),
+  //     12,
+  //     Paint()..color = Colors.white,
+  //   );
+  //
+  //   final picture = recorder.endRecording();
+  //   final img = await picture.toImage(size.toInt(), size.toInt());
+  //   final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+  //
+  //   driverIcon = BitmapDescriptor.fromBytes(pngBytes!.buffer.asUint8List());
+  // }
+
+
   Future<void> loadSimpleDriverIcon() async {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
+    try {
+      // Recommended size for markers: 40-60 px logical size (adjust as needed)
+      const double targetSize = 52.0; // 52 best lagta hai, chhota ya bada kar sakte ho
 
-    const size = 100.0;
+      driverIcon = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(targetSize, targetSize)), // size control yahan se
+        "assets/bike1.png",
+      );
 
-    canvas.drawCircle(
-      const Offset(size / 2, size / 2),
-      size / 2 - 18,
-      Paint()..color = const Color(0xFFD57430), // Bright Green
-    );
+      debugPrint("Bike icon loaded from assets/bike1.png – size ~$targetSize px");
+    } catch (e) {
+      debugPrint("Error loading bike icon: $e");
+      // Fallback: default Google Maps marker
+      driverIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+    }
 
-    canvas.drawCircle(
-      const Offset(size / 2, size / 2),
-      12,
-      Paint()..color = Colors.white,
-    );
-
-    final picture = recorder.endRecording();
-    final img = await picture.toImage(size.toInt(), size.toInt());
-    final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
-
-    driverIcon = BitmapDescriptor.fromBytes(pngBytes!.buffer.asUint8List());
+    // UI update
+    if (mounted) setState(() {});
   }
-
   Future<void> _fetchDeliveryData() async {
     final service = APIStateNetwork(callPrettyDio());
     final response = await service.getDeliveryById2(widget.deliveryId);
@@ -153,7 +184,6 @@ class _PickupScreenState extends State<PickupScreen> {
       }
     }
   }
-
   Future<void> _makePhoneCall(String? phoneNumber) async {
     if (phoneNumber == null || phoneNumber.trim().isEmpty) {
       Fluttertoast.showToast(msg: "फ़ोन नंबर उपलब्ध नहीं है");
@@ -174,7 +204,6 @@ class _PickupScreenState extends State<PickupScreen> {
       Fluttertoast.showToast(msg: "कुछ गलत हुआ: $e");
     }
   }
-
   void _emitDriverArrivedAtPickup() async {
     await _fetchDeliveryData();
     final payload = {"deliveryId": widget.deliveryId};
@@ -288,19 +317,16 @@ class _PickupScreenState extends State<PickupScreen> {
       // Show toast or retry
     });
   }
-
   void _startOrSyncWaitingTimer({
     required int fromSeconds,
     required int freeMinutes,
   }) {
     _maxFreeWaitingSeconds = freeMinutes * 60;
-
     setState(() {
       _isArrived = true;
       _waitingSeconds = fromSeconds;
       _updateWaitingTimeText();
     });
-
     _waitingTimer?.cancel();
     _waitingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
@@ -313,7 +339,6 @@ class _PickupScreenState extends State<PickupScreen> {
       });
     });
   }
-
   // Socket se jo response aaya usko yahan use karo
   void _handleDriverLocationResponse(Map<String, dynamic> response) {
     if (response["success"] == true) {
@@ -330,7 +355,6 @@ class _PickupScreenState extends State<PickupScreen> {
       _driverLatLng = null;
     }
   }
-
   void _navigateToGiveRatingScreen() {}
   void _navigateToHomeScreen() {
     Navigator.of(context).pushAndRemoveUntil(
@@ -340,7 +364,6 @@ class _PickupScreenState extends State<PickupScreen> {
       (route) => false,
     );
   }
-
   void _setupEventListeners() {
     socket.on("delivery:status_updated", (data) {
       log("Status confirmed: $data");
@@ -492,7 +515,39 @@ class _PickupScreenState extends State<PickupScreen> {
   //   // ... existing drop loop code ...
   //
   // }
+  bool _iconsLoaded = false;
+  Future<void> _loadCustomIcons() async {
+    try {
+      driverCarIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/car.png',
+      );
+      driverBikeIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/b.png',
+      );
+      driverAutoIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/t.png',
+      );
+      driverTruckIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/truck.png',
+      );
+      driverCycleIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/cycle.png',
+      );
 
+      _iconsLoaded = true;
+      if (mounted) setState(() {
+
+      });(() {});
+      log("Custom driver icons loaded");
+    } catch (e) {
+      log("Icon load error: $e");
+    }
+  }
   Future<void> _fetchRoute() async {
     const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
     double totalDistKm = 0.0;
@@ -602,7 +657,6 @@ class _PickupScreenState extends State<PickupScreen> {
       }
     }
   }
-
   LatLngBounds _calculateBounds(List<LatLng> points) {
     double minLat = points[0].latitude, maxLat = points[0].latitude;
     double minLng = points[0].longitude, maxLng = points[0].longitude;
@@ -619,7 +673,6 @@ class _PickupScreenState extends State<PickupScreen> {
       northeast: LatLng(maxLat, maxLng),
     );
   }
-
   List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
     int index = 0, len = encoded.length;
@@ -647,12 +700,10 @@ class _PickupScreenState extends State<PickupScreen> {
     }
     return points;
   }
-
   Future<void> _createNumberIcons() async {
     _number1Icon = await _createNumberIcon("1", Colors.red);
     _number2Icon = await _createNumberIcon("2", Colors.orange);
   }
-
   Future<BitmapDescriptor> _createNumberIcon(String number, Color color) async {
     final size = 80.0;
     final recorder = ui.PictureRecorder();
@@ -689,8 +740,7 @@ class _PickupScreenState extends State<PickupScreen> {
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
-
-  void _addMarkers() {
+  Future<void> _addMarkers() async {
     final markers = <Marker>{};
 
     // Current Location
@@ -700,7 +750,28 @@ class _PickupScreenState extends State<PickupScreen> {
           markerId: const MarkerId('current'),
           position: _driverLatLng!,
           infoWindow: const InfoWindow(title: 'driver Location'),
-          icon: driverIcon,
+          icon:
+
+
+
+          vehicleTypeName=="Bike"
+            ? driverBikeIcon
+            :  vehicleTypeName=="Car"
+            ? driverCarIcon
+            : vehicleTypeName=="Auto"
+            ? driverAutoIcon
+            : vehicleTypeName=="Truck"||vehicleTypeName=="Tata ace"?
+            driverTruckIcon:
+          vehicleTypeName=="Cycle"?
+              driverCycleIcon:driverTruckIcon
+
+
+
+          // await BitmapDescriptor.fromAssetImage(
+          //   ImageConfiguration(size: Size(20, 20)), // size control yahan se
+          //   "assets/bike1.png",
+          // )
+          // driverIcon,
           // BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         ),
       );
@@ -748,7 +819,6 @@ class _PickupScreenState extends State<PickupScreen> {
 
     setState(() => _markers = markers);
   }
-
   Future<void> _getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -777,8 +847,7 @@ class _PickupScreenState extends State<PickupScreen> {
     _addMarkers();
     _fetchRoute();
   }
-
-  @override
+  late String vehicleTypeName;   // ← yahan late declare karo  @override
   Widget build(BuildContext context) {
     final driver = widget.driver;
     final vehicleType = widget.vehicleType ?? {};
@@ -799,7 +868,11 @@ class _PickupScreenState extends State<PickupScreen> {
     final pickupAddress = widget.pickup['name']?.toString() ?? 'Unknown Pickup';
     final otp = widget.otp?.toString() ?? 'N/A';
     final amount = widget.amount?.toString() ?? '0';
-    final vehicleTypeName = vehicleType['name']?.toString() ?? 'N/A';
+
+
+     vehicleTypeName = vehicleType['name']?.toString() ?? 'N/A';
+
+
     final vehicleTypeNumber = vehicleDetail['numberPlate']?.toString() ?? 'N/A';
     final vehicalImage = (vehicleType['image']?.toString().isNotEmpty == true)
         ? vehicleType['image']
@@ -1352,7 +1425,6 @@ class _PickupScreenState extends State<PickupScreen> {
       ),
     );
   }
-
   Widget actionButton(String icon, String phone) {
     return Column(
       children: [
@@ -1380,7 +1452,6 @@ class _PickupScreenState extends State<PickupScreen> {
       ],
     );
   }
-
   Future<void> _openCustomerLiveTracking() async {
     if (_currentLatLng == null ||
         widget.pickup.isEmpty ||
@@ -1412,7 +1483,6 @@ class _PickupScreenState extends State<PickupScreen> {
       Fluttertoast.showToast(msg: "Google Maps not installed");
     }
   }
-
   void _showCancelBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -1426,7 +1496,6 @@ class _PickupScreenState extends State<PickupScreen> {
       ),
     );
   }
-
   @override
   void dispose() {
     socket.off('receive_message');
@@ -1451,7 +1520,6 @@ class CancelBottomSheetContent extends StatefulWidget {
   State<CancelBottomSheetContent> createState() =>
       _CancelBottomSheetContentState();
 }
-
 class _CancelBottomSheetContentState extends State<CancelBottomSheetContent> {
   final List<String> reasons = [
     'Driver not arrived on time',
