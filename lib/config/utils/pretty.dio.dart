@@ -19,6 +19,7 @@ Dio callPrettyDio() {
     ),
   );
 
+
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
@@ -62,5 +63,6 @@ Dio callPrettyDio() {
       },
     ),
   );
+
   return dio;
 }
