@@ -1,105 +1,3 @@
-/*
-import 'dart:developer';
-import 'package:delivery_mvp_app/CustomerScreen/otpPage/otp.screen.dart';
-import 'package:delivery_mvp_app/config/network/api.state.dart';
-import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
-import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
-import 'package:delivery_mvp_app/data/Model/registerBodyModel.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-
-mixin Registercontroller<T extends StatefulWidget> on State<T> {
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final phoneNumberController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-
-  bool isLoading = false;
-
-  Future<String> fcmGetToken() async {
-    // Permission request करें (iOS/Android पर जरूरी)
-    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: true, // iOS के लिए provisional permission
-      carPlay: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted permission');
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-      print('User granted provisional permission');
-    } else {
-      print('User declined or has not accepted permission');
-      return "no_permission"; // Return a fallback string instead of void
-    }
-
-    // FCM Token निकालें
-    String? token = await FirebaseMessaging.instance.getToken();
-    // setState(() {
-    //   _fcmToken = token;
-    // });
-    print('FCM Token: $token'); // Console में print होगा - moved before return
-    return token ?? "unknown_device";
-  }
-
-
-  void registerUser() async {
-    final deviceId = await fcmGetToken();
-    if (!registerformKey.currentState!.validate()) {
-      setState(() => isLoading = false);
-      return;
-    }
-    setState(() => isLoading = true);
-    final body = RegisterBodyModel(
-      firstName: firstNameController.text,
-      lastName: lastNameController.text,
-      email: emailController.text,
-      phone: phoneNumberController.text,
-      // password: passwordController.text,
-      deviceId: deviceId,
-    );
-    try {
-      final service = APIStateNetwork(callPrettyDio());
-      final response = await service.userRegister(body);
-
-      if (response.error == false) {
-        Fluttertoast.showToast(msg: response.message);
-        Navigator.pushAndRemoveUntil(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => OtpScreen(token: response.data!.token),
-          ),
-          (route) => false,
-        );
-        setState(() {
-          isLoading = false;
-        });
-      } else {
-        Fluttertoast.showToast(msg: response.message);
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e, st) {
-      setState(() {
-        isLoading = false;
-      });
-      log("${e.toString()} / ${st.toString()}");
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      // );
-    }
-  }
-
-
-}
-*/
-
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
@@ -134,15 +32,18 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.userRegister(body);
 
-      if (response.error == false) {
+      if (response.error == false || response.code == 0) {
         registerToken = response.data?.token;
+        log("REGISTER TOKEN: $registerToken");
 
         onSuccess?.call(registerToken!);
       } else {
         onError?.call(response.message);
       }
-    } catch (e) {
+    } catch (e, st) {
       onError?.call(e.toString());
+      log(st.toString());
+      log(e.toString());
     } finally {
       setState(() => isLoading = false);
     }
@@ -151,46 +52,94 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
   String otp = "";
   bool loading = false;
 
-  void sendOTP() async {
-    final body = VerifyRegisterBodyModel(token: registerToken!, otp: otp);
+  // void sendOTP() async {
+  //   final body = VerifyRegisterBodyModel(token: registerToken!, otp: otp);
+  //   setState(() {
+  //     loading = true;
+  //   });
+  //   try {
+  //     final service = APIStateNetwork(callPrettyDio());
+  //     final response = await service.verifyRegister(body);
+  //     if (response.error == false) {
+  //       var box = Hive.box("folder");
+  //       await box.put("token", response.data!.token);
+  //       await box.put("email", response.data!.email);
+  //       await box.put("firstName", response.data!.firstName);
+  //       await box.put("lastName", response.data!.lastName);
+  //       await box.put("phone", response.data!.phone);
+  //       await box.put("id", response.data!.id);
+  //       Fluttertoast.showToast(msg: response.message);
+  //       Navigator.pushAndRemoveUntil(
+  //         context,
+  //         CupertinoPageRoute(builder: (context) => HomeScreen()),
+  //         (route) => false,
+  //       );
+  //       setState(() {
+  //         loading = false;
+  //       });
+  //     } else {
+  //       Fluttertoast.showToast(msg: response.message);
+  //       setState(() {
+  //         loading = false;
+  //         otp = "";
+  //       });
+  //       registerVerifyotpKey.currentState!.clearOtp();
+  //     }
+  //   } catch (e, st) {
+  //     log("${e.toString()} / ${st.toString()}");
+  //     setState(() {
+  //       loading = false;
+  //     });
+  //     Fluttertoast.showToast(msg: "Error");
+  //   }
+  // }
+
+  void sendOTP(String token) async {
+    if (token.isEmpty) {
+      Fluttertoast.showToast(msg: "Invalid token, please register again");
+      return;
+    }
+
+    final body = VerifyRegisterBodyModel(token: token, otp: otp);
+
     setState(() {
       loading = true;
     });
+
     try {
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.verifyRegister(body);
+
       if (response.error == false) {
         var box = Hive.box("folder");
+
         await box.put("token", response.data!.token);
         await box.put("email", response.data!.email);
         await box.put("firstName", response.data!.firstName);
         await box.put("lastName", response.data!.lastName);
         await box.put("phone", response.data!.phone);
         await box.put("id", response.data!.id);
-
         Fluttertoast.showToast(msg: response.message);
+
         Navigator.pushAndRemoveUntil(
           context,
           CupertinoPageRoute(builder: (context) => HomeScreen()),
-              (route) => false,
+          (route) => false,
         );
-        setState(() {
-          loading = false;
-        });
       } else {
         Fluttertoast.showToast(msg: response.message);
         setState(() {
-          loading = false;
           otp = "";
         });
-        registerVerifyotpKey.currentState!.clearOtp();
+        registerVerifyotpKey.currentState?.clearOtp(); // ✅ safe call
       }
     } catch (e, st) {
       log("${e.toString()} / ${st.toString()}");
+      Fluttertoast.showToast(msg: "Error");
+    } finally {
       setState(() {
         loading = false;
       });
-      Fluttertoast.showToast(msg: "Error");
     }
   }
 }

@@ -405,6 +405,10 @@ class _RegisterScreenState extends State<RegisterScreen>
 }
 */
 
+
+
+
+
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/registerPage/controller/registerController.dart';
 import 'package:flutter/cupertino.dart';
@@ -643,6 +647,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                       phone: phoneNumberController.text,
                                       deviceId: deviceId,
                                     ),
+                                    token: token,
                                   ),
                                 ),
                               );

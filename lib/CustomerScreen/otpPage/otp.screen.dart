@@ -14,6 +14,7 @@ import '../registerPage/controller/registerController.dart';
 
 class OtpScreen extends StatefulWidget {
   final String mobile;
+  final String token;
 
   /// register request data (same as register screen)
   final RegisterBodyModel registerBody;
@@ -21,7 +22,7 @@ class OtpScreen extends StatefulWidget {
   const OtpScreen({
     super.key,
     required this.mobile,
-
+    required this.token,
     required this.registerBody,
   });
 
@@ -37,9 +38,11 @@ class _OtpScreenState extends State<OtpScreen>
   Timer? _timer;
   int _remainingSeconds = 60;
   bool canResend = false;
+  late String currentToken;
   @override
   void initState() {
     super.initState();
+    currentToken = widget.token; 
     startTimer();
   }
 
@@ -130,7 +133,8 @@ class _OtpScreenState extends State<OtpScreen>
                 onSubmit: (text) {
                   if (text.length == 4) {
                     // Auto trigger verification when 4 digits are entered
-                    sendOTP();
+                    // sendOTP(widget.token);
+                    sendOTP(currentToken);
                   }
                 },
                 onChange: (value) {
@@ -180,7 +184,8 @@ class _OtpScreenState extends State<OtpScreen>
                 ),
                 onPressed: otp.length == 4
                     ? () {
-                        sendOTP();
+                        // sendOTP(widget.token);
+                        sendOTP(currentToken);
                       }
                     : null,
                 child: loading
@@ -202,7 +207,8 @@ class _OtpScreenState extends State<OtpScreen>
 
     await registerUserApi(
       body: widget.registerBody,
-      onSuccess: (_) {
+      onSuccess: (newToken) {
+        currentToken = newToken;
         startTimer();
         Fluttertoast.showToast(msg: "OTP resent successfully");
       },
